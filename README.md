@@ -1,2 +1,3 @@
-# fwp
-FIDO Web Pay - The beginnings
+# FIDO Web Pay
+
+Just a place for experiments at the moment...
