@@ -67,16 +67,21 @@ public class EnrollServlet extends HttpServlet {
     static final String PRM_CERT_PATH    = "cert";
 
     static final String PRM_ALGORITHM    = "alg";
-    static final String CARD_HOLDER_NAME    = "siglbl";
 
     static final String FLG_CERT_PATH    = "cerflg";
     static final String FLG_JAVASCRIPT   = "jsflg";
     static final String FLG_JWK_INLINE   = "jwkflg";
     
     static final String DEFAULT_ALG      = "ES256";
+    static final String CARD_HOLDER_NAME = "chn";
+
     static final String DEFAULT_CARD_HOLDER_NAME  = "Anonymous Tester &#x1f638;";
     
     static final String WALLET_COOKIE    = "WALLET";
+
+    static final String WAITING_ID       = "wait";
+    static final String START_ID         = "start";
+    static final String FAILED_ID        = "fail";
     
     static boolean hasWalletCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -90,40 +95,101 @@ public class EnrollServlet extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder js = new StringBuilder("'use strict';\n");
-        StringBuilder html = new StringBuilder(hasWalletCookie(request) ?
+        boolean hasWalletCookie = hasWalletCookie(request);
+        StringBuilder html = new StringBuilder(hasWalletCookie ?
             "<div class='header'>Enroll Payment Cards</div>" +
             "<div style='display:flex;justify-content:center;margin-top:15pt;color=red;font-weight=bold'>" +
-            "You already have enrolled payment cards, what do you want to do with them?" +
+              "You already have enrolled payment cards, what do you want to do with them?" +
             "</div>" +
+
             "<div style='display:flex;justify-content:center'><table>" +
-            "<tr><td><div class='multibtn' onclick=\"document.location.href='hash'\">" +
-            "Buy Something!" +
-            "</div></td></tr>" +
-            "<tr><td><div class='multibtn' onclick=\"document.location.href='disenroll'\">" +
-            "Delete Cards..." +
-            "</div></td></tr>" +
-            "</table></div>"
+              "<tr><td><div class='multibtn' onclick=\"document.location.href='hash'\">" +
+                  "Buy Something!" +
+               "</div></td></tr>" +
+               "<tr><td><div class='multibtn' onclick=\"document.location.href='disenroll'\">" +
+                  "Delete Cards..." +
+              "</div></td></tr>" +
+              "</table>" +
+            "</div>"
                                  :
             "<form name='shoot' method='POST' action='enroll'>" +
+
             "<div class='header'>Enroll Payment Cards</div>" +
-            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-            "<table display='inline-block'><tr><td>Card Holder:</td></tr><tr><td>" +
-            "<input type='text' name='" + CARD_HOLDER_NAME + "' id='" + CARD_HOLDER_NAME + "' " +
-            "maxlength='50' value='" + DEFAULT_CARD_HOLDER_NAME + 
-            "' style='background-color:#def7fc;padding:2pt 3pt' autofocus>" +
-            "</td></tr></table>" +
-            "</div>" +
+
             "<div style='display:flex;justify-content:center'>" +
-            "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-            "Start Enrollment!" +
+              "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+                  "style='padding-top:5em;display:none' alt='waiting'/>" +
             "</div>" +
+            
+            "<div id='" + FAILED_ID + "' style='color:red;font-weight:bold;" +
+                "text-align:center;padding-top:3em;display:none'></div>" +
+
+            "<div id='" + START_ID + "'>" +
+              "<div style='display:flex;justify-content:center;margin-top:15pt'><table>" +
+                "<tr><td>Card Holder:</td></tr>" +
+                "<tr><td><input type='text' id='" + CARD_HOLDER_NAME + "' " +
+                    "maxlength='50' value='" + DEFAULT_CARD_HOLDER_NAME + 
+                    "' style='background-color:#def7fc;padding:2pt 3pt' autofocus></td></tr>" +
+              "</table></div>" +
+              "<div style='display:flex;justify-content:center'>" +
+                "<div class='stdbtn' onclick=\"startEnroll()\">" +
+                  "Start Enrollment!" +
+                "</div>" +
+              "</div>" +
             "</div>" +
-                "</form>");
-        js.append("// hi\n");
-        HTML.standardPage(response, 
-                         js.toString(),
-                         html);
+            
+            "</form>");
+
+        String js;
+        if (hasWalletCookie) {
+            js = null;
+        } else {
+            js = new StringBuilder(
+            "'use strict';\n" +
+            
+            "let globalError = null;\n" +
+            
+            "async function exchangeJSON(jsonInput) {\n" +
+            "  try {\n" +
+            "    const response = await fetch('fidoenroll', {\n" +
+            "           headers: {\n" +
+            "             'Content-Type': 'application/json'\n" +
+            "           },\n" +
+            "           method: 'POST',\n" +
+            "           credentials: 'same-origin',\n" +
+            "           body: JSON.stringify(jsonInput)\n" +
+            "        });\n" +
+            "    if (response.ok) {\n" +
+            "      const jsonResult = await response.json();\n" +
+            "      return jsonResult;\n" +
+            "    } else {\n" +
+            "      globalError = 'Server/network failure';\n" +
+            "    }\n" + 
+            "  } catch (error) {\n" +
+            "    globalError = error;\n" +
+            "  }\n" +
+            "}\n" +
+            
+            "async function startEnroll() {\n" +
+            "  document.getElementById('" + START_ID + "').style.display = 'none';\n" +
+            "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+            "  const result = await exchangeJSON({yes: 'I did it!'});\n" +
+            "  if (!globalError && result.success == true) {\n" +
+            "    const second = await exchangeJSON({yes: 'And again!', " +
+               "name: document.getElementById('" + CARD_HOLDER_NAME + "').value});\n" +
+            "  }\n" +
+            "  if (globalError) {\n" +
+            "    console.log('Fail: ' + globalError);\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
+            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+            "    e.textContent = 'Fail: ' + globalError;\n" +
+            "    e.style.display = 'block';\n" +
+            "  } else {\n" +
+            "    document.forms.shoot.submit();\n" +
+            "  }\n" +
+            "}\n").toString();
+        }
+        HTML.standardPage(response, js, html);
     }
     
     static String getParameter(HttpServletRequest request, String parameter) throws IOException {
@@ -161,7 +227,6 @@ public class EnrollServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             request.setCharacterEncoding("utf-8");
-            String cardHolderName = getParameter(request, CARD_HOLDER_NAME);
             StringBuilder js = new StringBuilder("'use strict';\n");
                 StringBuilder html = new StringBuilder(
                         "<div class='header'>Enrollment Succeeded</div>" +
@@ -174,9 +239,6 @@ public class EnrollServlet extends HttpServlet {
                         "</div>" +
                         "</div>");
                 js.append("// hi\n");
-                Cookie walletCookie = new Cookie(WALLET_COOKIE,"data");
-                walletCookie.setMaxAge(10000);
-                response.addCookie(walletCookie);
                 HTML.standardPage(response, 
                                  js.toString(),
                                  html);

@@ -23,11 +23,16 @@
         <servlet-name>EnrollServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.EnrollServlet</servlet-class>
     </servlet>
-    
+
     <servlet>
         <servlet-name>DisenrollServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.DisenrollServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>FIDOEnrollServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOEnrollServlet</servlet-class>
+    </servlet>    
         
     <servlet>
         <servlet-name>ValidateServlet</servlet-name>
@@ -72,6 +77,11 @@
     <servlet-mapping>
         <servlet-name>DisenrollServlet</servlet-name>
         <url-pattern>/disenroll</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>FIDOEnrollServlet</servlet-name>
+        <url-pattern>/fidoenroll</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>

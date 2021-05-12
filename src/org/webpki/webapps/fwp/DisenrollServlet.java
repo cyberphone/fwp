@@ -63,6 +63,7 @@ public class DisenrollServlet extends HttpServlet {
             "<form name='shoot' method='POST' action='disenroll'>" +
             "<div class='header'>Delete Payment Cards</div>" +
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+            "Comment: <i>This would be a part of an FWP &quot;wallet&quot; manager.</i>" +
             "</div>" +
             "<div style='display:flex;justify-content:center'>" +
             "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +

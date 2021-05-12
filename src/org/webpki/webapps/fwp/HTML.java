@@ -30,7 +30,7 @@ public class HTML {
     static Logger logger = Logger.getLogger(HTML.class.getName());
 
     static final String HTML_INIT = "<!DOCTYPE html>" +
-        "<html lang='en'><head><link rel='icon' href='webpkiorg.png' sizes='192x192'>" + 
+        "<html lang='en'><head><link rel='icon' href='images/webpkiorg.png' sizes='192x192'>" + 
         "<meta name='viewport' content='initial-scale=1.0'/>" + 
         "<title>FWP Lab</title>" + 
         "<link rel='stylesheet' type='text/css' href='style.css'>";
@@ -80,11 +80,11 @@ public class HTML {
         }
         html.append("</head><body>" +
             "<div style='display:flex;flex-wrap:wrap-reverse;justify-content:space-between'>" +
-            "<div><img src='thelab.svg' " +
+            "<div><img src='images/thelab.svg' " +
             "style='cursor:pointer;height:25pt;padding-bottom:10pt;margin-right:30pt'" +
             " onclick=\"document.location.href='home'\" title='Home of the lab...'/></div>" +
             "<div style='display:flex;padding-bottom:10pt'>" +
-            "<a href='https://github.com/cyberphone/fwp' target='_blank'><img src='fwp.svg' " +
+            "<a href='https://github.com/cyberphone/fwp' target='_blank'><img src='images/fwp.svg' " +
             "style='height:25pt' " +
             "title='Specifications, source code, etc.'/></a>" +
             "</div>" +
