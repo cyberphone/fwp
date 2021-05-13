@@ -34,7 +34,7 @@ public class HomeServlet extends HttpServlet {
         HTML.standardPage(response, null, new StringBuilder(
             "<div class='header'>FIDO&#xae; Web Pay (FWP) Demo</div>" +
             "<div style='padding-top:15pt'>This site permits testing and debugging " +
-            "a scheme for a payment authorization system based on FIDO2. " + 
+            "a scheme for a <i>universal payment authorization system</i> based on FIDO2. " + 
             "Due to the lack of built-in browser support, the &quot;Wallet&quot; UI is " +
             "currently implemented as a Web emulator." +
             "<p>Note that you can always return to the main menu by clicking " +

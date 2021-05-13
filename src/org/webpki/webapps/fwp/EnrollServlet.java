@@ -162,7 +162,7 @@ public class EnrollServlet extends HttpServlet {
             "  }\n" +
             "}\n" +
             
-            "async function exchangeJSON(jsonInput) {\n" +
+            "async function exchangeJSON(jsonInput, phaseTest) {\n" +
             "  try {\n" +
             "    const response = await fetch('fidoenroll', {\n" +
             "           headers: {\n" +
@@ -174,6 +174,9 @@ public class EnrollServlet extends HttpServlet {
             "        });\n" +
             "    if (response.ok) {\n" +
             "      const jsonResult = await response.json();\n" +
+            "      if (jsonResult." + FIDOEnrollServlet.PHASE_JSON + "!= phaseTest) {\n" +
+            "        setError('Out of phase');\n" +
+            "      }\n" +
             "      return jsonResult;\n" +
             "    } else {\n" +
             "      setError('Server/network failure');\n" +
@@ -186,10 +189,17 @@ public class EnrollServlet extends HttpServlet {
             "async function startEnroll() {\n" +
             "  document.getElementById('" + START_ID + "').style.display = 'none';\n" +
             "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-            "  const result = await exchangeJSON({yes: 'I did it!'});\n" +
-            "  if (!globalError && result.success == true) {\n" +
-            "    const second = await exchangeJSON({yes: 'And again!', " +
-               "name: document.getElementById('" + CARD_HOLDER_NAME + "').value});\n" +
+            "  const initPhase = await exchangeJSON({" + 
+                        FIDOEnrollServlet.PHASE_JSON + ":'" + 
+                        FIDOEnrollServlet.INIT_PHASE + "'},'" +
+                        FIDOEnrollServlet.INIT_PHASE + "');\n" +
+            "  if (!globalError) {\n" +
+            "    const finalizePhase = await exchangeJSON({" + 
+                        FIDOEnrollServlet.PHASE_JSON + ":'" + 
+                        FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
+                        FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
+                        "document.getElementById('" + CARD_HOLDER_NAME + "').value},'" +
+                        FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
             "  }\n" +
             "  if (globalError) {\n" +
             "    console.log('Fail: ' + globalError);\n" +

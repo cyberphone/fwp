@@ -18,12 +18,13 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.logging.Logger;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +37,6 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
-
-import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64URL;
 
 import org.webpki.webutil.ServletUtil;
 /**
@@ -57,7 +55,7 @@ public class FIDOEnrollServlet extends HttpServlet {
     static final String JSON_CONTENT_TYPE        = "application/json";
     
     // Used by the client and server to keep sync
-    static final String PHASE                    = "phase";
+    static final String PHASE_JSON               = "phase";
     // Arguments to PHASE
     static final String INIT_PHASE               = "init";
     static final String FINALIZE_PHASE           = "finalize";
@@ -96,58 +94,61 @@ public class FIDOEnrollServlet extends HttpServlet {
     }
     
     void failed(String what) throws IOException {
-    	throw new IOException(what);
+        throw new IOException(what);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
             // Get the input (request) data.
-            JSONObjectReader parsedJson = getJSON(request);
+            JSONObjectReader requestJson = getJSON(request);
             
             // Prepare for writing a response.
             JSONObjectWriter resultJson = new JSONObjectWriter();
             
             // The FIDO server is stateful and its state MUST be checked
             // with that of the client.
-            String phase = parsedJson.getString(PHASE);
+            String phase = requestJson.getString(PHASE_JSON);
 
             // Tentative: return the same phase info as in the request.
-        	resultJson.setString(PHASE, phase);
+            resultJson.setString(PHASE_JSON, phase);
             
             // Determine where are in the process.
             if (phase.equals(INIT_PHASE)) {
 
-            	// Firing up! We may have an old session but we don't really care.
-            	HttpSession session = request.getSession(true);
+                // Firing up! We may have an old session but we don't really care.
+                HttpSession session = request.getSession(true);
 
-            	// Two things need to be accomplished:
-            	// - Set session
-            	// - Provide FIDO register challenge data
-            	byte[] challenge = CryptoRandom.generateRandom(20);
-            	resultJson.setBinary(CHALLENGE_JSON, challenge);
-            	session.setAttribute(CHALLENGE_JSON, challenge);
+                // Two things need to be accomplished:
+                // - Set session
+                // - Provide FIDO register challenge data
+                byte[] challenge = CryptoRandom.generateRandom(20);
+                resultJson.setBinary(CHALLENGE_JSON, challenge);
+                session.setAttribute(CHALLENGE_JSON, challenge);
 
             } else if (phase.equals(FINALIZE_PHASE)) {
-                
-            	// Finalizing! Now we must have a session 
-            	HttpSession session = request.getSession(false);
-            	if (session == null) {
-            		failed("Missing finalize session");
-            	}
-            	byte[] challenge = (byte[]) session.getAttribute(CHALLENGE_JSON);
+ 
+Thread.sleep(2000);
+                // Finalizing! Now we must have a session 
+                HttpSession session = request.getSession(false);
+                if (session == null) {
+                    failed("Missing finalize session");
+                }
+                byte[] challenge = (byte[]) session.getAttribute(CHALLENGE_JSON);
                 if (challenge == null) {
-                	failed("Challenge session data missing");
+                    failed("Challenge session data missing");
                 }
 
                 // Get card holder name.
-            	String cardHolder = parsedJson.getString(CARD_HOLDER_JSON);
+                String cardHolder = requestJson.getString(CARD_HOLDER_JSON);
+
+if (cardHolder.equals("bad")) failed(cardHolder);
                 
                 // Assuming that everything has been verified we are finally ready
                 // issuing the requested payment credentials.
                 
-                // We use an UUID as the sole entry in the database and tie
-            	// the credentials and (a single) FIDO authenticator to that.
+                // We use a UUID as the sole entry in the database and tie
+                // the credentials and (a single) FIDO authenticator to that.
                 String uuid = UUID.randomUUID().toString();
                 
                 // To enable the Web emulator we put the UUID in a persistent cookie. 
@@ -156,32 +157,9 @@ public class FIDOEnrollServlet extends HttpServlet {
                 walletCookie.setSecure(true);
                 response.addCookie(walletCookie);
             } else {
-            	failed("Unknown phase: " + phase);
+                failed("Unknown phase: " + phase);
             }
-            if (parsedJson.getString("yes").contains("again")) {
-                HttpSession session = request.getSession(false);
-                if (session != null && session.getAttribute("login") != null) {
-        String temp = parsedJson.getString("name");
-        if (temp.equals("bad")) throw new IOException(temp);
-
-                    logger.info("Yes Set-Cookie");
-                    String uuid = UUID.randomUUID().toString();
-                    Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE, uuid);
-                    walletCookie.setMaxAge(10000000);
-                    walletCookie.setSecure(true);
-                    response.addCookie(walletCookie);
-                    result.setBoolean("success", true);
-                } else {
-                    logger.info("NO SESSION");
-                    result.setBoolean("success", false);
-                }
-            } else {
-                Thread.sleep(2000);
-                HttpSession session = request.getSession(true);
-                session.setAttribute("login", "yes");
-                result.setBoolean("success", true);
-            }
-            returnJSON(response, result);
+            returnJSON(response, resultJson);
         } catch (Exception e) {
             throw new IOException(e);
         }
