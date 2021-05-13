@@ -35,33 +35,8 @@
     </servlet>    
         
     <servlet>
-        <servlet-name>ValidateServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.ValidateServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>NoWebCryptoServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.NoWebCryptoServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>JavaScriptSignatureServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.JavaScriptSignatureServlet</servlet-class>
-    </servlet>
-
-    <servlet>
         <servlet-name>HashServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.HashServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>KeyConvertServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.KeyConvertServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>DumpASN1Servlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.DumpASN1Servlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -85,33 +60,8 @@
     </servlet-mapping>
     
     <servlet-mapping>
-        <servlet-name>ValidateServlet</servlet-name>
-        <url-pattern>/validate</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>NoWebCryptoServlet</servlet-name>
-        <url-pattern>/nowebcrypto</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>JavaScriptSignatureServlet</servlet-name>
-        <url-pattern>/jssignature</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>HashServlet</servlet-name>
         <url-pattern>/hash</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>KeyConvertServlet</servlet-name>
-        <url-pattern>/keyconv</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>DumpASN1Servlet</servlet-name>
-        <url-pattern>/dumpasn1</url-pattern>
     </servlet-mapping>
 
     <security-constraint>

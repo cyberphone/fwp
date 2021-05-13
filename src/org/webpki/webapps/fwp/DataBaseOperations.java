@@ -33,8 +33,6 @@ import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
-import org.webpki.json.JSONOutputFormats;
-
 public class DataBaseOperations {
 
     static Logger logger = Logger.getLogger(DataBaseOperations.class.getCanonicalName());

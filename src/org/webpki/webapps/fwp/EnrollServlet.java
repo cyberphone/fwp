@@ -18,36 +18,14 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.net.URLEncoder;
-
-import java.security.KeyPair;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.HmacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
-
-import org.webpki.jose.jws.JWSAsymKeySigner;
-import org.webpki.jose.jws.JWSHmacSigner;
-import org.webpki.jose.jws.JWSSigner;
-
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONParser;
-
-import org.webpki.util.Base64;
-import org.webpki.util.Base64URL;
-import org.webpki.util.DebugFormatter;
-import org.webpki.util.PEMDecoder;
 
 public class EnrollServlet extends HttpServlet {
     
@@ -233,13 +211,6 @@ public class EnrollServlet extends HttpServlet {
             }
         }
         return s.toString();
-    }
-
-    static byte[] decodeSymmetricKey(String keyString) throws IOException {
-        return keyString.startsWith("@") ? 
-                   keyString.substring(1).getBytes("utf-8") 
-                                         : 
-                  DebugFormatter.getByteArrayFromHex(keyString);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
