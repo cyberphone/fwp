@@ -32,11 +32,13 @@ public class HomeServlet extends HttpServlet {
             throws IOException, ServletException {
 
         HTML.standardPage(response, null, new StringBuilder(
-            "<div class='header'>Fido Web Pay (FWP) Demo</div>" +
+            "<div class='header'>FIDO&#xae; Web Pay (FWP) Demo</div>" +
             "<div style='padding-top:15pt'>This site permits testing and debugging " +
             "a scheme for a payment authorization system based on FIDO2. " + 
-            "Due to the lack of built-in browser support, the UI is " +
-            "currently implemented as a Web emulator.</div>" +
+            "Due to the lack of built-in browser support, the &quot;Wallet&quot; UI is " +
+            "currently implemented as a Web emulator." +
+            "<p>Note that you can always return to the main menu by clicking " +
+            "<span style='position:relative;top:0.3em'><img src='images/thelab.svg' style='width:4em' alt='the lab'/></span></p></div>" +
             "<div style='display:flex;justify-content:center'><table>" +
             "<tr><td><div class='multibtn' " +
             "onclick=\"document.location.href='hash'\" " +
@@ -48,13 +50,10 @@ public class HomeServlet extends HttpServlet {
             "title='Enroll Payment Cards'>" +
             "Enroll Payment Cards..." +
             "</div></td></tr>" +
-            "<tr><td><div class='multibtn' " +
-            "onclick=\"document.location.href='disenroll'\" " +
-            "title='Delete Payment Cards...'>" +
-            "Delete Payment Cards..." +
-            "</div></td></tr>" +
+            WalletAdminServlet.WALLET_ADMIN_BUTTON +
             "</table></div>" +
-            "<div class='sitefooter'>Privacy/security notice: this test site depends on local " +
-            "but persistent cookies.</div>"));
+            "<div class='sitefooter'>Trademarks: FIDO is a trademark of the FIDO Alliance.<br>" +
+            "Privacy/security notice: this test site depends on a local " +
+            "persistent cookie.</div>"));
     }
 }

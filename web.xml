@@ -25,8 +25,8 @@
     </servlet>
 
     <servlet>
-        <servlet-name>DisenrollServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.DisenrollServlet</servlet-class>
+        <servlet-name>WalletAdminServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.WalletAdminServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -75,8 +75,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>DisenrollServlet</servlet-name>
-        <url-pattern>/disenroll</url-pattern>
+        <servlet-name>WalletAdminServlet</servlet-name>
+        <url-pattern>/walletadmin</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>

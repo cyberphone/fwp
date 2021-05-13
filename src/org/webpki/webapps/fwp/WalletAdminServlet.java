@@ -49,38 +49,45 @@ import org.webpki.util.Base64URL;
 import org.webpki.util.DebugFormatter;
 import org.webpki.util.PEMDecoder;
 
-public class DisenrollServlet extends HttpServlet {
+public class WalletAdminServlet extends HttpServlet {
     
-    static Logger logger = Logger.getLogger(DisenrollServlet.class.getName());
+    static Logger logger = Logger.getLogger(WalletAdminServlet.class.getName());
 
     private static final long serialVersionUID = 1L;
+    
+    static final String WALLET_ADMIN_BUTTON =
+            "<tr><td><div class='multibtn' onclick=\"document.location.href='walletadmin'\">" +
+                "Wallet Administration..." +
+            "</div></td></tr>" +
+            "</table>";
 
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         StringBuilder js = new StringBuilder("'use strict';\n");
-        StringBuilder html = new StringBuilder(EnrollServlet.hasWalletCookie(request) ?
-            "<form name='shoot' method='POST' action='disenroll'>" +
-            "<div class='header'>Delete Payment Cards</div>" +
+        StringBuilder html = new StringBuilder(
+            "<div class='header'>Wallet Administration</div>" +
+
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-            "Comment: <i>This would be a part of an FWP &quot;wallet&quot; manager.</i>" +
-            "</div>" +
-            "<div style='display:flex;justify-content:center'>" +
-            "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-            "Delete Cards!" +
-            "</div>" +
-            "</div>" +
-            "</form>"
-                                          :
-            "<div class='header'>Delete Payment Cards</div>" +
-            "<div style='display:flex;justify-content:center;margin-top:15pt;color=blue;font-weight=bold'>" +
-            "You have no payment cards, maybe you want to enroll?" +
-            "</div>" +
-            "<div style='display:flex;justify-content:center'>" +
-            "<div class='stdbtn' onclick=\"document.location.href='enroll'\">" +
-            "Go to Enroll Dialog..." +
-            "</div>" +
+              "<div class='comment'>" +
+                "The &quot;Wallet&quot; is a central part of FWP since it holds all " +
+                "related payment cards" +
+              "</div>" +
             "</div>");
+
+        html.append(EnrollServlet.hasWalletCookie(request) ?
+
+            "<form name='shoot' method='POST' action='walletadmin'></form>" +
+            "<div style='display:flex;justify-content:center'>" +
+              "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+                "Delete Cards!" +
+              "</div>" +
+            "</div>"
+                                          :
+            "<div class='important'>" +
+              "You currently have no payment cards" +
+            "</div>");
+
         js.append("// hi\n");
         HTML.standardPage(response, 
                          js.toString(),

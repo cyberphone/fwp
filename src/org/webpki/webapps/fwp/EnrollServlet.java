@@ -98,23 +98,26 @@ public class EnrollServlet extends HttpServlet {
         boolean hasWalletCookie = hasWalletCookie(request);
         StringBuilder html = new StringBuilder(hasWalletCookie ?
             "<div class='header'>Enroll Payment Cards</div>" +
-            "<div style='display:flex;justify-content:center;margin-top:15pt;color=red;font-weight=bold'>" +
-              "You already have enrolled payment cards, what do you want to do with them?" +
+
+            "<div class='important'>" +
+              "You already have enrolled payment cards" +
             "</div>" +
 
             "<div style='display:flex;justify-content:center'><table>" +
-              "<tr><td><div class='multibtn' onclick=\"document.location.href='hash'\">" +
-                  "Buy Something!" +
-               "</div></td></tr>" +
-               "<tr><td><div class='multibtn' onclick=\"document.location.href='disenroll'\">" +
-                  "Delete Cards..." +
-              "</div></td></tr>" +
+            WalletAdminServlet.WALLET_ADMIN_BUTTON +
               "</table>" +
             "</div>"
                                  :
             "<form name='shoot' method='POST' action='enroll'>" +
 
             "<div class='header'>Enroll Payment Cards</div>" +
+
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+            "<div class='comment'>" +
+            "In a real-world setting, you would enroll cards at an <i>issuer</i> site " +
+            "(after having logged-in using an <i>issuer-specific method</i>)." +
+            "</div>" +
+            "</div>" +
 
             "<div style='display:flex;justify-content:center'>" +
               "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
@@ -149,6 +152,16 @@ public class EnrollServlet extends HttpServlet {
             
             "let globalError = null;\n" +
             
+            "function setError(message) {\n" +
+            "  if (!globalError) {\n" +
+            "    globalError = message;\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
+            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+            "    e.textContent = 'Fail: ' + globalError;\n" +
+            "    e.style.display = 'block';\n" +
+            "  }\n" +
+            "}\n" +
+            
             "async function exchangeJSON(jsonInput) {\n" +
             "  try {\n" +
             "    const response = await fetch('fidoenroll', {\n" +
@@ -163,10 +176,10 @@ public class EnrollServlet extends HttpServlet {
             "      const jsonResult = await response.json();\n" +
             "      return jsonResult;\n" +
             "    } else {\n" +
-            "      globalError = 'Server/network failure';\n" +
+            "      setError('Server/network failure');\n" +
             "    }\n" + 
             "  } catch (error) {\n" +
-            "    globalError = error;\n" +
+            "    setError(error);\n" +
             "  }\n" +
             "}\n" +
             
@@ -180,10 +193,6 @@ public class EnrollServlet extends HttpServlet {
             "  }\n" +
             "  if (globalError) {\n" +
             "    console.log('Fail: ' + globalError);\n" +
-            "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
-            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
-            "    e.textContent = 'Fail: ' + globalError;\n" +
-            "    e.style.display = 'block';\n" +
             "  } else {\n" +
             "    document.forms.shoot.submit();\n" +
             "  }\n" +
