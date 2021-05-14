@@ -117,6 +117,7 @@ public class EnrollServlet extends HttpServlet {
             
             "function setError(message) {\n" +
             "  if (!globalError) {\n" +
+            "    console.log('Fail: ' + globalError);\n" +
             "    globalError = message;\n" +
             "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
             "    let e = document.getElementById('" + FAILED_ID + "');\n" +
@@ -156,18 +157,55 @@ public class EnrollServlet extends HttpServlet {
                         FIDOEnrollServlet.PHASE_JSON + ":'" + 
                         FIDOEnrollServlet.INIT_PHASE + "'},'" +
                         FIDOEnrollServlet.INIT_PHASE + "');\n" +
-            "  if (!globalError) {\n" +
-            "    const finalizePhase = await exchangeJSON({" + 
+            "  if (globalError) return;\n" +
+
+            "  let userId = initPhase." + FIDOEnrollServlet.RP_USER_ID + ";\n" +
+            "  let publicKey = {\n" +
+            "    challenge: Uint8Array.from(window.atob(initPhase." + 
+                     FIDOEnrollServlet.RP_CHALL_B64_JSON + "), c=>c.charCodeAt(0)),\n" +
+            "    rp: {\n" +
+            "      name: 'FIDO Web Pay'\n" +
+            "    },\n" +
+            "    user: {\n" +
+            "      id: new TextEncoder().encode(userId),\n" +
+            "      name: userId,\n" +
+            "      displayName: userId\n" +
+            "    },\n" +
+            "    pubKeyCredParams: [{\n" +
+            "      type: 'public-key',\n" +
+            "      alg: -7\n" +
+            "    },{\n" +
+            "      type: 'public-key',\n" +
+            "      alg: -8\n" +
+            "    },{\n" +
+            "      type: 'public-key',\n" +
+            "      alg: -257\n" +
+            "    }],\n" +
+            "    timeout: 360000,\n" +
+            "    excludeCredentials: [],\n" +
+            "    authenticatorSelection: {\n" +
+            "      requireResidentKey: true,\n" +
+            "      userVerification: 'preferred'\n" +
+            "    },\n" +
+            "    attestation: 'direct',\n" +
+            "    extensions: {}\n" +
+            "  };\n" +
+            
+            "  console.log(publicKey);\n" +
+            "  navigator.credentials.create({ publicKey }).then(function(credentialInfo) {\n" +
+            "    console.log(credentialInfo);\n" +
+            "  }).catch(function (err) {\n" +
+            "    setError(err);\n" +
+            "  });\n" +
+            
+            "  const finalizePhase = await exchangeJSON({" + 
                         FIDOEnrollServlet.PHASE_JSON + ":'" + 
                         FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
                         FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
                         "document.getElementById('" + CARD_HOLDER_NAME + "').value},'" +
                         FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
-            "  }\n" +
-            "  if (globalError) {\n" +
-            "    console.log('Fail: ' + globalError);\n" +
-            "  } else {\n" +
-            "    document.forms.shoot.submit();\n" +
+            "  if (!globalError) {\n" +
+  //          "    document.forms.shoot.submit();\n" +
             "  }\n" +
             "}\n").toString();
         }

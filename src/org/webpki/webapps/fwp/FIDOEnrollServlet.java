@@ -18,8 +18,10 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.sql.Connection;
 
+import java.util.Base64;
 import java.util.UUID;
 
 import java.util.logging.Logger;
@@ -64,8 +66,12 @@ public class FIDOEnrollServlet extends HttpServlet {
     static final String FINALIZE_PHASE           = "finalize";
     
     // Additional JSON elements
-    static final String CHALLENGE_JSON           = "challenge";
+    static final String RP_CHALL_B64_JSON        = "challb64";
+    static final String RP_USER_ID               = "userId";
     static final String CARD_HOLDER_JSON         = "cardHolder";
+    
+    // Init phase session data
+    static final String REGISTER_DATA            = "regdata";
 
     static Logger logger = Logger.getLogger(FIDOEnrollServlet.class.getName());
 
@@ -145,9 +151,15 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // Two things need to be accomplished:
                 // - Set session
                 // - Provide FIDO register challenge data
-                byte[] challenge = CryptoRandom.generateRandom(20);
-                resultJson.setBinary(CHALLENGE_JSON, challenge);
-                session.setAttribute(CHALLENGE_JSON, challenge);
+                byte[] challenge = CryptoRandom.generateRandom(32);
+                resultJson.setString(RP_CHALL_B64_JSON,
+                                     Base64.getEncoder().encodeToString(challenge));
+                // We use a UUID as the sole entry in the database and tie
+                // the credentials and (a single) FIDO authenticator to that.
+                resultJson.setString(RP_USER_ID, UUID.randomUUID().toString());
+                
+                // This what we send but we must also 
+                session.setAttribute(REGISTER_DATA, new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FINALIZE_PHASE)) {
  
@@ -157,10 +169,11 @@ Thread.sleep(2000);
                 if (session == null) {
                     failed("Missing finalize session");
                 }
-                byte[] challenge = (byte[]) session.getAttribute(CHALLENGE_JSON);
-                if (challenge == null) {
-                    failed("Challenge session data missing");
+                JSONObjectReader registerData = (JSONObjectReader) session.getAttribute(REGISTER_DATA);
+                if (registerData == null) {
+                    failed("Enrollment register data missing");
                 }
+                String userId = registerData.getString(RP_USER_ID);
 
                 // Get card holder name.
                 String cardHolder = requestJson.getString(CARD_HOLDER_JSON);
@@ -170,9 +183,6 @@ if (cardHolder.equals("bad")) failed(cardHolder);
                 // Assuming that everything has been verified we are finally ready
                 // issuing the requested payment credentials.
                 
-                // We use a UUID as the sole entry in the database and tie
-                // the credentials and (a single) FIDO authenticator to that.
-                String userId = UUID.randomUUID().toString();
                 
                 // Now perform all the database chores.
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
