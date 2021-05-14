@@ -47,6 +47,30 @@ public class HashServlet extends HttpServlet {
 
     static final String HASH_ALGORITHM     = "alg";
     
+    static String getParameter(HttpServletRequest request, String parameter) throws IOException {
+        String string = request.getParameter(parameter);
+        if (string == null) {
+            throw new IOException("Missing data for: "+ parameter);
+        }
+        return string.trim();
+    }
+    
+    static byte[] getBinaryParameter(HttpServletRequest request, String parameter) throws IOException {
+        return getParameter(request, parameter).getBytes("utf-8");
+    }
+
+    static String getTextArea(HttpServletRequest request, String name)
+            throws IOException {
+        String string = getParameter(request, name);
+        StringBuilder s = new StringBuilder();
+        for (char c : string.toCharArray()) {
+            if (c != '\r') {
+                s.append(c);
+            }
+        }
+        return s.toString();
+    }
+
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
@@ -57,9 +81,9 @@ public class HashServlet extends HttpServlet {
 
             // Get the input data items
             JSONObjectReader parsedJson = JSONParser.parse(
-                    EnrollServlet.getParameter(request, JSON_DATA));
+                    getParameter(request, JSON_DATA));
             HashAlgorithms hashAlgorithm = HashAlgorithms.getAlgorithmFromId(
-                    EnrollServlet.getParameter(request, HASH_ALGORITHM), 
+                    getParameter(request, HASH_ALGORITHM), 
                     AlgorithmPreferences.JOSE);
 
             // Create a pretty-printed JSON object without canonicalization

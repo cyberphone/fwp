@@ -33,33 +33,17 @@ public class EnrollServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    // HTML form arguments
-    static final String PRM_JSON_DATA    = "json";
-    
-    static final String PRM_JWS_EXTRA    = "xtra";
-
-    static final String PRM_SECRET_KEY   = "sec";
-
-    static final String PRM_PRIVATE_KEY  = "priv";
-
-    static final String PRM_CERT_PATH    = "cert";
-
-    static final String PRM_ALGORITHM    = "alg";
-
-    static final String FLG_CERT_PATH    = "cerflg";
-    static final String FLG_JAVASCRIPT   = "jsflg";
-    static final String FLG_JWK_INLINE   = "jwkflg";
-    
-    static final String DEFAULT_ALG      = "ES256";
-    static final String CARD_HOLDER_NAME = "chn";
-
+    // HTML form arguments.
     static final String DEFAULT_CARD_HOLDER_NAME  = "Anonymous Tester &#x1f638;";
+    static final String CARD_HOLDER_NAME          = "chn";
     
-    static final String WALLET_COOKIE    = "WALLET";
+    // The center of it all...
+    static final String WALLET_COOKIE             = "WALLET";
 
-    static final String WAITING_ID       = "wait";
-    static final String START_ID         = "start";
-    static final String FAILED_ID        = "fail";
+    // DIV elements to turn on and turn off.
+    private static final String WAITING_ID        = "wait";
+    private static final String USER_IFC_ID       = "uifc";
+    private static final String FAILED_ID         = "fail";
     
     static boolean hasWalletCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -81,8 +65,9 @@ public class EnrollServlet extends HttpServlet {
               "You already have enrolled payment cards" +
             "</div>" +
 
-            "<div style='display:flex;justify-content:center'><table>" +
-            WalletAdminServlet.WALLET_ADMIN_BUTTON +
+            "<div style='display:flex;justify-content:center'>" +
+              "<table>" +
+                WalletAdminServlet.WALLET_ADMIN_BUTTON +
               "</table>" +
             "</div>"
                                  :
@@ -91,10 +76,10 @@ public class EnrollServlet extends HttpServlet {
             "<div class='header'>Enroll Payment Cards</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-            "<div class='comment'>" +
-            "In a real-world setting, you would enroll cards at an <i>issuer</i> site " +
-            "(after having logged-in using an <i>issuer-specific method</i>)." +
-            "</div>" +
+              "<div class='comment'>" +
+                  "In a real-world setting, you would enroll cards at an <i>issuer</i> site " +
+                  "(after having logged-in using an <i>issuer-specific method</i>)." +
+              "</div>" +
             "</div>" +
 
             "<div style='display:flex;justify-content:center'>" +
@@ -102,16 +87,16 @@ public class EnrollServlet extends HttpServlet {
                   "style='padding-top:5em;display:none' alt='waiting'/>" +
             "</div>" +
             
-            "<div id='" + FAILED_ID + "' style='color:red;font-weight:bold;" +
-                "text-align:center;padding-top:3em;display:none'></div>" +
+            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
 
-            "<div id='" + START_ID + "'>" +
+            "<div id='" + USER_IFC_ID + "'>" +
               "<div style='display:flex;justify-content:center;margin-top:15pt'><table>" +
                 "<tr><td>Card Holder:</td></tr>" +
                 "<tr><td><input type='text' id='" + CARD_HOLDER_NAME + "' " +
                     "maxlength='50' value='" + DEFAULT_CARD_HOLDER_NAME + 
                     "' style='background-color:#def7fc;padding:2pt 3pt' autofocus></td></tr>" +
               "</table></div>" +
+
               "<div style='display:flex;justify-content:center'>" +
                 "<div class='stdbtn' onclick=\"startEnroll()\">" +
                   "Start Enrollment!" +
@@ -165,7 +150,7 @@ public class EnrollServlet extends HttpServlet {
             "}\n" +
             
             "async function startEnroll() {\n" +
-            "  document.getElementById('" + START_ID + "').style.display = 'none';\n" +
+            "  document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
             "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
             "  const initPhase = await exchangeJSON({" + 
                         FIDOEnrollServlet.PHASE_JSON + ":'" + 
@@ -189,49 +174,25 @@ public class EnrollServlet extends HttpServlet {
         HTML.standardPage(response, js, html);
     }
     
-    static String getParameter(HttpServletRequest request, String parameter) throws IOException {
-        String string = request.getParameter(parameter);
-        if (string == null) {
-            throw new IOException("Missing data for: "+ parameter);
-        }
-        return string.trim();
-    }
-    
-    static byte[] getBinaryParameter(HttpServletRequest request, String parameter) throws IOException {
-        return getParameter(request, parameter).getBytes("utf-8");
-    }
-
-    static String getTextArea(HttpServletRequest request, String name)
-            throws IOException {
-        String string = getParameter(request, name);
-        StringBuilder s = new StringBuilder();
-        for (char c : string.toCharArray()) {
-            if (c != '\r') {
-                s.append(c);
-            }
-        }
-        return s.toString();
-    }
-
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
             request.setCharacterEncoding("utf-8");
             StringBuilder js = new StringBuilder("'use strict';\n");
-                StringBuilder html = new StringBuilder(
-                        "<div class='header'>Enrollment Succeeded</div>" +
-                        "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                        "You did it!" +
-                        "</div>" +
-                        "<div style='display:flex;justify-content:center'>" +
-                        "<div class='stdbtn' onclick=\"document.location.href='hash'\">" +
-                        "Buy Something..." +
-                        "</div>" +
-                        "</div>");
-                js.append("// hi\n");
-                HTML.standardPage(response, 
-                                 js.toString(),
-                                 html);
+            StringBuilder html = new StringBuilder(
+                "<div class='header'>Enrollment Succeeded</div>" +
+
+                "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                    "You did it!" +
+                "</div>" +
+
+                "<div style='display:flex;justify-content:center'>" +
+                  "<div class='stdbtn' onclick=\"document.location.href='hash'\">" +
+                      "Buy Something..." +
+                  "</div>" +
+                "</div>");
+            js.append("// hi\n");
+            HTML.standardPage(response, js.toString(), html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

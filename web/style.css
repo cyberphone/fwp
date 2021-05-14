@@ -112,6 +112,14 @@ li {
   border-color:black;
 }
 
+.errorText {
+  color:red;
+  font-weight:bold;
+  text-align:center;
+  padding-top:3em;
+  display:none;
+}
+
 .sigparmbox {
   border-color:#008040;
   background-color:#fbfff7;

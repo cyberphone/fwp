@@ -18,9 +18,12 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.sql.Connection;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +44,6 @@ public class WalletAdminServlet extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder js = new StringBuilder("'use strict';\n");
         StringBuilder html = new StringBuilder(
             "<div class='header'>Wallet Administration</div>" +
 
@@ -65,56 +67,47 @@ public class WalletAdminServlet extends HttpServlet {
               "You currently have no payment cards" +
             "</div>");
 
-        js.append("// hi\n");
-        HTML.standardPage(response, 
-                         js.toString(),
-                         html);
+        HTML.standardPage(response, null, html);
     }
     
-    static String getParameter(HttpServletRequest request, String parameter) throws IOException {
-        String string = request.getParameter(parameter);
-        if (string == null) {
-            throw new IOException("Missing data for: "+ parameter);
-        }
-        return string.trim();
-    }
-    
-    static byte[] getBinaryParameter(HttpServletRequest request, String parameter) throws IOException {
-        return getParameter(request, parameter).getBytes("utf-8");
-    }
-
-    static String getTextArea(HttpServletRequest request, String name)
-            throws IOException {
-        String string = getParameter(request, name);
-        StringBuilder s = new StringBuilder();
-        for (char c : string.toCharArray()) {
-            if (c != '\r') {
-                s.append(c);
+    static String getUserIdFromCookie(HttpServletRequest request) throws IOException {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(EnrollServlet.WALLET_COOKIE)) {
+                return cookie.getValue();
             }
         }
-        return s.toString();
+        throw new IOException("Wallet cookie not found!");
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            request.setCharacterEncoding("utf-8");
-            StringBuilder js = new StringBuilder("'use strict';\n");
-                StringBuilder html = new StringBuilder(
-                        "<form name='shoot' method='POST' action='hash'>" +
-                        "<div class='header'>Payment Cards Deleted</div>" +
-                        "<div style='display:flex;justify-content:center;margin-top:15pt'>")
-                    .append("Thank you testing.  We hope that you liked it!")
-                    .append(
-                        "</div>" +
-                        "</form>");
-                js.append("// hi\n");
-                Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE,"");
-                walletCookie.setMaxAge(0);
-                response.addCookie(walletCookie);
-                HTML.standardPage(response, 
-                                 js.toString(),
-                                 html);
+            // The user ID is stored in a persistent cookie.
+            String userId = getUserIdFromCookie(request);
+            
+            // This is the only database call needed for deleting a user.
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                DataBaseOperations.deleteUser(userId, connection);
+            }
+            
+            // Remove the user (cookie) from the browser as well.
+            Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE,"");
+            walletCookie.setMaxAge(0);
+            response.addCookie(walletCookie);
+            
+            // Tell the user that it worked...
+            StringBuilder html = new StringBuilder(
+                    "<form name='shoot' method='POST' action='hash'>" +
+                    "<div class='header'>Payment Cards Deleted</div>" +
+                    "<div style='display:flex;justify-content:center;margin-top:15pt'>")
+                .append("Thank you testing.  We hope that you liked it!")
+                .append(
+                    "</div>" +
+                    "</form>");
+            HTML.standardPage(response, null, html);
+
+            logger.info("Removed user: " + userId);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

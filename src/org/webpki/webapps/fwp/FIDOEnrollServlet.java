@@ -17,8 +17,11 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
 
 import java.util.UUID;
+
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -72,16 +75,16 @@ public class FIDOEnrollServlet extends HttpServlet {
             throw new IOException("Unexpected MIME type:" + request.getContentType());
         }
         JSONObjectReader parsedJson = JSONParser.parse(ServletUtil.getData(request));
-  //      if (FWPService.logging) {
+        if (FWPService.logging) {
             logger.info("Received: " + parsedJson.toString());
-  //      }
+        }
         return parsedJson;
     }
 
     static void returnJSON(HttpServletResponse response, JSONObjectWriter json) throws IOException {
-//        if (FWPService.logging) {
+        if (FWPService.logging) {
             logger.info("To be returned: " + json.toString());
-//        }
+        }
         byte[] rawData = json.serializeToBytes(JSONOutputFormats.NORMALIZED);
         response.setContentType(JSON_CONTENT_TYPE);
         response.setHeader(HTTP_PRAGMA, "No-Cache");
@@ -95,6 +98,26 @@ public class FIDOEnrollServlet extends HttpServlet {
     
     void failed(String what) throws IOException {
         throw new IOException(what);
+    }
+    
+    static String getStackTrace(Exception e, String message) {
+        StringBuilder error = new StringBuilder()
+                .append(e.getClass().getName())
+                .append(": ")
+                .append(message);
+        StackTraceElement[] st = e.getStackTrace();
+        int length = st.length;
+        if (length > 20) {
+            length = 20;
+        }
+        for (int i = 0; i < length; i++) {
+            String entry = st[i].toString();
+            error.append("\n  at " + entry);
+            if (entry.contains(".HttpServlet")) {
+                break;
+            }
+        }
+        return error.toString();
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -149,20 +172,34 @@ if (cardHolder.equals("bad")) failed(cardHolder);
                 
                 // We use a UUID as the sole entry in the database and tie
                 // the credentials and (a single) FIDO authenticator to that.
-                String uuid = UUID.randomUUID().toString();
+                String userId = UUID.randomUUID().toString();
                 
-                // To enable the Web emulator we put the UUID in a persistent cookie. 
-                Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE, uuid);
+                // Now perform all the database chores.
+                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+
+                    // Store basic data.
+                    DataBaseOperations.createUser(userId, cardHolder, connection);
+                }
+
+                // To enable the Web emulator, put the UUID in a persistent cookie. 
+                Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE, userId);
                 walletCookie.setMaxAge(8640000);  // 100 days.
                 walletCookie.setSecure(true);
                 response.addCookie(walletCookie);
+
+                logger.info("Created user: " + userId);
             } else {
                 failed("Unknown phase: " + phase);
             }
             returnJSON(response, resultJson);
+
         } catch (Exception e) {
-            throw new IOException(e);
+            String message = e.getMessage();
+            logger.log(Level.SEVERE, getStackTrace(e, message));
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            PrintWriter writer = response.getWriter();
+            writer.print(message);
+            writer.flush();
         }
     }
-
 }

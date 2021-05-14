@@ -18,18 +18,9 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-import java.security.GeneralSecurityException;
-
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
@@ -41,4 +32,37 @@ public class DataBaseOperations {
         try (Connection connection = FWPService.jdbcDataSource.getConnection();) { }
     }
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Create user                                                                                //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static void createUser(String userId,
+                           String commonName,
+                           Connection connection) throws SQLException, IOException {
+/*
+        CREATE PROCEDURE CreateUserSP (IN p_UserID CHAR(36),
+                                       IN p_CommonName VARCHAR(50))
+*/
+        try (CallableStatement stmt = 
+                connection.prepareCall("{call CreateUserSP(?,?)}");) {
+            stmt.setString(1, userId);
+            stmt.setString(2, commonName);
+            stmt.execute();
+        }
+    }
+
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Delete user                                                                                //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static void deleteUser(String userId,
+                           Connection connection) throws SQLException, IOException {
+/*
+        CREATE PROCEDURE DeleteUserSP (IN p_UserID CHAR(36))
+*/
+        try (CallableStatement stmt = 
+                connection.prepareCall("{call DeleteUserSP(?)}");) {
+            stmt.setString(1, userId);
+            stmt.execute();
+        }
+    }
 }
