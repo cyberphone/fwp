@@ -16,8 +16,6 @@
  */
 package org.webpki.webapps.fwp;
 
-import java.io.IOException;
-
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,17 +31,17 @@ public class DataBaseOperations {
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Create user                                                                                //
+    // Create (or recreate) user and give it some payment credentials as well                     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    static void createUser(String userId,
-                           String commonName,
-                           Connection connection) throws SQLException, IOException {
+    static void initiateUserAccount(String userId,
+                                    String commonName,
+                                    Connection connection) throws SQLException {
 /*
-        CREATE PROCEDURE CreateUserSP (IN p_UserID CHAR(36),
-                                       IN p_CommonName VARCHAR(50))
+        CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
+                                                IN p_CommonName VARCHAR(50))
 */
         try (CallableStatement stmt = 
-                connection.prepareCall("{call CreateUserSP(?,?)}");) {
+                connection.prepareCall("{call InitiateUserAccountSP(?,?)}");) {
             stmt.setString(1, userId);
             stmt.setString(2, commonName);
             stmt.execute();
@@ -54,15 +52,30 @@ public class DataBaseOperations {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Delete user                                                                                //
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    static void deleteUser(String userId,
-                           Connection connection) throws SQLException, IOException {
+    static void deletePaymentCards(String userId,
+                                   Connection connection) throws SQLException {
 /*
-        CREATE PROCEDURE DeleteUserSP (IN p_UserID CHAR(36))
+        CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
 */
-        try (CallableStatement stmt = 
-                connection.prepareCall("{call DeleteUserSP(?)}");) {
+        try (CallableStatement stmt = connection.prepareCall("{call DeletePaymentCardsSP(?)}");) {
             stmt.setString(1, userId);
             stmt.execute();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Check if the user (which may not exist) has payment cards                                  //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+        CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
+
+*/
+    static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
+        try (CallableStatement stmt = connection.prepareCall("{call HasPaymentCardsSP(?,?)}");) {
+            stmt.registerOutParameter(1, java.sql.Types.BOOLEAN);
+            stmt.setString(2, userId);
+            stmt.execute();
+            return stmt.getBoolean(1);
         }
     }
 }

@@ -39,17 +39,15 @@ GRANT SELECT ON v_routines TO fwp@localhost;
 --
 -- Create tables and stored procedures
 --
--- ###############################################################
--- # This is the Payer side of a PoC database for "Direct Mode"  #
--- # Open Banking APIs.  The database holds information about    #
--- # Credentials and OAuth2 tokens                               #
--- ###############################################################
+-- #################################################
+-- # This is a database for the FIDO Web Pay PoC   #
+-- #################################################
 
 /*=============================================*/
 /*                   USERS                     *
 /*=============================================*/
 CREATE TABLE USERS (
-    UserID          CHAR(36)    NOT NULL UNIQUE,                        -- Unique User ID &
+    UserId          CHAR(36)    NOT NULL UNIQUE,                        -- Unique User ID &
                                                                         -- cookie for FWP Wallet
                                                                         -- Uses UUID
 
@@ -57,7 +55,7 @@ CREATE TABLE USERS (
     
     Created         TIMESTAMP   NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Administrator data
                                                                         
-    PRIMARY KEY (UserID)
+    PRIMARY KEY (UserId)
 );
 
 
@@ -72,6 +70,7 @@ CREATE TABLE CREDENTIALS (
 
     CredentialId    INT         NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
 
+/*
     AccountId       VARCHAR(30) NOT NULL,                               -- Account Reference
     
     PaymentMethodUrl VARCHAR(50) NOT NULL,                              -- Payment method URL
@@ -81,22 +80,20 @@ CREATE TABLE CREDENTIALS (
     IpAddress       VARCHAR(50) NOT NULL,                               -- "Statistics"
 
     LastAccess      TIMESTAMP   NULL,                                   -- "Statistics"
-    
-    UserID          CHAR(36)    NOT NULL,                               -- Owner
+ */   
+    UserId          CHAR(36)    NOT NULL,                               -- Owner
 
     Created         TIMESTAMP   NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Administrator data
 
 -- Authentication of user authorization signatures is performed
 -- by verifying that both SHA256 of the public key (in X.509 DER
 -- format) and claimed CredentialId match.
-
+/*
     S256AuthKey     BINARY(32)  NOT NULL,                               -- Payment request key hash 
-
-    S256BalKey      BINARY(32)  NOT NULL,                               -- Balance key hash 
-
+*/
     PRIMARY KEY (CredentialId),
-    FOREIGN KEY (UserID) REFERENCES USERS(UserID) ON DELETE CASCADE
-) AUTO_INCREMENT=200500123;                                             -- Brag about "users" :-)
+    FOREIGN KEY (UserId) REFERENCES USERS(UserId) ON DELETE CASCADE
+);
 
 
 DELIMITER //
@@ -113,24 +110,38 @@ CREATE PROCEDURE ASSERT_TRUE (IN p_DidIt BOOLEAN,
 //
 
 
-CREATE PROCEDURE CreateUserSP (IN p_UserID CHAR(36),
-                               IN p_CommonName VARCHAR(50))
+CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
+                                        IN p_CommonName VARCHAR(50))
   BEGIN
-    INSERT INTO USERS(UserID, 
+    -- To make it simple, clear previous entry...
+    DELETE FROM USERS WHERE UserId = p_UserId;
+    
+    -- Create an entry with the same UserId
+    INSERT INTO USERS(UserId, 
                       CommonName) 
         VALUES(p_UserId,
                p_CommonName);
+               
+    -- Add the needed credentials
+    INSERT INTO CREDENTIALS(UserId) 
+        VALUES(p_UserId);
   END
 //
 
 
-CREATE PROCEDURE DeleteUserSP (IN p_UserID CHAR(36))
+CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
   BEGIN
-  /* production only...
-    CALL ASSERT_TRUE (EXISTS (SELECT * FROM USERS WHERE UserID=p_UserID),
-                      "Missing UserID!");
-   */
-    DELETE FROM USERS WHERE UserID=p_UserID;
+    DELETE Target FROM CREDENTIALS As Target
+        INNER JOIN USERS ON USERS.UserId = Target.UserId
+        WHERE USERS.UserId = p_UserId;
+  END
+//
+
+CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
+  BEGIN
+    SET p_Found = EXISTS (SELECT * FROM USERS
+        INNER JOIN CREDENTIALS ON USERS.UserId = CREDENTIALS.UserId
+        WHERE USERS.UserId = p_UserId);
   END
 //
 
@@ -138,14 +149,25 @@ DELIMITER ;
 
 -- Run a few tests
 
-SET @UserID = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
+SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 SET @CommonName = "Luke Skywalker";
 
-CALL CreateUserSP(@UserID, @CommonName);
+CALL InitiateUserAccountSP(@UserId, @CommonName);
+
+CALL HasPaymentCardsSP(@found, @UserId);
+
+CALL ASSERT_TRUE(@found = TRUE, "Must have");
+
+CALL DeletePaymentCardsSP(@UserId);
+
+CALL HasPaymentCardsSP(@found, @UserId);
+
+CALL ASSERT_TRUE(@found = FALSE, "Must NOT have");
+
 
 -- Remove all test data
 
-CALL DeleteUserSP(@UserID);
+DELETE FROM USERS;
 
 SET @Result = 'SUCCESSFUL';
 SELECT @Result;

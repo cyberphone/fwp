@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,57 +43,46 @@ public class WalletAdminServlet extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder html = new StringBuilder(
-            "<div class='header'>Wallet Administration</div>" +
-
-            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-              "<div class='comment'>" +
-                "The &quot;Wallet&quot; is a central part of FWP since it holds all " +
-                "related payment cards" +
-              "</div>" +
-            "</div>");
-
-        html.append(EnrollServlet.hasWalletCookie(request) ?
-
-            "<form name='shoot' method='POST' action='walletadmin'></form>" +
-            "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-                "Delete Cards!" +
-              "</div>" +
-            "</div>"
-                                          :
-            "<div class='important'>" +
-              "You currently have no payment cards" +
-            "</div>");
-
-        HTML.standardPage(response, null, html);
-    }
+        try {
+            StringBuilder html = new StringBuilder(
+                "<div class='header'>Wallet Administration</div>" +
     
-    static String getUserIdFromCookie(HttpServletRequest request) throws IOException {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(EnrollServlet.WALLET_COOKIE)) {
-                return cookie.getValue();
-            }
+                "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                  "<div class='comment'>" +
+                    "The &quot;Wallet&quot; is a central part of FWP since it holds all " +
+                    "related payment cards" +
+                  "</div>" +
+                "</div>");
+    
+            html.append(EnrollServlet.hasPaymentCards(request) ?
+    
+                "<form name='shoot' method='POST' action='walletadmin'></form>" +
+                "<div style='display:flex;justify-content:center'>" +
+                  "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+                    "Delete Cards!" +
+                  "</div>" +
+                "</div>"
+                                              :
+                "<div class='important'>" +
+                  "You currently have no payment cards" +
+                "</div>");
+    
+            HTML.standardPage(response, null, html);
+        } catch (Exception e) {
+            HTML.errorPage(response, e);
         }
-        throw new IOException("Wallet cookie not found!");
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
             // The user ID is stored in a persistent cookie.
-            String userId = getUserIdFromCookie(request);
+            String userId = EnrollServlet.getWalletCookie(request);
             
-            // This is the only database call needed for deleting a user.
+            // This is the only database call needed for deleting payment cards (all of them...).
             try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                DataBaseOperations.deleteUser(userId, connection);
+                DataBaseOperations.deletePaymentCards(userId, connection);
             }
-            
-            // Remove the user (cookie) from the browser as well.
-            Cookie walletCookie = new Cookie(EnrollServlet.WALLET_COOKIE,"");
-            walletCookie.setMaxAge(0);
-            response.addCookie(walletCookie);
             
             // Tell the user that it worked...
             StringBuilder html = new StringBuilder(
@@ -107,7 +95,7 @@ public class WalletAdminServlet extends HttpServlet {
                     "</form>");
             HTML.standardPage(response, null, html);
 
-            logger.info("Removed user: " + userId);
+            logger.info("Deleted payment cards for user: " + userId);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

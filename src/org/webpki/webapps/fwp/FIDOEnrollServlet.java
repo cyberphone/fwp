@@ -147,16 +147,23 @@ public class FIDOEnrollServlet extends HttpServlet {
 
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
+                
+                // Due to limitations in FIDO credential management we
+                // reuse an existing user ID if there is one.
+                String userId = EnrollServlet.getWalletCookie(request);
+                if (userId == null) {
+                    userId = UUID.randomUUID().toString();
+                    logger.info("Created new user: " + userId);
+                }
 
-                // Two things need to be accomplished:
-                // - Set session
                 // - Provide FIDO register challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
                 resultJson.setString(RP_CHALL_B64_JSON,
                                      Base64.getEncoder().encodeToString(challenge));
+
                 // We use a UUID as the sole entry in the database and tie
                 // the credentials and (a single) FIDO authenticator to that.
-                resultJson.setString(RP_USER_ID, UUID.randomUUID().toString());
+                resultJson.setString(RP_USER_ID, userId);
                 
                 // This what we send but we must also 
                 session.setAttribute(REGISTER_DATA, new JSONObjectReader(resultJson));
@@ -182,13 +189,11 @@ if (cardHolder.equals("bad")) failed(cardHolder);
                 
                 // Assuming that everything has been verified we are finally ready
                 // issuing the requested payment credentials.
-                
-                
+ 
                 // Now perform all the database chores.
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-
-                    // Store basic data.
-                    DataBaseOperations.createUser(userId, cardHolder, connection);
+                   // Store basic data.
+                    DataBaseOperations.initiateUserAccount(userId, cardHolder, connection);
                 }
 
                 // To enable the Web emulator, put the UUID in a persistent cookie. 
@@ -197,7 +202,7 @@ if (cardHolder.equals("bad")) failed(cardHolder);
                 walletCookie.setSecure(true);
                 response.addCookie(walletCookie);
 
-                logger.info("Created user: " + userId);
+                logger.info("Initiated user: " + userId);
             } else {
                 failed("Unknown phase: " + phase);
             }
