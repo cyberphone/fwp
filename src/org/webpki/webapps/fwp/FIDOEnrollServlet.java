@@ -21,7 +21,6 @@ import java.io.PrintWriter;
 
 import java.sql.Connection;
 
-import java.util.Base64;
 import java.util.UUID;
 
 import java.util.logging.Logger;
@@ -66,7 +65,7 @@ public class FIDOEnrollServlet extends HttpServlet {
     static final String FINALIZE_PHASE           = "finalize";
     
     // Additional JSON elements
-    static final String RP_CHALL_B64_JSON        = "challb64";
+    static final String RP_CHALLENGE_JSON        = "challenge";
     static final String RP_USER_ID               = "userId";
     
     // Returned
@@ -161,8 +160,7 @@ public class FIDOEnrollServlet extends HttpServlet {
 
                 // - Provide FIDO register challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
-                resultJson.setString(RP_CHALL_B64_JSON,
-                                     Base64.getEncoder().encodeToString(challenge));
+                resultJson.setBinary(RP_CHALLENGE_JSON, challenge);
 
                 // We use a UUID as the sole entry in the database and tie
                 // the credentials and (a single) FIDO authenticator to that.
@@ -173,7 +171,6 @@ public class FIDOEnrollServlet extends HttpServlet {
 
             } else if (phase.equals(FINALIZE_PHASE)) {
  
-Thread.sleep(2000);
                 // Finalizing! Now we must have a session 
                 HttpSession session = request.getSession(false);
                 if (session == null) {
@@ -190,13 +187,7 @@ Thread.sleep(2000);
                 
                 // Get credintialId.  Note: it is called "KeyHandle" in the database
                 // to match the FWP specification.
-                String credentialIdB64U = requestJson.getString(KEY_HANDLE_JSON);
-                
-                // This is awkward.  We get an ID in Base64Url from "create()" but
-                // we must for simplicity and compliance with browsers perform
-                // an "atob" which makes it more logical to store a Base64 version.
-                String keyHandleB64 = Base64.getMimeEncoder().encodeToString(
-                        Base64.getUrlDecoder().decode(credentialIdB64U)); 
+                String keyHandleB64 = requestJson.getString(KEY_HANDLE_JSON);
                 
                 // Waiting for key implementation
                 byte[] fakeCosePublicKey = new byte[100];

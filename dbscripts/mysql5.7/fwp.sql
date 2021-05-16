@@ -61,7 +61,7 @@ CREATE TABLE USERS (
     CardHolder      VARCHAR(50)  NOT NULL,
     
     
-    -- FIDO CredentialId expressed as a Base64-encoded string.
+    -- FIDO CredentialId expressed as a Base64url-encoded string.
     --
     -- In a real-world FWP implementation this would be a part of the local
     -- FWP wallet database since a verifier does not need this information.

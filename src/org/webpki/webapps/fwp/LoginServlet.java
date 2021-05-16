@@ -61,7 +61,12 @@ public class LoginServlet extends HttpServlet {
                 "'use strict';\n" +
                 
                 "let globalError = null;\n" +
-                
+
+                "function b64urlToU8arr(code) {\n" +
+                "  return Uint8Array.from(window.atob(" +
+                       "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
+                "}\n" +
+
                 "function setError(message) {\n" +
                 "  if (!globalError) {\n" +
                 "    console.log('Fail: ' + globalError);\n" +
@@ -76,9 +81,9 @@ public class LoginServlet extends HttpServlet {
                 "  let options = {\n" +
                 "    challenge: new Uint8Array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15," + 
                                                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]),\n" +
-                "    allowCredentials: [{type: 'public-key', id: Uint8Array.from(window.atob('" +
-                     keyHandle + "'), c=>c.charCodeAt(0))}]\n" +
-                "    ,timeout: 120000\n" +
+                "    allowCredentials: [{type: 'public-key', id: b64urlToU8arr('" +
+                         keyHandle + "')}],\n" +
+                "    timeout: 120000\n" +
                 "  };\n" +
                 
                 "  console.log(options);\n" +

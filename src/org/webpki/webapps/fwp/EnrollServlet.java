@@ -135,6 +135,11 @@ public class EnrollServlet extends HttpServlet {
                 
                 "let globalError = null;\n" +
                 
+                "function b64urlToU8arr(code) {\n" +
+                "  return Uint8Array.from(window.atob(" +
+                       "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
+                "}\n" +
+                
                 "function setError(message) {\n" +
                 "  if (!globalError) {\n" +
                 "    console.log('Fail: ' + message);\n" +
@@ -181,15 +186,15 @@ public class EnrollServlet extends HttpServlet {
     
                 "  let userId = initPhase." + FIDOEnrollServlet.RP_USER_ID + ";\n" +
                 "  let publicKey = {\n" +
-                "    challenge: Uint8Array.from(window.atob(initPhase." + 
-                         FIDOEnrollServlet.RP_CHALL_B64_JSON + "), c=>c.charCodeAt(0)),\n" +
+                "    challenge: b64urlToU8arr(initPhase." + 
+                         FIDOEnrollServlet.RP_CHALLENGE_JSON + "),\n" +
                 "    rp: {\n" +
                 "      name: 'FIDO Web Pay'\n" +
                 "    },\n" +
                 "    user: {\n" +
                 "      id: new TextEncoder().encode(userId),\n" +
                 "      name: userId,\n" +
-                "      displayName: userId\n" +
+                "      displayName: 'FWP User'\n" +
                 "    },\n" +
                 "    pubKeyCredParams: [{\n" +
                 "      type: 'public-key',\n" +
@@ -216,15 +221,15 @@ public class EnrollServlet extends HttpServlet {
                 "    const result = await navigator.credentials.create({publicKey});\n" +
                 "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
-                FIDOEnrollServlet.PHASE_JSON + ":'" + 
-                FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
-                FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
-                "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
-                FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id},'" +
-                FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
-    "  if (!globalError) {\n" +
-               "    document.forms.shoot.submit();\n" +
-    "  }\n" +
+                        FIDOEnrollServlet.PHASE_JSON + ":'" + 
+                        FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
+                        FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
+                        "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
+                        FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id},'" +
+                        FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
+                "    if (!globalError) {\n" +
+                "      document.forms.shoot.submit();\n" +
+                "    }\n" +
                 "  } catch (error) {\n" +
                 "    setError(error);\n" +
                 "  }\n" +
