@@ -16,11 +16,17 @@
  */
 package org.webpki.webapps.fwp;
 
+import java.io.IOException;
+
+import java.security.GeneralSecurityException;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.util.logging.Logger;
+
+import org.webpki.crypto.HashAlgorithms;
 
 public class DataBaseOperations {
 
@@ -34,16 +40,23 @@ public class DataBaseOperations {
     // Create (or recreate) user and give it some payment credentials as well                     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
     static void initiateUserAccount(String userId,
-                                    String commonName,
-                                    Connection connection) throws SQLException {
+                                    String cardHolder,
+                                    String keyHandle,
+                                    byte[] cosePublicKey,
+                                    Connection connection)
+            throws SQLException, IOException, GeneralSecurityException {
 /*
-        CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
-                                                IN p_CommonName VARCHAR(50))
+    CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
+                                            IN p_CardHolder VARCHAR(50),
+                                            IN p_KeyHandle VARCHAR(100),
+                                            IN p_S256KeyHash BINARY(32))
 */
         try (CallableStatement stmt = 
-                connection.prepareCall("{call InitiateUserAccountSP(?,?)}");) {
+                connection.prepareCall("{call InitiateUserAccountSP(?,?,?,?)}");) {
             stmt.setString(1, userId);
-            stmt.setString(2, commonName);
+            stmt.setString(2, cardHolder);
+            stmt.setString(3, keyHandle);
+            stmt.setBytes(4, HashAlgorithms.SHA256.digest(cosePublicKey));
             stmt.execute();
         }
     }
@@ -63,19 +76,42 @@ public class DataBaseOperations {
         }
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Check if the user (which may not exist) has payment cards                                  //
     ////////////////////////////////////////////////////////////////////////////////////////////////
+   static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
 /*
-        CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
+       CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
 
 */
-    static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
         try (CallableStatement stmt = connection.prepareCall("{call HasPaymentCardsSP(?,?)}");) {
             stmt.registerOutParameter(1, java.sql.Types.BOOLEAN);
             stmt.setString(2, userId);
             stmt.execute();
             return stmt.getBoolean(1);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // WebAuthn on Android as well as FWP presume that the key handle (CredentialId) is known.    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static String getKeyHandle(String userId, Connection connection)
+            throws IOException, SQLException {
+/*
+        CREATE PROCEDURE GetKeyHandleSP (OUT p_KeyHandle VARCHAR(100),
+                                         IN p_UserId CHAR(36))
+*/
+        try (CallableStatement stmt = connection.prepareCall("{call GetKeyHandleSP(?,?)}");) {
+            stmt.registerOutParameter(1, java.sql.Types.VARCHAR);
+            stmt.setString(2, userId);
+            stmt.execute();
+            String keyHandle = stmt.getString(1);
+            if (keyHandle == null) {
+                throw new IOException("Missing keyh andle for user: " + userId);
+            }
+            return keyHandle;
         }
     }
 }

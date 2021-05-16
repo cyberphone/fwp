@@ -68,7 +68,10 @@ public class FIDOEnrollServlet extends HttpServlet {
     // Additional JSON elements
     static final String RP_CHALL_B64_JSON        = "challb64";
     static final String RP_USER_ID               = "userId";
+    
+    // Returned
     static final String CARD_HOLDER_JSON         = "cardHolder";
+    static final String KEY_HANDLE_JSON          = "keyHandle";
     
     // Init phase session data
     static final String REGISTER_DATA            = "regdata";
@@ -81,9 +84,9 @@ public class FIDOEnrollServlet extends HttpServlet {
             throw new IOException("Unexpected MIME type:" + request.getContentType());
         }
         JSONObjectReader parsedJson = JSONParser.parse(ServletUtil.getData(request));
-        if (FWPService.logging) {
+//        if (FWPService.logging) {
             logger.info("Received: " + parsedJson.toString());
-        }
+  //      }
         return parsedJson;
     }
 
@@ -184,6 +187,20 @@ Thread.sleep(2000);
 
                 // Get card holder name.
                 String cardHolder = requestJson.getString(CARD_HOLDER_JSON);
+                
+                // Get credintialId.  Note: it is called "KeyHandle" in the database
+                // to match the FWP specification.
+                String credentialIdB64U = requestJson.getString(KEY_HANDLE_JSON);
+                
+                // This is awkward.  We get an ID in Base64Url from "create()" but
+                // we must for simplicity and compliance with browsers perform
+                // an "atob" which makes it more logical to store a Base64 version.
+                String keyHandleB64 = Base64.getMimeEncoder().encodeToString(
+                        Base64.getUrlDecoder().decode(credentialIdB64U)); 
+                
+                // Waiting for key implementation
+                byte[] fakeCosePublicKey = new byte[100];
+                for (int i = 0; i < fakeCosePublicKey.length; i++) fakeCosePublicKey[i] = (byte) i;
 
 if (cardHolder.equals("bad")) failed(cardHolder);
                 
@@ -193,7 +210,11 @@ if (cardHolder.equals("bad")) failed(cardHolder);
                 // Now perform all the database chores.
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
                    // Store basic data.
-                    DataBaseOperations.initiateUserAccount(userId, cardHolder, connection);
+                    DataBaseOperations.initiateUserAccount(userId, 
+                                                           cardHolder,
+                                                           keyHandleB64,
+                                                           fakeCosePublicKey,
+                                                           connection);
                 }
 
                 // To enable the Web emulator, put the UUID in a persistent cookie. 

@@ -41,57 +41,70 @@ GRANT SELECT ON v_routines TO fwp@localhost;
 --
 -- #################################################
 -- # This is a database for the FIDO Web Pay PoC   #
+-- #                                               #
+-- # It is only useful for the Web based PoC :-)   #
 -- #################################################
 
 /*=============================================*/
 /*                   USERS                     *
 /*=============================================*/
-CREATE TABLE USERS (
-    UserId          CHAR(36)    NOT NULL UNIQUE,                        -- Unique User ID &
-                                                                        -- cookie for FWP Wallet
-                                                                        -- Uses UUID
 
-    CommonName      VARCHAR(50) NOT NULL,                               -- Name on cards
+CREATE TABLE USERS (
+                      
+    -- Unique User ID.
+    -- This ID is kept in the persistent cookie used by FWP Wallet emulator.
+    -- Here using a UUID.
     
-    Created         TIMESTAMP   NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Administrator data
+    UserId          CHAR(36)     NOT NULL UNIQUE, 
+
+
+    -- Name on payment cards
+
+    CardHolder      VARCHAR(50)  NOT NULL,
+    
+    
+    -- FIDO CredentialId expressed as a Base64-encoded string.
+    --
+    -- In a real-world FWP implementation this would be a part of the local
+    -- FWP wallet database since a verifier does not need this information.
+    -- However, in a server-oriented setting using the WebAuthn API the
+    -- FIDO CredentialId must be known by the verifier.  
+
+    KeyHandle       VARCHAR(100) NOT NULL,
+
+
+    -- Authentication of user authorization signatures is performed
+    -- by verifying that both SHA256 of the public key (in canonical
+    -- CBOR/COSE format) and claimed UserId match.
+
+    S256KeyHash     BINARY(32)   NOT NULL,
+
+    Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
                                                                         
     PRIMARY KEY (UserId)
 );
 
 
 /*=============================================*/
-/*                CREDENTIALS                  */
+/*                PAYMENT_CARDS                */
 /*=============================================*/
 
-CREATE TABLE CREDENTIALS (
+CREATE TABLE PAYMENT_CARDS (
 
--- Note: a Credential holds an external representation of an Account ID
--- like an IBAN or Card Number + and an Authorization key
+-- Note: a payment card holds an external representation of an Account ID
+-- like an IBAN or Card Number
 
-    CredentialId    INT         NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
+    SerialNumber   INT           NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
 
-/*
-    AccountId       VARCHAR(30) NOT NULL,                               -- Account Reference
+    UserId          CHAR(36)     NOT NULL,                               -- Owner
+
+    AccountId       VARCHAR(30)  NOT NULL,                               -- Account Reference
     
-    PaymentMethodUrl VARCHAR(50) NOT NULL,                              -- Payment method URL
+    PaymentMethodUrl VARCHAR(50) NOT NULL,                               -- Payment method URL
 
-    AccessCount     INT         NOT NULL  DEFAULT 0,                    -- "Statistics"
-    
-    IpAddress       VARCHAR(50) NOT NULL,                               -- "Statistics"
+    Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
 
-    LastAccess      TIMESTAMP   NULL,                                   -- "Statistics"
- */   
-    UserId          CHAR(36)    NOT NULL,                               -- Owner
-
-    Created         TIMESTAMP   NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Administrator data
-
--- Authentication of user authorization signatures is performed
--- by verifying that both SHA256 of the public key (in X.509 DER
--- format) and claimed CredentialId match.
-/*
-    S256AuthKey     BINARY(32)  NOT NULL,                               -- Payment request key hash 
-*/
-    PRIMARY KEY (CredentialId),
+    PRIMARY KEY (SerialNumber),
     FOREIGN KEY (UserId) REFERENCES USERS(UserId) ON DELETE CASCADE
 );
 
@@ -111,37 +124,74 @@ CREATE PROCEDURE ASSERT_TRUE (IN p_DidIt BOOLEAN,
 
 
 CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
-                                        IN p_CommonName VARCHAR(50))
+                                        IN p_CardHolder VARCHAR(50),
+                                        IN p_KeyHandle VARCHAR(100),
+                                        IN p_S256KeyHash BINARY(32))
   BEGIN
     -- To make it simple, clear previous entry...
     DELETE FROM USERS WHERE UserId = p_UserId;
     
     -- Create an entry with the same UserId
     INSERT INTO USERS(UserId, 
-                      CommonName) 
+                      CardHolder,
+                      KeyHandle,
+                      S256KeyHash) 
         VALUES(p_UserId,
-               p_CommonName);
+               p_CardHolder,
+               p_KeyHandle,
+               p_S256KeyHash);
                
-    -- Add the needed credentials
-    INSERT INTO CREDENTIALS(UserId) 
-        VALUES(p_UserId);
+    -- Add payment cards...
+    INSERT INTO PAYMENT_CARDS(UserId,
+                              AccountId,
+                              PaymentMethodUrl) 
+        VALUES(p_UserId,
+               "FR7630002111110020050014382",
+               "https://bankdirect.com");
   END
 //
 
 
 CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
   BEGIN
-    DELETE Target FROM CREDENTIALS As Target
+    DELETE Target FROM PAYMENT_CARDS As Target
         INNER JOIN USERS ON USERS.UserId = Target.UserId
         WHERE USERS.UserId = p_UserId;
   END
 //
 
-CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
+CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN,
+                                    IN p_UserId CHAR(36))
   BEGIN
     SET p_Found = EXISTS (SELECT * FROM USERS
-        INNER JOIN CREDENTIALS ON USERS.UserId = CREDENTIALS.UserId
+        INNER JOIN PAYMENT_CARDS ON USERS.UserId = PAYMENT_CARDS.UserId
         WHERE USERS.UserId = p_UserId);
+  END
+//
+
+CREATE PROCEDURE GetKeyHandleSP (OUT p_KeyHandle VARCHAR(100),
+                                 IN p_UserId CHAR(36))
+  BEGIN
+    SELECT KeyHandle INTO p_KeyHandle FROM USERS
+        WHERE USERS.UserId = p_UserId;
+  END
+//
+
+CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
+                                 IN p_UserId CHAR(36),
+                                 IN p_S256KeyHash BINARY(32))
+  BEGIN
+    DECLARE v_S256KeyHash BINARY(32);
+    
+    SELECT S256KeyHash INTO v_S256KeyHash FROM USERS
+        WHERE USERS.UserId = p_UserId;
+    IF v_S256KeyHash IS NULL THEN
+      SET p_Status = 1;    -- No such users
+    ELSEIF v_S256KeyHash <> p_S256KeyHash THEN
+      SET p_Status = 2;    -- Non-matching key
+    ELSE                       
+      SET p_Status = 0;    -- Success
+    END IF;
   END
 //
 
@@ -150,9 +200,14 @@ DELIMITER ;
 -- Run a few tests
 
 SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
-SET @CommonName = "Luke Skywalker";
+SET @CardHolder = "Luke Skywalker";
+SET @KeyHandle = "gfdgddrer4535srwrsrwr";
+SET @S256KeyHash = x'b3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
 
-CALL InitiateUserAccountSP(@UserId, @CommonName);
+SET @WrongS256KeyHash = x'c3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
+SET @WrongUserId = "3fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
+
+CALL InitiateUserAccountSP(@UserId, @CardHolder, @KeyHandle, @S256KeyHash);
 
 CALL HasPaymentCardsSP(@found, @UserId);
 
@@ -164,6 +219,23 @@ CALL HasPaymentCardsSP(@found, @UserId);
 
 CALL ASSERT_TRUE(@found = FALSE, "Must NOT have");
 
+CALL AuthenticateSP(@Status, @UserId, @S256KeyHash);
+CALL ASSERT_TRUE(@Status = 0, "Auth failed");
+
+CALL AuthenticateSP(@Status, @WrongUserId, @S256KeyHash);
+CALL ASSERT_TRUE(@Status = 1, "Wrong user failed");
+
+CALL AuthenticateSP(@Status, @UserId, @WrongS256KeyHash);
+CALL ASSERT_TRUE(@Status = 2, "Wrong key failed");
+
+CALL GetKeyHandleSP(@OutKeyHandle, @UserId); 
+CALL ASSERT_TRUE(@OutKeyHandle = @KeyHandle, "Key handle failed");
+
+CALL GetKeyHandleSP(@OutKeyHandle, @WrongUserId); 
+CALL ASSERT_TRUE(@OutKeyHandle IS NULL, "Key handle failed");
+
+CALL GetKeyHandleSP(@OutKeyHandle, NULL); 
+CALL ASSERT_TRUE(@OutKeyHandle IS NULL, "Key handle failed");
 
 -- Remove all test data
 

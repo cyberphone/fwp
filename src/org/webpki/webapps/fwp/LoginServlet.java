@@ -18,14 +18,10 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,53 +42,61 @@ public class LoginServlet extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder html = new StringBuilder(
-            "<form name='shoot' method='POST' action='enroll'>" +
-
-            "<div class='header'>Login Test</div>" +
-
-            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
-            "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"startLogin()\">" +
-                "Login..." +
-              "</div>" +
-            "</div>" +
-            "</form>");
-
-        String js = new StringBuilder(
-            "'use strict';\n" +
-            
-            "let globalError = null;\n" +
-            
-            "function setError(message) {\n" +
-            "  if (!globalError) {\n" +
-            "    console.log('Fail: ' + globalError);\n" +
-            "    globalError = message;\n" +
-            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
-            "    e.textContent = 'Fail: ' + globalError;\n" +
-            "    e.style.display = 'block';\n" +
-            "  }\n" +
-            "}\n" +
-            
-            "function startLogin() {\n" +
-            "  let options = {\n" +
-            "    challenge: new Uint8Array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15," + 
-                                           "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])\n" + 
-       //     "    ,timeout: 120000\n" +
-            "  };\n" +
-            
-            "  console.log(options);\n" +
-            "  navigator.credentials.get({ publicKey: options }).then(function(result) {\n" +
-            "    console.log(result);\n" +
-            "  }).catch(function (err) {\n" +
-            "    setError(err);\n" +
-            "  });\n" +
-            
-            "  if (!globalError) {\n" +
- //               "    document.forms.shoot.submit();\n" +
-            "  }\n" +
-            "}\n").toString();
-        HTML.standardPage(response, js, html);
+        try {
+            String keyHandle = EnrollServlet.getKeyHandle(request);
+            StringBuilder html = new StringBuilder(
+                "<form name='shoot' method='POST' action='login'>" +
+    
+                "<div class='header'>Login Test</div>" +
+    
+                "<div id='" + FAILED_ID + "' class='errorText'></div>" +
+                "<div style='display:flex;justify-content:center'>" +
+                  "<div class='stdbtn' onclick=\"startLogin()\">" +
+                    "Login..." +
+                  "</div>" +
+                "</div>" +
+                "</form>");
+    
+            String js = new StringBuilder(
+                "'use strict';\n" +
+                
+                "let globalError = null;\n" +
+                
+                "function setError(message) {\n" +
+                "  if (!globalError) {\n" +
+                "    console.log('Fail: ' + globalError);\n" +
+                "    globalError = message;\n" +
+                "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+                "    e.textContent = 'Fail: ' + globalError;\n" +
+                "    e.style.display = 'block';\n" +
+                "  }\n" +
+                "}\n" +
+                
+                "function startLogin() {\n" +
+                "  let options = {\n" +
+                "    challenge: new Uint8Array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15," + 
+                                               "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]),\n" +
+                "    allowCredentials: [{type: 'public-key', id: Uint8Array.from(window.atob('" +
+                     keyHandle + "'), c=>c.charCodeAt(0))}]\n" +
+                "    ,timeout: 120000\n" +
+                "  };\n" +
+                
+                "  console.log(options);\n" +
+                "  navigator.credentials.get({ publicKey: options }).then(function(result) {\n" +
+                "    console.log(result);\n" +
+                "    document.forms.shoot.submit();\n" +
+                "  }).catch(function (err) {\n" +
+                "    setError(err);\n" +
+                "  });\n" +
+                
+                "  if (!globalError) {\n" +
+        //        "    document.forms.shoot.submit();\n" +
+                "  }\n" +
+                "}\n").toString();
+            HTML.standardPage(response, js, html);
+        } catch (Exception e) {
+            HTML.errorPage(response, e);
+        }
     }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)

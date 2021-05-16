@@ -68,6 +68,16 @@ public class EnrollServlet extends HttpServlet {
         }
     }
     
+    static String getKeyHandle(HttpServletRequest request) throws SQLException, IOException {
+        String claimedUserId = getWalletCookie(request);
+        if (claimedUserId == null) {
+            throw new IOException("Cookie '" + WALLET_COOKIE + "' is missing");
+        }
+        try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+            return DataBaseOperations.getKeyHandle(claimedUserId, connection);
+        }
+    }
+    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
@@ -127,7 +137,7 @@ public class EnrollServlet extends HttpServlet {
                 
                 "function setError(message) {\n" +
                 "  if (!globalError) {\n" +
-                "    console.log('Fail: ' + globalError);\n" +
+                "    console.log('Fail: ' + message);\n" +
                 "    globalError = message;\n" +
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
                 "    let e = document.getElementById('" + FAILED_ID + "');\n" +
@@ -202,21 +212,23 @@ public class EnrollServlet extends HttpServlet {
                 "  };\n" +
                 
                 "  console.log(publicKey);\n" +
-                "  navigator.credentials.create({ publicKey }).then(function(credentialInfo) {\n" +
-                "    console.log(credentialInfo);\n" +
-                "  }).catch(function (err) {\n" +
-                "    setError(err);\n" +
-                "  });\n" +
-                
-                "  const finalizePhase = await exchangeJSON({" + 
-                            FIDOEnrollServlet.PHASE_JSON + ":'" + 
-                            FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
-                            FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
-                            "document.getElementById('" + CARD_HOLDER_NAME + "').value},'" +
-                            FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
-                "  if (!globalError) {\n" +
- //               "    document.forms.shoot.submit();\n" +
+                "  try {\n" +
+                "    const result = await navigator.credentials.create({publicKey});\n" +
+                "    console.log(result);\n" +
+                "    const finalizePhase = await exchangeJSON({" + 
+                FIDOEnrollServlet.PHASE_JSON + ":'" + 
+                FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
+                FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
+                "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
+                FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id},'" +
+                FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
+    "  if (!globalError) {\n" +
+               "    document.forms.shoot.submit();\n" +
+    "  }\n" +
+                "  } catch (error) {\n" +
+                "    setError(error);\n" +
                 "  }\n" +
+                
                 "}\n").toString();
             HTML.standardPage(response, js, html);
         } catch (Exception e) {
