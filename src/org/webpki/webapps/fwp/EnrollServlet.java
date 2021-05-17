@@ -216,7 +216,7 @@ public class EnrollServlet extends HttpServlet {
                 "    timeout: 360000,\n" +
                 "    excludeCredentials: [],\n" +
                 "    authenticatorSelection: {\n" +
-                "      requireResidentKey: true,\n" +
+                "      residentKey: 'preferred',\n" +
                 "      userVerification: 'preferred'\n" +
                 "    },\n" +
                 "    attestation: 'direct',\n" +
