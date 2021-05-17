@@ -18,14 +18,10 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,48 +36,15 @@ public class EnrollServlet extends HttpServlet {
     static final String DEFAULT_CARD_HOLDER_NAME  = "Anonymous Tester &#x1f638;";
     static final String CARD_HOLDER_NAME          = "chn";
     
-    // The center of it all...
-    static final String WALLET_COOKIE             = "WALLET";
-
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID        = "wait";
     private static final String USER_IFC_ID       = "uifc";
     private static final String FAILED_ID         = "fail";
     
-    static String getWalletCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(WALLET_COOKIE)) {
-                return cookie.getValue();
-            }
-        }
-        return null;
-    }
-    
-    static boolean hasPaymentCards(HttpServletRequest request) throws SQLException {
-        String claimedUserId = getWalletCookie(request);
-        if (claimedUserId == null) {
-            return false;
-        }
-        try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-            return DataBaseOperations.hasPaymentCards(claimedUserId, connection);
-        }
-    }
-    
-    static String getKeyHandle(HttpServletRequest request) throws SQLException, IOException {
-        String claimedUserId = getWalletCookie(request);
-        if (claimedUserId == null) {
-            throw new IOException("Cookie '" + WALLET_COOKIE + "' is missing");
-        }
-        try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-            return DataBaseOperations.getKeyHandle(claimedUserId, connection);
-        }
-    }
-    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            boolean alreadyEnrolled = hasPaymentCards(request);
+            boolean alreadyEnrolled = FWPCommon.hasPaymentCards(request);
             StringBuilder html = new StringBuilder(alreadyEnrolled ?
                 "<div class='header'>Enroll Payment Cards</div>" +
     
@@ -170,7 +133,7 @@ public class EnrollServlet extends HttpServlet {
                 "        });\n" +
                 "    if (response.ok) {\n" +
                 "      const jsonResult = await response.json();\n" +
-                "      if (jsonResult." + FIDOEnrollServlet.PHASE_JSON + "!= phaseTest) {\n" +
+                "      if (jsonResult." + FWPCommon.PHASE_JSON + "!= phaseTest) {\n" +
                 "        setError('Out of phase');\n" +
                 "      }\n" +
                 "      return jsonResult;\n" +
@@ -186,15 +149,15 @@ public class EnrollServlet extends HttpServlet {
                 "  document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
                 "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
                 "  const initPhase = await exchangeJSON({" + 
-                            FIDOEnrollServlet.PHASE_JSON + ":'" + 
-                            FIDOEnrollServlet.INIT_PHASE + "'},'" +
-                            FIDOEnrollServlet.INIT_PHASE + "');\n" +
+                            FWPCommon.PHASE_JSON + ":'" + 
+                            FWPCommon.INIT_PHASE + "'},'" +
+                            FWPCommon.INIT_PHASE + "');\n" +
                 "  if (globalError) return;\n" +
     
-                "  let userId = initPhase." + FIDOEnrollServlet.RP_USER_ID + ";\n" +
+                "  let userId = initPhase." + FWPCommon.RP_USER_ID + ";\n" +
                 "  let publicKey = {\n" +
                 "    challenge: b64urlToU8arr(initPhase." + 
-                         FIDOEnrollServlet.RP_CHALLENGE_JSON + "),\n" +
+                         FWPCommon.RP_CHALLENGE_JSON + "),\n" +
                 "    rp: {\n" +
                 "      name: 'FIDO Web Pay'\n" +
                 "    },\n" +
@@ -228,16 +191,16 @@ public class EnrollServlet extends HttpServlet {
                 "    const result = await navigator.credentials.create({publicKey});\n" +
                 "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
-                        FIDOEnrollServlet.PHASE_JSON + ":'" + 
-                        FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
-                        FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
+                        FWPCommon.PHASE_JSON + ":'" + 
+                        FWPCommon.FINALIZE_PHASE + "'," + 
+                        FWPCommon.CARD_HOLDER_JSON + ":" +
                         "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
-                        FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id," +
-                        FIDOEnrollServlet.ATTESTATION_JSON + 
+                        FWPCommon.KEY_HANDLE_JSON + ":result.id," +
+                        FWPCommon.ATTESTATION_JSON + 
                         ":arrBufToB64url(result.response.attestationObject)," +
-                        FIDOEnrollServlet.CLIENT_DATA_JSON + 
+                        FWPCommon.CLIENT_DATA_JSON + 
                         ":arrBufToB64url(result.response.clientDataJSON)},'" +
-                        FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
+                        FWPCommon.FINALIZE_PHASE + "');\n" +
                 "    if (!globalError) {\n" +
                 "      document.forms.shoot.submit();\n" +
                 "    }\n" +

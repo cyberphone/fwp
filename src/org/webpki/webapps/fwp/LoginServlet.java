@@ -43,7 +43,7 @@ public class LoginServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            String keyHandle = EnrollServlet.getKeyHandle(request);
+            String keyHandle = FWPCommon.getKeyHandle(request);
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='login'>" +
     
@@ -77,22 +77,24 @@ public class LoginServlet extends HttpServlet {
                 "  }\n" +
                 "}\n" +
                 
-                "function startLogin() {\n" +
-                "  let options = {\n" +
+                "async function startLogin() {\n" +
+                "  const options = {\n" +
                 "    challenge: new Uint8Array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15," + 
                                                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]),\n" +
                 "    allowCredentials: [{type: 'public-key', id: b64urlToU8arr('" +
                          keyHandle + "')}],\n" +
+                "    userVerification: 'preferred'," +
                 "    timeout: 120000\n" +
                 "  };\n" +
                 
                 "  console.log(options);\n" +
-                "  navigator.credentials.get({ publicKey: options }).then(function(result) {\n" +
+                "  try {\n" +
+                "    const result = await navigator.credentials.get({ publicKey: options });\n" +
                 "    console.log(result);\n" +
                 "    document.forms.shoot.submit();\n" +
-                "  }).catch(function (err) {\n" +
-                "    setError(err);\n" +
-                "  });\n" +
+                "  } catch (error) {\n" +
+                "    setError(error);\n" +
+                "  }\n" +
                 
                 "  if (!globalError) {\n" +
         //        "    document.forms.shoot.submit();\n" +

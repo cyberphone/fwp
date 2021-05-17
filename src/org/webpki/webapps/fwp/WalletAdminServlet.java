@@ -54,7 +54,7 @@ public class WalletAdminServlet extends HttpServlet {
                   "</div>" +
                 "</div>");
     
-            html.append(EnrollServlet.hasPaymentCards(request) ?
+            html.append(FWPCommon.hasPaymentCards(request) ?
     
                 "<form name='shoot' method='POST' action='walletadmin'></form>" +
                 "<div style='display:flex;justify-content:center'>" +
@@ -77,7 +77,7 @@ public class WalletAdminServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // The user ID is stored in a persistent cookie.
-            String userId = EnrollServlet.getWalletCookie(request);
+            String userId = FWPCommon.getWalletCookie(request);
             
             // This is the only database call needed for deleting payment cards (all of them...).
             try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
