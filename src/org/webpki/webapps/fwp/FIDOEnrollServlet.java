@@ -71,6 +71,8 @@ public class FIDOEnrollServlet extends HttpServlet {
     // Returned
     static final String CARD_HOLDER_JSON         = "cardHolder";
     static final String KEY_HANDLE_JSON          = "keyHandle";
+    static final String ATTESTATION_JSON         = "attestation";
+    static final String CLIENT_DATA_JSON         = "clientData";
     
     // Init phase session data
     static final String REGISTER_DATA            = "regdata";
@@ -189,6 +191,12 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // to match the FWP specification.
                 String keyHandleB64 = requestJson.getString(KEY_HANDLE_JSON);
                 
+                byte[] attestation = requestJson.getBinary(ATTESTATION_JSON);
+                logger.info("L1=" + attestation.length);
+                
+                byte[] clientData = requestJson.getBinary(CLIENT_DATA_JSON);
+                logger.info("L2=" + clientData.length);
+
                 // Waiting for key implementation
                 byte[] fakeCosePublicKey = new byte[100];
                 for (int i = 0; i < fakeCosePublicKey.length; i++) fakeCosePublicKey[i] = (byte) i;

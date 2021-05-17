@@ -137,7 +137,14 @@ public class EnrollServlet extends HttpServlet {
                 
                 "function b64urlToU8arr(code) {\n" +
                 "  return Uint8Array.from(window.atob(" +
-                       "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
+                      "code.replace(/-/g, '+').replace(/_/g, '/') + '===='.substring(0, " +
+                      "(4 - (code.length % 4)) % 4)), c=>c.charCodeAt(0));\n" +
+                "}\n" +
+
+                "function arrBufToB64url(bytes) {\n" +
+                "  return window.btoa(String.fromCharCode.apply(null, " +
+                      "new Uint8Array(bytes))).replace(/\\+/g, '-')" +
+                      ".replace(/\\//g, '_').replace(/=/g, '');\n" +
                 "}\n" +
                 
                 "function setError(message) {\n" +
@@ -225,7 +232,11 @@ public class EnrollServlet extends HttpServlet {
                         FIDOEnrollServlet.FINALIZE_PHASE + "'," + 
                         FIDOEnrollServlet.CARD_HOLDER_JSON + ":" +
                         "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
-                        FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id},'" +
+                        FIDOEnrollServlet.KEY_HANDLE_JSON + ":result.id," +
+                        FIDOEnrollServlet.ATTESTATION_JSON + 
+                        ":arrBufToB64url(result.response.attestationObject)," +
+                        FIDOEnrollServlet.CLIENT_DATA_JSON + 
+                        ":arrBufToB64url(result.response.clientDataJSON)},'" +
                         FIDOEnrollServlet.FINALIZE_PHASE + "');\n" +
                 "    if (!globalError) {\n" +
                 "      document.forms.shoot.submit();\n" +
