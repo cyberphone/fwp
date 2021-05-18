@@ -21,14 +21,11 @@ import java.io.PrintWriter;
 
 import java.sql.Connection;
 
-import java.util.UUID;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +36,7 @@ import org.webpki.crypto.CryptoRandom;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -60,6 +58,13 @@ public class FIDOLoginServlet extends HttpServlet {
             // Prepare for writing a response.
             JSONObjectWriter resultJson = new JSONObjectWriter();
             
+            // Get the enrolled user.
+            String userId = FWPCommon.getWalletCookie(request);
+            if (userId == null) {
+                resultJson.setString(FWPCommon.ERROR_JSON, "User ID missing, have you enrolled?");
+                return;
+            }
+            
             // The FIDO server is stateful and its state MUST be checked
             // with that of the client.
             String phase = requestJson.getString(FWPCommon.PHASE_JSON);
@@ -73,32 +78,37 @@ public class FIDOLoginServlet extends HttpServlet {
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
-                // Due to limitations in FIDO credential management we
-                // reuse an existing user ID if there is one.
-                String userId = FWPCommon.getWalletCookie(request);
+                // Clear existing login if any.
+                session.removeAttribute(FWPCommon.ATTR_LOGGED_IN_USER);
 
-                // - Provide FIDO register challenge data
+                // We need to specify which key to use.                 
+                String keyHandle;
+                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                    // Get FIDO credentialId (which is called keyHandle in FWP).
+                    keyHandle = DataBaseOperations.getKeyHandle(userId, connection);
+                }
+                resultJson.setString(FWPCommon.KEY_HANDLE_JSON, keyHandle);
+
+                // - Provide FIDO challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
                 resultJson.setBinary(FWPCommon.RP_CHALLENGE_JSON, challenge);
 
-                // We use a UUID as the sole entry in the database and tie
-                // the credentials and (a single) FIDO authenticator to that.
-                resultJson.setString(FWPCommon.RP_USER_ID, userId);
-                
                 // This what we send but we must also 
-                session.setAttribute(FWPCommon.LOGIN_DATA, new JSONObjectReader(resultJson));
+                session.setAttribute(FWPCommon.ATTR_LOGIN_DATA, new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
-                // Finalizing! Now we must have a session 
+                // Login response! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
                     FWPCommon.failed("Missing finalize session");
                 }
+                
+                // Get the object holding the login session in progress.
                 JSONObjectReader loginData = 
-                        (JSONObjectReader) session.getAttribute(FWPCommon.LOGIN_DATA);
+                        (JSONObjectReader) session.getAttribute(FWPCommon.ATTR_LOGIN_DATA);
                 if (loginData == null) {
-                    FWPCommon.failed("Enrollment register data missing");
+                    FWPCommon.failed("Login data missing");
                 }
 
                 // Check that we are in "sync".
@@ -109,45 +119,14 @@ public class FIDOLoginServlet extends HttpServlet {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
-                // User ID is central.
-                String userId = loginData.getString(FWPCommon.RP_USER_ID);
+                // Here we are supposed to the check the signature....
+                byte[] authenticatorData = requestJson.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
+                byte[] signature = requestJson.getBinary(FWPCommon.SIGNATURE_JSON);
 
-                // Get card holder name.
-                String cardHolder = requestJson.getString(FWPCommon.CARD_HOLDER_JSON);
+                // We did it, set logged-in attribute.
+                session.setAttribute(FWPCommon.ATTR_LOGGED_IN_USER, userId);
                 
-                // Get credintialId.  Note: it is called "KeyHandle" in the database
-                // to match the FWP specification.
-                String keyHandleB64 = requestJson.getString(FWPCommon.KEY_HANDLE_JSON);
-                
-                // The object that holds it all.
-                byte[] attestation = requestJson.getBinary(FWPCommon.ATTESTATION_JSON);
- 
-                // Waiting for key implementation :(
-                byte[] fakeCosePublicKey = new byte[100];
-                for (int i = 0; i < fakeCosePublicKey.length; i++) fakeCosePublicKey[i] = (byte) i;
-
-if (cardHolder.equals("bad")) FWPCommon.failed(cardHolder);
-                
-                // Assuming that everything has been verified we are finally ready
-                // issuing the requested payment credentials.
- 
-                // Now perform all the database chores.
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                   // Store basic data.
-                    DataBaseOperations.initiateUserAccount(userId, 
-                                                           cardHolder,
-                                                           keyHandleB64,
-                                                           fakeCosePublicKey,
-                                                           connection);
-                }
-
-                // To enable the Web emulator, put the UUID in a persistent cookie. 
-                Cookie walletCookie = new Cookie(FWPCommon.WALLET_COOKIE, userId);
-                walletCookie.setMaxAge(8640000);  // 100 days.
-                walletCookie.setSecure(true);
-                response.addCookie(walletCookie);
-
-                logger.info("Initiated user: " + userId);
+                logger.info("Logged-in user: " + userId);
             } else {
                 FWPCommon.failed("Unknown phase: " + phase);
             }

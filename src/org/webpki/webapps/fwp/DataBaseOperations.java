@@ -109,7 +109,7 @@ public class DataBaseOperations {
             stmt.execute();
             String keyHandle = stmt.getString(1);
             if (keyHandle == null) {
-                throw new IOException("Missing keyh andle for user: " + userId);
+                throw new IOException("Missing keyhandle for user: " + userId);
             }
             return keyHandle;
         }

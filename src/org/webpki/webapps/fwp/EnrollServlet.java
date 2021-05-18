@@ -97,6 +97,8 @@ public class EnrollServlet extends HttpServlet {
                 "'use strict';\n" +
                 
                 "let globalError = null;\n" +
+                
+                "const serviceUrl = 'fidoenroll';\n" +
 
                 FWPCommon.FWP_JAVASCRIPT +
 

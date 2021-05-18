@@ -90,17 +90,17 @@ public class FIDOEnrollServlet extends HttpServlet {
                 resultJson.setString(FWPCommon.RP_USER_ID, userId);
                 
                 // This what we send but we must also 
-                session.setAttribute(FWPCommon.REGISTER_DATA, new JSONObjectReader(resultJson));
+                session.setAttribute(FWPCommon.ATTR_REGISTER_DATA, new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
-                // Finalizing! Now we must have a session 
+                // Finalizing! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
                     FWPCommon.failed("Missing finalize session");
                 }
                 JSONObjectReader registerData = 
-                        (JSONObjectReader) session.getAttribute(FWPCommon.REGISTER_DATA);
+                        (JSONObjectReader) session.getAttribute(FWPCommon.ATTR_REGISTER_DATA);
                 if (registerData == null) {
                     FWPCommon.failed("Enrollment register data missing");
                 }
@@ -121,7 +121,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 
                 // Get credintialId.  Note: it is called "KeyHandle" in the database
                 // to match the FWP specification.
-                String keyHandleB64 = requestJson.getString(FWPCommon.KEY_HANDLE_JSON);
+                String keyHandle = requestJson.getString(FWPCommon.KEY_HANDLE_JSON);
                 
                 // The object that holds it all.
                 byte[] attestation = requestJson.getBinary(FWPCommon.ATTESTATION_JSON);
@@ -141,12 +141,12 @@ if (cardHolder.equals("-2")) { // Soft server error
                 // Assuming that everything has been verified we are finally ready
                 // issuing the requested payment credentials.
  
-                // Now perform all the database chores.
+                // A single call will do the trick.
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                   // Store basic data.
+                    // Store basic data.
                     DataBaseOperations.initiateUserAccount(userId, 
                                                            cardHolder,
-                                                           keyHandleB64,
+                                                           keyHandle,
                                                            fakeCosePublicKey,
                                                            connection);
                 }

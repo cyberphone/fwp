@@ -44,6 +44,11 @@
         <servlet-class>org.webpki.webapps.fwp.LoginServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>FIDOLoginServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOLoginServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -72,6 +77,11 @@
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FIDOLoginServlet</servlet-name>
+        <url-pattern>/fidologin</url-pattern>
     </servlet-mapping>
 
     <security-constraint>

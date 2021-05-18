@@ -70,10 +70,15 @@ public class FWPCommon {
     static final String KEY_HANDLE_JSON          = "keyHandle";
     static final String ATTESTATION_JSON         = "attestation";
     static final String CLIENT_DATA_JSON         = "clientData";
+    static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
+    static final String SIGNATURE_JSON           = "signature";
     
-    // Init phase session data
-    static final String REGISTER_DATA            = "registerdata";
-    static final String LOGIN_DATA               = "logindata";
+    // Init/finalize phase session attributes
+    static final String ATTR_REGISTER_DATA       = "registerdata";
+    static final String ATTR_LOGIN_DATA          = "logindata";
+    
+    // When logged in this attribute contain the user ID.
+    static final String ATTR_LOGGED_IN_USER      = "user";
     
     // Having a separate JS script is an option but this code
     // is 1) small 2) depends on global constants
@@ -94,7 +99,7 @@ public class FWPCommon {
         "async function exchangeJSON(jsonObject, currentPhase) {\n" +
         "  try {\n" +
         "    jsonObject." + PHASE_JSON + " = currentPhase;\n" +
-        "    const response = await fetch('fidoenroll', {\n" +
+        "    const response = await fetch(serviceUrl, {\n" +
         "           headers: {\n" +
         "             'Content-Type': 'application/json'\n" +
         "           },\n" +
@@ -140,17 +145,7 @@ public class FWPCommon {
             return DataBaseOperations.hasPaymentCards(claimedUserId, connection);
         }
     }
-    
-    static String getKeyHandle(HttpServletRequest request) throws SQLException, IOException {
-        String claimedUserId = getWalletCookie(request);
-        if (claimedUserId == null) {
-            throw new IOException("Cookie '" + WALLET_COOKIE + "' is missing");
-        }
-        try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-            return DataBaseOperations.getKeyHandle(claimedUserId, connection);
-        }
-    }
-    
+
     static JSONObjectReader getJSON(HttpServletRequest request) throws IOException {
         if (!request.getContentType().equals("application/json")) {
             logger.log(Level.SEVERE, "JSON MIME type expected");

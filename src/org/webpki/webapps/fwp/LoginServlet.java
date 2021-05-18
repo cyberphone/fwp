@@ -42,68 +42,83 @@ public class LoginServlet extends HttpServlet {
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        try {
-            String keyHandle = FWPCommon.getKeyHandle(request);
-            StringBuilder html = new StringBuilder(
-                "<form name='shoot' method='POST' action='login'>" +
-    
-                "<div class='header'>Login Test</div>" +
-    
-                "<div id='" + FAILED_ID + "' class='errorText'></div>" +
-                "<div style='display:flex;justify-content:center'>" +
-                  "<div class='stdbtn' onclick=\"startLogin()\">" +
-                    "Login..." +
-                  "</div>" +
-                "</div>" +
-                "</form>");
-    
-            String js = new StringBuilder(
-                "'use strict';\n" +
-                
-                "let globalError = null;\n" +
+        StringBuilder html = new StringBuilder(
+            "<form name='shoot' method='POST' action='login'>" +
 
-                "function b64urlToU8arr(code) {\n" +
-                "  return Uint8Array.from(window.atob(" +
-                       "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
-                "}\n" +
+            "<div class='header'>Login Test</div>" +
 
-                "function setError(message) {\n" +
-                "  if (!globalError) {\n" +
-                "    console.log('Fail: ' + globalError);\n" +
-                "    globalError = message;\n" +
-                "    let e = document.getElementById('" + FAILED_ID + "');\n" +
-                "    e.textContent = 'Fail: ' + globalError;\n" +
-                "    e.style.display = 'block';\n" +
-                "  }\n" +
-                "}\n" +
-                
-                "async function startLogin() {\n" +
-                "  const options = {\n" +
-                "    challenge: new Uint8Array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15," + 
-                                               "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]),\n" +
-                "    allowCredentials: [{type: 'public-key', id: b64urlToU8arr('" +
-                         keyHandle + "')}],\n" +
-                "    userVerification: 'preferred'," +
-                "    timeout: 120000\n" +
-                "  };\n" +
-                
-                "  console.log(options);\n" +
-                "  try {\n" +
-                "    const result = await navigator.credentials.get({ publicKey: options });\n" +
-                "    console.log(result);\n" +
-                "    document.forms.shoot.submit();\n" +
-                "  } catch (error) {\n" +
-                "    setError(error);\n" +
-                "  }\n" +
-                
-                "  if (!globalError) {\n" +
-        //        "    document.forms.shoot.submit();\n" +
-                "  }\n" +
-                "}\n").toString();
-            HTML.standardPage(response, js, html);
-        } catch (Exception e) {
-            HTML.errorPage(response, e);
-        }
+            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
+            "<div style='display:flex;justify-content:center'>" +
+              "<div class='stdbtn' onclick=\"startLogin()\">" +
+                "Login..." +
+              "</div>" +
+            "</div>" +
+            "</form>");
+
+        String js = new StringBuilder(
+            "'use strict';\n" +
+            
+            "let globalError = null;\n" +
+            
+            "const serviceUrl = 'fidologin';\n" +
+
+            FWPCommon.FWP_JAVASCRIPT +
+
+            "function b64urlToU8arr(code) {\n" +
+            "  return Uint8Array.from(window.atob(" +
+                   "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
+            "}\n" +
+
+            "function setError(message) {\n" +
+            "  if (!globalError) {\n" +
+            "    console.log('Fail: ' + globalError);\n" +
+            "    globalError = message;\n" +
+            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+            "    e.textContent = 'Fail: ' + globalError;\n" +
+            "    e.style.display = 'block';\n" +
+            "  }\n" +
+            "}\n" +
+            
+            "async function startLogin() {\n" +
+            "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
+            "  if (globalError) return;\n" +
+
+            "  const options = {\n" +
+            "    challenge: b64urlToU8arr(initPhase." + FWPCommon.RP_CHALLENGE_JSON + "),\n" +
+
+            "    allowCredentials: [{type: 'public-key', " +
+                     "id: b64urlToU8arr(initPhase." + FWPCommon.KEY_HANDLE_JSON + ")}],\n" +
+
+            "    userVerification: 'preferred'," +
+
+            "    timeout: 120000\n" +
+            "  };\n" +
+            
+            "  console.log(options);\n" +
+            "  try {\n" +
+            "    const result = await navigator.credentials.get({ publicKey: options });\n" +
+            "    console.log(result);\n" +
+            "    const finalizePhase = await exchangeJSON({" + 
+
+                         FWPCommon.AUTHENTICATOR_DATA_JSON + 
+                         ":arrBufToB64url(result.response.authenticatorData)," +
+
+                         FWPCommon.SIGNATURE_JSON + 
+                         ":arrBufToB64url(result.response.signature)," +
+
+                         FWPCommon.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response.clientDataJSON)},'" +
+
+                         FWPCommon.FINALIZE_PHASE + "');\n" +
+
+            "    if (!globalError) document.forms.shoot.submit();\n" +
+
+            "  } catch (error) {\n" +
+            "    setError(error);\n" +
+            "  }\n" +
+
+            "}\n").toString();
+        HTML.standardPage(response, js, html);
     }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
