@@ -153,6 +153,7 @@ public class FWPCommon {
         }
         JSONObjectReader parsedJson = JSONParser.parse(ServletUtil.getData(request));
 //        if (FWPService.logging) {
+            logger.info("User agent: " + request.getHeader("user-agent"));
             logger.info("Received: " + parsedJson.toString());
   //      }
         return parsedJson;
