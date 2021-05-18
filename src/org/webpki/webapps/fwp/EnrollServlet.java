@@ -33,8 +33,8 @@ public class EnrollServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // HTML form arguments.
-    static final String DEFAULT_CARD_HOLDER_NAME  = "Anonymous Tester &#x1f638;";
-    static final String CARD_HOLDER_NAME          = "chn";
+    private static final String DEFAULT_CARD_HOLDER_NAME  = "Anonymous Tester &#x1f638;";
+    private static final String CARD_HOLDER_NAME          = "chn";
     
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID        = "wait";
@@ -97,19 +97,9 @@ public class EnrollServlet extends HttpServlet {
                 "'use strict';\n" +
                 
                 "let globalError = null;\n" +
-                
-                "function b64urlToU8arr(code) {\n" +
-                "  return Uint8Array.from(window.atob(" +
-                      "code.replace(/-/g, '+').replace(/_/g, '/') + '===='.substring(0, " +
-                      "(4 - (code.length % 4)) % 4)), c=>c.charCodeAt(0));\n" +
-                "}\n" +
 
-                "function arrBufToB64url(bytes) {\n" +
-                "  return window.btoa(String.fromCharCode.apply(null, " +
-                      "new Uint8Array(bytes))).replace(/\\+/g, '-')" +
-                      ".replace(/\\//g, '_').replace(/=/g, '');\n" +
-                "}\n" +
-                
+                FWPCommon.FWP_JAVASCRIPT +
+
                 "function setError(message) {\n" +
                 "  if (!globalError) {\n" +
                 "    console.log('Fail: ' + message);\n" +
@@ -121,43 +111,15 @@ public class EnrollServlet extends HttpServlet {
                 "  }\n" +
                 "}\n" +
                 
-                "async function exchangeJSON(jsonInput, phaseTest) {\n" +
-                "  try {\n" +
-                "    const response = await fetch('fidoenroll', {\n" +
-                "           headers: {\n" +
-                "             'Content-Type': 'application/json'\n" +
-                "           },\n" +
-                "           method: 'POST',\n" +
-                "           credentials: 'same-origin',\n" +
-                "           body: JSON.stringify(jsonInput)\n" +
-                "        });\n" +
-                "    if (response.ok) {\n" +
-                "      const jsonResult = await response.json();\n" +
-                "      if (jsonResult." + FWPCommon.PHASE_JSON + "!= phaseTest) {\n" +
-                "        setError('Out of phase');\n" +
-                "      }\n" +
-                "      return jsonResult;\n" +
-                "    } else {\n" +
-                "      setError('Server/network failure');\n" +
-                "    }\n" + 
-                "  } catch (error) {\n" +
-                "    setError(error);\n" +
-                "  }\n" +
-                "}\n" +
-                
                 "async function startEnroll() {\n" +
                 "  document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
                 "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "  const initPhase = await exchangeJSON({" + 
-                            FWPCommon.PHASE_JSON + ":'" + 
-                            FWPCommon.INIT_PHASE + "'},'" +
-                            FWPCommon.INIT_PHASE + "');\n" +
+                "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
                 "  if (globalError) return;\n" +
     
                 "  let userId = initPhase." + FWPCommon.RP_USER_ID + ";\n" +
                 "  let publicKey = {\n" +
-                "    challenge: b64urlToU8arr(initPhase." + 
-                         FWPCommon.RP_CHALLENGE_JSON + "),\n" +
+                "    challenge: b64urlToU8arr(initPhase." + FWPCommon.RP_CHALLENGE_JSON + "),\n" +
                 "    rp: {\n" +
                 "      name: 'FIDO Web Pay'\n" +
                 "    },\n" +
@@ -191,19 +153,22 @@ public class EnrollServlet extends HttpServlet {
                 "    const result = await navigator.credentials.create({publicKey});\n" +
                 "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
-                        FWPCommon.PHASE_JSON + ":'" + 
-                        FWPCommon.FINALIZE_PHASE + "'," + 
-                        FWPCommon.CARD_HOLDER_JSON + ":" +
-                        "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
-                        FWPCommon.KEY_HANDLE_JSON + ":result.id," +
-                        FWPCommon.ATTESTATION_JSON + 
-                        ":arrBufToB64url(result.response.attestationObject)," +
-                        FWPCommon.CLIENT_DATA_JSON + 
-                        ":arrBufToB64url(result.response.clientDataJSON)},'" +
-                        FWPCommon.FINALIZE_PHASE + "');\n" +
-                "    if (!globalError) {\n" +
-                "      document.forms.shoot.submit();\n" +
-                "    }\n" +
+
+                         FWPCommon.CARD_HOLDER_JSON + ":" +
+                         "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
+
+                         FWPCommon.KEY_HANDLE_JSON + ":result.id," +
+
+                         FWPCommon.ATTESTATION_JSON + 
+                         ":arrBufToB64url(result.response.attestationObject)," +
+
+                         FWPCommon.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response.clientDataJSON)},'" +
+
+                         FWPCommon.FINALIZE_PHASE + "');\n" +
+
+                "    if (!globalError) document.forms.shoot.submit();\n" +
+
                 "  } catch (error) {\n" +
                 "    setError(error);\n" +
                 "  }\n" +

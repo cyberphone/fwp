@@ -42,14 +42,14 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 
 /**
- * This Servlet is called from the EnrollServlet SPA
+ * This Servlet is called from the LoginServlet SPA
  *
  */
-public class FIDOEnrollServlet extends HttpServlet {
+public class FIDOLoginServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
    
-    static Logger logger = Logger.getLogger(FIDOEnrollServlet.class.getName());
+    static Logger logger = Logger.getLogger(FIDOLoginServlet.class.getName());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -76,10 +76,6 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // Due to limitations in FIDO credential management we
                 // reuse an existing user ID if there is one.
                 String userId = FWPCommon.getWalletCookie(request);
-                if (userId == null) {
-                    userId = UUID.randomUUID().toString();
-                    logger.info("Created new user: " + userId);
-                }
 
                 // - Provide FIDO register challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
@@ -90,7 +86,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 resultJson.setString(FWPCommon.RP_USER_ID, userId);
                 
                 // This what we send but we must also 
-                session.setAttribute(FWPCommon.REGISTER_DATA, new JSONObjectReader(resultJson));
+                session.setAttribute(FWPCommon.LOGIN_DATA, new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
@@ -99,9 +95,9 @@ public class FIDOEnrollServlet extends HttpServlet {
                 if (session == null) {
                     FWPCommon.failed("Missing finalize session");
                 }
-                JSONObjectReader registerData = 
-                        (JSONObjectReader) session.getAttribute(FWPCommon.REGISTER_DATA);
-                if (registerData == null) {
+                JSONObjectReader loginData = 
+                        (JSONObjectReader) session.getAttribute(FWPCommon.LOGIN_DATA);
+                if (loginData == null) {
                     FWPCommon.failed("Enrollment register data missing");
                 }
 
@@ -109,12 +105,12 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] clientData = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
                 JSONObjectReader clientDataJSON = JSONParser.parse(clientData);
                 if (!ArrayUtil.compare(clientDataJSON.getBinary(FWPCommon.RP_CHALLENGE_JSON),
-                    registerData.getBinary(FWPCommon.RP_CHALLENGE_JSON))) {
+                    loginData.getBinary(FWPCommon.RP_CHALLENGE_JSON))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
                 // User ID is central.
-                String userId = registerData.getString(FWPCommon.RP_USER_ID);
+                String userId = loginData.getString(FWPCommon.RP_USER_ID);
 
                 // Get card holder name.
                 String cardHolder = requestJson.getString(FWPCommon.CARD_HOLDER_JSON);
@@ -130,13 +126,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] fakeCosePublicKey = new byte[100];
                 for (int i = 0; i < fakeCosePublicKey.length; i++) fakeCosePublicKey[i] = (byte) i;
 
-// Test only
-if (cardHolder.equals("-1")) FWPCommon.failed(cardHolder);  // Hard server error
-if (cardHolder.equals("-2")) { // Soft server error
-    FWPCommon.returnJSON(response, resultJson.setString(FWPCommon.ERROR_JSON, 
-                                                        "Sorry, something isn't as it should"));
-    return;
-}
+if (cardHolder.equals("bad")) FWPCommon.failed(cardHolder);
                 
                 // Assuming that everything has been verified we are finally ready
                 // issuing the requested payment credentials.

@@ -62,6 +62,9 @@ public class FWPCommon {
     static final String RP_CHALLENGE_JSON        = "challenge";
     static final String RP_USER_ID               = "userId";
     
+    // Attribute returned to the client in case of a server-side error
+    static final String ERROR_JSON               = "error";
+    
     // Returned
     static final String CARD_HOLDER_JSON         = "cardHolder";
     static final String KEY_HANDLE_JSON          = "keyHandle";
@@ -69,7 +72,52 @@ public class FWPCommon {
     static final String CLIENT_DATA_JSON         = "clientData";
     
     // Init phase session data
-    static final String REGISTER_DATA            = "regdata";
+    static final String REGISTER_DATA            = "registerdata";
+    static final String LOGIN_DATA               = "logindata";
+    
+    // Having a separate JS script is an option but this code
+    // is 1) small 2) depends on global constants
+    static final String FWP_JAVASCRIPT =
+
+        "function b64urlToU8arr(code) {\n" +
+        "  return Uint8Array.from(window.atob(" +
+              "code.replace(/-/g, '+').replace(/_/g, '/') + '===='.substring(0, " +
+              "(4 - (code.length % 4)) % 4)), c=>c.charCodeAt(0));\n" +
+        "}\n" +
+
+        "function arrBufToB64url(bytes) {\n" +
+        "  return window.btoa(String.fromCharCode.apply(null, " +
+              "new Uint8Array(bytes))).replace(/\\+/g, '-')" +
+              ".replace(/\\//g, '_').replace(/=/g, '');\n" +
+        "}\n" +
+        
+        "async function exchangeJSON(jsonObject, currentPhase) {\n" +
+        "  try {\n" +
+        "    jsonObject." + PHASE_JSON + " = currentPhase;\n" +
+        "    const response = await fetch('fidoenroll', {\n" +
+        "           headers: {\n" +
+        "             'Content-Type': 'application/json'\n" +
+        "           },\n" +
+        "           method: 'POST',\n" +
+        "           credentials: 'same-origin',\n" +
+        "           body: JSON.stringify(jsonObject)\n" +
+        "        });\n" +
+        "    if (response.ok) {\n" +
+        "      const jsonResult = await response.json();\n" +
+        "      if (jsonResult." + PHASE_JSON + "!= currentPhase) {\n" +
+        "        setError('Out of phase');\n" +
+        "      }\n" +
+        "      if (jsonResult." + ERROR_JSON + ") {\n" +
+        "        setError(jsonResult." + ERROR_JSON + ");\n" +
+        "      }\n" +
+        "      return jsonResult;\n" +
+        "    } else {\n" +
+        "      setError('Server/network failure');\n" +
+        "    }\n" + 
+        "  } catch (error) {\n" +
+        "    setError(error);\n" +
+        "  }\n" +
+        "}\n";
 
     static Logger logger = Logger.getLogger(FWPCommon.class.getName());
 
@@ -116,9 +164,9 @@ public class FWPCommon {
     }
 
     static void returnJSON(HttpServletResponse response, JSONObjectWriter json) throws IOException {
-        if (FWPService.logging) {
+ //       if (FWPService.logging) {
             logger.info("To be returned: " + json.toString());
-        }
+//        }
         byte[] rawData = json.serializeToBytes(JSONOutputFormats.NORMALIZED);
         response.setContentType(JSON_CONTENT_TYPE);
         response.setHeader(HTTP_PRAGMA, "No-Cache");
