@@ -4,6 +4,7 @@
   <property file="fwp.properties"/>
   <property name="openkeystore.dir" location="${openkeystore}"/>
   <property name="src.dir" value="src"/>
+  <property name="test.dir" value="test"/>
   <property name="temp.dir" value=".tmp"/>
   <property name="dist.dir" value="dist"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
@@ -40,7 +41,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat"/>
+      <echo message="build tomcat testfido"/>
   </target>
 
   <target name="tomcat">
@@ -105,6 +106,46 @@
         <exclude name="*-2*"/>
       </zipfileset>
     </war>
+  </target>
+    
+  <target name="testfido">
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+    <fixcrlf srcdir="."
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
+    <javac debug="${debug}"
+           srcdir="${src.dir}:${test.dir}"
+           destdir="${temp.dir}"
+           includeAntRuntime="false">
+        <classpath>
+              <fileset dir="${webpki.lib.dir}">
+                <include name="*.jar"/>
+             </fileset>
+             <fileset dir="${third.party.lib.dir}">
+                <include name="*.jar"/>
+              </fileset>
+        </classpath>
+    </javac>
+    <property name="testvectors" location="fido2testvectors.json"/>
+    <junit fork="no" haltonfailure="yes">
+       <test name="org.webpki.webapps.fwp.FIDOTest"/>
+       <formatter type="plain" usefile="false"/>
+       <sysproperty key="json.data" value="${testvectors}"/>
+       <classpath>
+            <pathelement path="${temp.dir}"/>
+            <fileset dir="${webpki.lib.dir}">
+              <include name="*.jar"/>
+           </fileset>
+           <fileset dir="${third.party.lib.dir}">
+              <include name="*.jar"/>
+            </fileset>
+      </classpath>
+    </junit>
+
   </target>
    
 </project>
