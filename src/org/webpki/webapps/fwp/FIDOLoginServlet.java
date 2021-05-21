@@ -134,7 +134,7 @@ public class FIDOLoginServlet extends HttpServlet {
                             KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey);
                     if (!new SignatureWrapper(keyAlgorithm.getRecommendedSignatureAlgorithm(),
                                               coreClientData.publicKey)
-                            .setEcdsaSignatureEncoding(false)
+                            .setEcdsaSignatureEncoding(true)
                             .update(ArrayUtil.add(authenticatorData,
                                                   HashAlgorithms.SHA256.digest(clientDataJSON)))
                             .verify(signature)) {
