@@ -70,12 +70,19 @@ CREATE TABLE USERS (
     -- However, in a server-oriented setting using the WebAuthn API the
     -- FIDO CredentialId must be known by the verifier.  
 
-    KeyHandle       VARCHAR(100) NOT NULL,
+    CredentialId    VARCHAR(100) NOT NULL,
 
 
-    -- Authentication of user authorization signatures is performed
-    -- by verifying that both SHA256 of the public key (in canonical
-    -- CBOR/COSE format) and claimed UserId match.
+    -- The FWP wallet is obliged including the associated public key in
+    -- assertions.  Here it is stored in the CBOR/COSE format.
+    
+    PublicKey       VARBINARY(300) NOT NULL,
+
+
+    -- Authentication of FWP assertions is performed by verifying that 
+    -- both the SHA256 of the public key and claimed UserId match.
+    -- This is typically performed after having verified that the
+    -- signature is valid.
 
     S256KeyHash     BINARY(32)   NOT NULL,
 
@@ -125,7 +132,8 @@ CREATE PROCEDURE ASSERT_TRUE (IN p_DidIt BOOLEAN,
 
 CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                                         IN p_CardHolder VARCHAR(50),
-                                        IN p_KeyHandle VARCHAR(100),
+                                        IN p_CredentialId VARCHAR(100),
+                                        IN p_PublicKey VARBINARY(300),
                                         IN p_S256KeyHash BINARY(32))
   BEGIN
     -- To make it simple, clear previous entry...
@@ -134,11 +142,13 @@ CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
     -- Create an entry with the same UserId
     INSERT INTO USERS(UserId, 
                       CardHolder,
-                      KeyHandle,
+                      CredentialId,
+                      PublicKey,
                       S256KeyHash) 
         VALUES(p_UserId,
                p_CardHolder,
-               p_KeyHandle,
+               p_CredentialId,
+               p_PublicKey,
                p_S256KeyHash);
                
     -- Add payment cards...
@@ -169,10 +179,11 @@ CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN,
   END
 //
 
-CREATE PROCEDURE GetKeyHandleSP (OUT p_KeyHandle VARCHAR(100),
-                                 IN p_UserId CHAR(36))
+CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
+                                      OUT p_PublicKey VARBINARY(300),
+                                      IN p_UserId CHAR(36))
   BEGIN
-    SELECT KeyHandle INTO p_KeyHandle FROM USERS
+    SELECT CredentialId, PublicKey INTO p_CredentialId, p_PublicKey FROM USERS
         WHERE USERS.UserId = p_UserId;
   END
 //
@@ -201,13 +212,14 @@ DELIMITER ;
 
 SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 SET @CardHolder = "Luke Skywalker";
-SET @KeyHandle = "gfdgddrer4535srwrsrwr";
+SET @CredentialId = "gfdgddrer4535srwrsrwr";
 SET @S256KeyHash = x'b3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
+SET @DummyPublicKey = x'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 SET @WrongS256KeyHash = x'c3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
 SET @WrongUserId = "3fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 
-CALL InitiateUserAccountSP(@UserId, @CardHolder, @KeyHandle, @S256KeyHash);
+CALL InitiateUserAccountSP(@UserId, @CardHolder, @CredentialId, @DummyPublicKey, @S256KeyHash);
 
 CALL HasPaymentCardsSP(@found, @UserId);
 
@@ -228,14 +240,15 @@ CALL ASSERT_TRUE(@Status = 1, "Wrong user failed");
 CALL AuthenticateSP(@Status, @UserId, @WrongS256KeyHash);
 CALL ASSERT_TRUE(@Status = 2, "Wrong key failed");
 
-CALL GetKeyHandleSP(@OutKeyHandle, @UserId); 
-CALL ASSERT_TRUE(@OutKeyHandle = @KeyHandle, "Key handle failed");
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @UserId); 
+CALL ASSERT_TRUE(@OutCredentialId = @CredentialId, "CredentialId failed");
+CALL ASSERT_TRUE(@OutPublicKey = @DummyPublicKey, "PublicKey failed");
 
-CALL GetKeyHandleSP(@OutKeyHandle, @WrongUserId); 
-CALL ASSERT_TRUE(@OutKeyHandle IS NULL, "Key handle failed");
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @WrongUserId); 
+CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
-CALL GetKeyHandleSP(@OutKeyHandle, NULL); 
-CALL ASSERT_TRUE(@OutKeyHandle IS NULL, "Key handle failed");
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, NULL); 
+CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
 -- Remove all test data
 

@@ -84,20 +84,20 @@ public class LoginServlet extends HttpServlet {
             "  if (globalError) return;\n" +
 
             "  const options = {\n" +
-            "    challenge: b64urlToU8arr(initPhase." + FWPCommon.RP_CHALLENGE_JSON + "),\n" +
+            "    challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
 
             "    allowCredentials: [{type: 'public-key', " +
-                     "id: b64urlToU8arr(initPhase." + FWPCommon.KEY_HANDLE_JSON + ")}],\n" +
+                     "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
 
             "    userVerification: 'preferred'," +
 
             "    timeout: 120000\n" +
             "  };\n" +
             
-            "  console.log(options);\n" +
+//            "  console.log(options);\n" +
             "  try {\n" +
             "    const result = await navigator.credentials.get({ publicKey: options });\n" +
-            "    console.log(result);\n" +
+//            "    console.log(result);\n" +
             "    const finalizePhase = await exchangeJSON({" + 
 
                          FWPCommon.AUTHENTICATOR_DATA_JSON + 

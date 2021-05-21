@@ -16,9 +16,11 @@
  */
 package org.webpki.webapps.fwp;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-
+import java.security.PublicKey;
 import java.sql.Connection;
 
 import java.util.UUID;
@@ -34,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.cbor.CBORObject;
+import org.webpki.cbor.CBORPublicKey;
 import org.webpki.crypto.CryptoRandom;
 
 import org.webpki.json.JSONObjectReader;
@@ -83,11 +87,11 @@ public class FIDOEnrollServlet extends HttpServlet {
 
                 // - Provide FIDO register challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
-                resultJson.setBinary(FWPCommon.RP_CHALLENGE_JSON, challenge);
+                resultJson.setBinary(FWPCommon.CHALLENGE, challenge);
 
                 // We use a UUID as the sole entry in the database and tie
                 // the credentials and (a single) FIDO authenticator to that.
-                resultJson.setString(FWPCommon.RP_USER_ID, userId);
+                resultJson.setString(FWPCommon.USER_ID, userId);
                 
                 // This what we send but we must also 
                 session.setAttribute(FWPCommon.ATTR_REGISTER_DATA, new JSONObjectReader(resultJson));
@@ -106,29 +110,42 @@ public class FIDOEnrollServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientData = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
-                JSONObjectReader clientDataJSON = JSONParser.parse(clientData);
-                if (!ArrayUtil.compare(clientDataJSON.getBinary(FWPCommon.RP_CHALLENGE_JSON),
-                    registerData.getBinary(FWPCommon.RP_CHALLENGE_JSON))) {
+                byte[] clientDataJSON = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
+                if (!ArrayUtil.compare(
+                        JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE),
+                        registerData.getBinary(FWPCommon.CHALLENGE))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
                 // User ID is central.
-                String userId = registerData.getString(FWPCommon.RP_USER_ID);
+                String userId = registerData.getString(FWPCommon.USER_ID);
 
                 // Get card holder name.
                 String cardHolder = requestJson.getString(FWPCommon.CARD_HOLDER_JSON);
                 
-                // Get credintialId.  Note: it is called "KeyHandle" in the database
-                // to match the FWP specification.
-                String keyHandle = requestJson.getString(FWPCommon.KEY_HANDLE_JSON);
+                // Get credintialId.  To simplify things a bit we keep it in B64U notation.
+                String credentialId = requestJson.getString(FWPCommon.CREDENTIAL_ID);
                 
-                // The object that holds it all.
-                byte[] attestation = requestJson.getBinary(FWPCommon.ATTESTATION_JSON);
- 
-                // Waiting for key implementation :(
-                byte[] fakeCosePublicKey = new byte[100];
-                for (int i = 0; i < fakeCosePublicKey.length; i++) fakeCosePublicKey[i] = (byte) i;
+                // The object that holds it all but we don't care about attestations yet...
+                byte[] attestationObject = requestJson.getBinary(FWPCommon.ATTESTATION_OBJECT);
+
+                // Digging out the COSE public key is somewhat difficult...
+                byte[] authData = CBORObject.decode(attestationObject)
+                        .getTextStringMap().getObject("authData").getByteString();
+                if ((authData[32] & (FWPCommon.FLAG_AT + FWPCommon.FLAG_ED)) != FWPCommon.FLAG_AT) {
+                    FWPCommon.returnJSON(response, resultJson.setString(
+                        FWPCommon.ERROR_JSON, 
+                        "Unsupported authData flags: " + authData[32]));
+                    return;
+                }
+                int i = 32 + 1 + 4 + 16;
+                int credentialIdLength = (authData[i++] << 8) + authData[i++];
+                int offset = i + credentialIdLength;
+                byte[] rawPublicKey = new byte[authData.length - offset];
+                System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
+
+                // Verify that we actually got a genuine public key.
+                CBORPublicKey.decode(CBORObject.decode(rawPublicKey));
 
 // Test only
 if (cardHolder.equals("-1")) FWPCommon.failed(cardHolder);  // Hard server error
@@ -146,8 +163,8 @@ if (cardHolder.equals("-2")) { // Soft server error
                     // Store basic data.
                     DataBaseOperations.initiateUserAccount(userId, 
                                                            cardHolder,
-                                                           keyHandle,
-                                                           fakeCosePublicKey,
+                                                           credentialId,
+                                                           rawPublicKey,
                                                            connection);
                 }
 

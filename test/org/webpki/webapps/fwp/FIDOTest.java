@@ -88,18 +88,22 @@ public class FIDOTest {
         return clientDataJSON;
     }
     
-    PublicKey getPublicKey(CBORObject attestation, String rpUrl, byte[] keyHandle) throws Exception {
+    PublicKey getPublicKey(CBORObject attestation, 
+                           String rpUrl,
+                           byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
-        byte[] authData = attestation.getTextStringMap().getMappedValue("authData").getByteString();
+        byte[] authData = attestation.getTextStringMap().getObject("authData").getByteString();
 // System.out.println(DebugFormatter.getHexDebugData(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));
         assertFalse("AT", (authData[32] & 0x40) == 0);
+        assertTrue("ED", (authData[32] & 0x80) == 0);
    
         int i = 32 + 1 + 4 + 16;
         int credentialIdLength = (authData[i++] << 8) + authData[i++];
-        assertTrue("credentialIdLength", credentialIdLength == keyHandle.length);
-        assertTrue("credentialId", ArrayUtil.compare(authData, i, keyHandle, 0, credentialIdLength));
+        assertTrue("credentialIdLength", credentialIdLength == credentialId.length);
+        assertTrue("credentialId", 
+                   ArrayUtil.compare(authData, i, credentialId, 0, credentialIdLength));
         int offset = i + credentialIdLength;
         byte[] rawPublicKey = new byte[authData.length - offset];
         System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
@@ -112,18 +116,21 @@ public class FIDOTest {
         String token = vector.getString("token");
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");
-        byte[] createChallenge = create.getBinary(FWPCommon.RP_CHALLENGE_JSON);
-        String userId = create.getString(FWPCommon.RP_USER_ID);
+        byte[] createChallenge = create.getBinary(FWPCommon.CHALLENGE);
+        String userId = create.getString(FWPCommon.USER_ID);
         JSONObjectReader createResponse = vector.getObject("create.response");
-        byte[] createKeyHandle = createResponse.getBinary(FWPCommon.KEY_HANDLE_JSON);
+        byte[] createCredentialId = createResponse.getBinary(FWPCommon.CREDENTIAL_ID);
         CBORObject attestation = 
-                CBORObject.decode(createResponse.getBinary(FWPCommon.ATTESTATION_JSON));
-        PublicKey publicKey = getPublicKey(attestation, rpUrl, createKeyHandle);
-        byte[] createClientData = clientDataJson(createResponse, "webauthn.create", rpUrl, createChallenge);
+                CBORObject.decode(createResponse.getBinary(FWPCommon.ATTESTATION_OBJECT));
+        PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
+        byte[] createClientData = clientDataJson(createResponse, 
+                                                 "webauthn.create", 
+                                                 rpUrl, 
+                                                 createChallenge);
         JSONObjectReader get = vector.getObject("get");
-        byte[] getKeyHandle = get.getBinary(FWPCommon.KEY_HANDLE_JSON);
-        assertTrue("keyHandle", ArrayUtil.compare(createKeyHandle, getKeyHandle));
-        byte[] getChallenge = get.getBinary(FWPCommon.RP_CHALLENGE_JSON);
+        byte[] getCredentialId = get.getBinary(FWPCommon.CREDENTIAL_ID);
+        assertTrue("keyHandle", ArrayUtil.compare(createCredentialId, getCredentialId));
+        byte[] getChallenge = get.getBinary(FWPCommon.CHALLENGE);
         JSONObjectReader getResponse = vector.getObject("get.response");
         byte[] authenticatorData = getResponse.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
         byte[] signature = getResponse.getBinary(FWPCommon.SIGNATURE_JSON);
@@ -132,7 +139,8 @@ public class FIDOTest {
         assertTrue("signature",
           new SignatureWrapper(keyAlgorithm.getRecommendedSignatureAlgorithm(), publicKey)
                 .setEcdsaSignatureEncoding(true)
-                .update(ArrayUtil.add(authenticatorData, HashAlgorithms.SHA256.digest(getClientData)))
+                .update(ArrayUtil.add(authenticatorData,
+                                      HashAlgorithms.SHA256.digest(getClientData)))
                 .verify(signature));
 
     }

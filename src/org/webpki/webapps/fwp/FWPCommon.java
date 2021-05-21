@@ -58,18 +58,22 @@ public class FWPCommon {
     static final String INIT_PHASE               = "init";
     static final String FINALIZE_PHASE           = "finalize";
     
-    // Additional JSON elements
-    static final String RP_CHALLENGE_JSON        = "challenge";
-    static final String RP_USER_ID               = "userId";
+    static final int    FLAG_ED                  = 0x80;
+    static final int    FLAG_AT                  = 0x40;
+    
+    // FIDO call data
+    static final String CHALLENGE                = "challenge";
+    static final String USER_ID                  = "userId";
     
     // Attribute returned to the client in case of a server-side error
     static final String ERROR_JSON               = "error";
     
     // Returned
     static final String CARD_HOLDER_JSON         = "cardHolder";
-    static final String KEY_HANDLE_JSON          = "keyHandle";
-    static final String ATTESTATION_JSON         = "attestation";
-    static final String CLIENT_DATA_JSON         = "clientData";
+    // Returned FIDO
+    static final String CREDENTIAL_ID            = "credentialId";
+    static final String ATTESTATION_OBJECT       = "attestationObject";
+    static final String CLIENT_DATA_JSON         = "clientDataJSON";
     static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
     static final String SIGNATURE_JSON           = "signature";
     
@@ -173,7 +177,13 @@ public class FWPCommon {
         serverOutputStream.write(rawData);
         serverOutputStream.flush();
     }
-    
+
+    static void softError(HttpServletResponse response, 
+                          JSONObjectWriter json,
+                          String errorMesseage) throws IOException {
+        FWPCommon.returnJSON(response, json.setString(FWPCommon.ERROR_JSON, errorMesseage));
+    }
+
     static void failed(String what) throws IOException {
         throw new IOException(what);
     }

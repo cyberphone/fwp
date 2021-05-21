@@ -119,9 +119,9 @@ public class EnrollServlet extends HttpServlet {
                 "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
                 "  if (globalError) return;\n" +
     
-                "  let userId = initPhase." + FWPCommon.RP_USER_ID + ";\n" +
+                "  let userId = initPhase." + FWPCommon.USER_ID + ";\n" +
                 "  let publicKey = {\n" +
-                "    challenge: b64urlToU8arr(initPhase." + FWPCommon.RP_CHALLENGE_JSON + "),\n" +
+                "    challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
                 "    rp: {\n" +
                 "      name: 'FIDO Web Pay'\n" +
                 "    },\n" +
@@ -150,22 +150,23 @@ public class EnrollServlet extends HttpServlet {
                 "    extensions: {}\n" +
                 "  };\n" +
                 
-                "  console.log(publicKey);\n" +
+//                "  console.log(publicKey);\n" +
                 "  try {\n" +
                 "    const result = await navigator.credentials.create({publicKey});\n" +
-                "    console.log(result);\n" +
+//                "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
 
                          FWPCommon.CARD_HOLDER_JSON + ":" +
                          "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
 
-                         FWPCommon.KEY_HANDLE_JSON + ":result.id," +
+                         // Core FIDO return data
+                         FWPCommon.CREDENTIAL_ID + ":result.id," +
 
-                         FWPCommon.ATTESTATION_JSON + 
-                         ":arrBufToB64url(result.response.attestationObject)," +
+                         FWPCommon.ATTESTATION_OBJECT + 
+                         ":arrBufToB64url(result.response." + FWPCommon.ATTESTATION_OBJECT + ")," +
 
                          FWPCommon.CLIENT_DATA_JSON + 
-                         ":arrBufToB64url(result.response.clientDataJSON)},'" +
+                         ":arrBufToB64url(result.response." + FWPCommon.CLIENT_DATA_JSON + ")},'" +
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +
 
