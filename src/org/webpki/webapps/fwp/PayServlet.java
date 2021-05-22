@@ -36,11 +36,11 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 
-public class HashServlet extends HttpServlet {
+public class PayServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    static Logger logger = Logger.getLogger(HashServlet.class.getName());
+    static Logger logger = Logger.getLogger(PayServlet.class.getName());
 
     // HTML form arguments
     static final String JSON_DATA        = "json";

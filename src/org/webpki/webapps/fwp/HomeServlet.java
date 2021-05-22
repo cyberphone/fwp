@@ -58,7 +58,7 @@ public class HomeServlet extends HttpServlet {
             "<div id='" + BUTTONS_ID + "' style='display:flex;justify-content:center'>" +
               "<table>" +
 
-                "<tr><td><div class='multibtn' onclick=\"document.location.href='hash'\" >" +
+                "<tr><td><div class='multibtn' onclick=\"document.location.href='pay'\" >" +
                     "Buy Something!" +
                 "</div></td></tr>" +
     
@@ -68,6 +68,10 @@ public class HomeServlet extends HttpServlet {
 
                 WalletAdminServlet.WALLET_ADMIN_BUTTON +
               
+                "<tr><td><div class='multibtn' onclick=\"document.location.href='login'\" >" +
+                    "&quot;WebAuthn&quot; Login..." +
+                "</div></td></tr>" +
+
               "</table>" +
             "</div>" +
 

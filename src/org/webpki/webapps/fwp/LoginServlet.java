@@ -37,7 +37,10 @@ public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     
-    private static final String FAILED_ID  = "fail";
+    // DIV elements to turn on and turn off.
+    private static final String WAITING_ID     = "wait";
+    private static final String FAILED_ID      = "fail";
+    private static final String ACTIVATE_ID    = "activate";
 
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -47,9 +50,15 @@ public class LoginServlet extends HttpServlet {
 
             "<div class='header'>Login Test</div>" +
 
-            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
             "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"startLogin()\">" +
+              "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+                  "style='padding-top:2em;display:none' alt='waiting'/>" +
+            "</div>" +
+
+            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
+
+            "<div style='display:flex;justify-content:center'>" +
+              "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"startLogin()\">" +
                 "Login..." +
               "</div>" +
             "</div>" +
@@ -80,6 +89,8 @@ public class LoginServlet extends HttpServlet {
             "}\n" +
             
             "async function startLogin() {\n" +
+            "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
+            "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
             "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
             "  if (globalError) return;\n" +
 

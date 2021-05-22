@@ -194,7 +194,7 @@ public class EnrollServlet extends HttpServlet {
                 "</div>" +
 
                 "<div style='display:flex;justify-content:center'>" +
-                  "<div class='stdbtn' onclick=\"document.location.href='hash'\">" +
+                  "<div class='stdbtn' onclick=\"document.location.href='pay'\">" +
                       "Buy Something..." +
                   "</div>" +
                 "</div>");

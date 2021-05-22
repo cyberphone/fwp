@@ -37,8 +37,7 @@ public class WalletAdminServlet extends HttpServlet {
     static final String WALLET_ADMIN_BUTTON =
             "<tr><td><div class='multibtn' onclick=\"document.location.href='walletadmin'\">" +
                 "Wallet Administration..." +
-            "</div></td></tr>" +
-            "</table>";
+            "</div></td></tr>";
 
     
     public void doGet(HttpServletRequest request, HttpServletResponse response)
