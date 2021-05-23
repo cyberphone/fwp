@@ -170,7 +170,7 @@ public class LoginServlet extends HttpServlet {
                     "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
                         "<div class='ctblhead'>Card Holder</div>" +
                         "<div style='padding-bottom:1em'>")
-                .append(coreClientData.cardHolder)
+                .append(HTML.encode(coreClientData.cardHolder, false))
                 .append("</div>" +
 
                         "<div class='ctblhead'>User ID</div>" +
