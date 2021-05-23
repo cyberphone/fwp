@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.cbor.CBORPublicKey;
+import org.webpki.crypto.KeyAlgorithms;
 
 /**
  * This is just for testing enrolled credentials
@@ -191,6 +192,9 @@ public class LoginServlet extends HttpServlet {
 
                         "<tr><th>FIDO Public Key (COSE)</th></tr>" +
                         "<tr><td style='word-break:break-all;text-align:left'><code>")
+                .append("/ ")
+                .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
+                .append(" Key /<br>")
                 .append(CBORPublicKey.encode(coreClientData.publicKey).toString()
                             .replace("\n", "<br>").replace(" ", "&nbsp;"))
                 .append("</code></td></tr>" +
