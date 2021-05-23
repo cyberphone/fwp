@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2019 WebPKI.org (http://webpki.org).
+ *  Copyright 2018-2021 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -142,7 +142,9 @@ public class FIDOLoginServlet extends HttpServlet {
                         return;
                     }
                 }
+
                 // We did it, set logged-in attribute.
+                // Note that the session cookie is returned and set via the fetch() operation.
                 session.setAttribute(FWPCommon.ATTR_LOGGED_IN_USER, userId);
                 
                 logger.info("Logged-in user: " + userId);

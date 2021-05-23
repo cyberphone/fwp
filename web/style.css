@@ -41,7 +41,6 @@ li {
   text-align:center;
   font-weight:bolder;
   font-size:12pt;
-  font-family:arial,verdana;
 }
 
 .sitefooter {
@@ -68,35 +67,7 @@ li {
   padding:3pt 10pt;
 }
 
-.sigparmbox {
-  border-radius:5pt;
-  padding:0 5pt 5pt 5pt;
-}
-
-.sigparmhead {
-  border-radius:3pt;
-  padding:3pt 5pt;
-  z-index:5;
-  position:relative;
-  top:-10pt;
-  margin-bottom:-3pt;
-}
-
-.defbtn {
-  border-radius:2pt;
-  display:inline-block;
-  cursor:pointer;
-  padding:1pt 3pt;
-  background-color:#f0f5fd;
-  border-color:#2a53ea;
-}
-
-.sigparmbox, .sigparmhead, .defbtn {
-  border-width:1px;
-  border-style:solid;
-}
-
-.sigparmhead, .sitefooter {
+.sitefooter {
   border-color:#c85000;
   background-color:##fffdf2;
 }
@@ -126,20 +97,12 @@ li {
   display:none;
 }
 
-.sigparmbox {
-  border-color:#008040;
-  background-color:#fbfff7;
-}
-
-.stdbtn, .multibtn, .sigparmbox, .staticbox, .textbox {
+.stdbtn, .multibtn, .staticbox, .textbox {
   box-shadow:3pt 3pt 3pt #d0d0d0;
 }
 
 .stdbtn {
   display:inline-block;
-}
-
-.stdbtn {
   margin-top:15pt;
 }
 
@@ -150,7 +113,7 @@ li {
 
 @media (max-width:768px) {
 
-  .stdbtn, .multibtn, .sigparmbox, .staticbox, .textbox {
+  .stdbtn, .multibtn, .staticbox, .textbox {
     box-shadow:2pt 2pt 2pt #d0d0d0;
   }
 
