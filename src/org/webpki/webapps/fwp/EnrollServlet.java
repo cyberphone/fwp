@@ -185,22 +185,18 @@ public class EnrollServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        try {
-            StringBuilder html = new StringBuilder(
-                "<div class='header'>Enrollment Succeeded</div>" +
+        StringBuilder html = new StringBuilder(
+            "<div class='header'>Enrollment Succeeded</div>" +
 
-                "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                    "You did it!" +
-                "</div>" +
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                "You did it!" +
+            "</div>" +
 
-                "<div style='display:flex;justify-content:center'>" +
-                  "<div class='stdbtn' onclick=\"document.location.href='pay'\">" +
-                      "Buy Something..." +
-                  "</div>" +
-                "</div>");
-            HTML.standardPage(response, null, html);
-        } catch (Exception e) {
-            HTML.errorPage(response, e);
-        }
+            "<div style='display:flex;justify-content:center'>" +
+              "<div class='stdbtn' onclick=\"document.location.href='pay'\">" +
+                  "Buy Something..." +
+              "</div>" +
+            "</div>");
+        HTML.standardPage(response, null, html);
     }
 }

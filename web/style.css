@@ -1,13 +1,19 @@
 body {
   margin:10pt;
   font-size:10pt;
-  font-family:Verdana,'Bitstream Vera Sans','DejaVu Sans',Arial,'Liberation Sans';
+  font-family:Roboto,sans-serif,"Segoe UI";
 }
 
 a {
   color:#007fff;
   text-decoration:none;
   outline:none;
+}
+
+.codetable td {
+  text-align:center;
+  padding-bottom:1em;
+  font-family:"Noto Mono",monospace;
 }
 
 li {

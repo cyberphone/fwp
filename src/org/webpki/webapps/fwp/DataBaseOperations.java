@@ -102,6 +102,7 @@ public class DataBaseOperations {
    static class CoreClientData {
        String credentialId;
        PublicKey publicKey;
+       String cardHolder;
    }
 
 
@@ -111,14 +112,17 @@ public class DataBaseOperations {
     static CoreClientData getCoreClientData(String userId, Connection connection)
             throws IOException, SQLException, GeneralSecurityException {
 /*
-        CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
-                                              OUT p_PublicKey VARBINARY(300),
-                                              IN p_UserId CHAR(36))
+    CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
+                                          OUT p_PublicKey VARBINARY(300),
+                                          OUT p_CardHolder VARCHAR(50),
+                                          IN p_UserId CHAR(36))
 */
-        try (CallableStatement stmt = connection.prepareCall("{call GetCoreClientDataSP(?,?,?)}");) {
+        try (CallableStatement stmt = 
+                connection.prepareCall("{call GetCoreClientDataSP(?,?,?,?)}");) {
             stmt.registerOutParameter(1, java.sql.Types.VARCHAR);
             stmt.registerOutParameter(2, java.sql.Types.VARBINARY);
-            stmt.setString(3, userId);
+            stmt.registerOutParameter(3, java.sql.Types.VARCHAR);
+            stmt.setString(4, userId);
             stmt.execute();
             String credentialId = stmt.getString(1);
             if (credentialId == null) {
@@ -127,6 +131,7 @@ public class DataBaseOperations {
             CoreClientData coreClientData = new CoreClientData();
             coreClientData.credentialId = credentialId;
             coreClientData.publicKey = CBORPublicKey.decode(CBORObject.decode(stmt.getBytes(2)));
+            coreClientData.cardHolder = stmt.getString(3);
             return coreClientData;
         }
     }

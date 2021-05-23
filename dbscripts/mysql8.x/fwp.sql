@@ -181,9 +181,14 @@ CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN,
 
 CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
                                       OUT p_PublicKey VARBINARY(300),
+                                      OUT p_CardHolder VARCHAR(50),
                                       IN p_UserId CHAR(36))
   BEGIN
-    SELECT CredentialId, PublicKey INTO p_CredentialId, p_PublicKey FROM USERS
+    SELECT CredentialId, 
+           PublicKey, 
+           CardHolder INTO p_CredentialId, 
+                           p_PublicKey, 
+                           p_CardHolder FROM USERS
         WHERE USERS.UserId = p_UserId;
   END
 //
@@ -240,14 +245,15 @@ CALL ASSERT_TRUE(@Status = 1, "Wrong user failed");
 CALL AuthenticateSP(@Status, @UserId, @WrongS256KeyHash);
 CALL ASSERT_TRUE(@Status = 2, "Wrong key failed");
 
-CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @UserId); 
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @OutCardHolder, @UserId); 
 CALL ASSERT_TRUE(@OutCredentialId = @CredentialId, "CredentialId failed");
 CALL ASSERT_TRUE(@OutPublicKey = @DummyPublicKey, "PublicKey failed");
+CALL ASSERT_TRUE(@OutCardHolder = @CardHolder, "CardHolder failed");
 
-CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @WrongUserId); 
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @OutCardHolder, @WrongUserId); 
 CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
-CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, NULL); 
+CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @OutCardHolder, NULL); 
 CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
 -- Remove all test data

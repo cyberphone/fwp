@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.sql.Connection;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -25,6 +27,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.webpki.cbor.CBORPublicKey;
 
 /**
  * This is just for testing enrolled credentials
@@ -50,6 +55,13 @@ public class LoginServlet extends HttpServlet {
 
             "<div class='header'>Login Test</div>" +
 
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+              "<div class='comment'>" +
+                  "Login is not a part of FIDO Web Pay, but associated FIDO authenticators " +
+                  "can <i>optionally</i> be used for that as well." +
+              "</div>" +
+            "</div>" +
+            
             "<div style='display:flex;justify-content:center'>" +
               "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
                   "style='padding-top:2em;display:none' alt='waiting'/>" +
@@ -73,11 +85,6 @@ public class LoginServlet extends HttpServlet {
 
             FWPCommon.FWP_JAVASCRIPT +
 
-            "function b64urlToU8arr(code) {\n" +
-            "  return Uint8Array.from(window.atob(" +
-                   "code.replace(/-/g, '+').replace(/_/g, '/')), c=>c.charCodeAt(0));\n" +
-            "}\n" +
-
             "function setError(message) {\n" +
             "  if (!globalError) {\n" +
             "    console.log('Fail: ' + globalError);\n" +
@@ -100,7 +107,7 @@ public class LoginServlet extends HttpServlet {
             "    allowCredentials: [{type: 'public-key', " +
                      "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
 
-            "    userVerification: 'preferred'," +
+            "    userVerification: 'preferred',\n" +
 
             "    timeout: 120000\n" +
             "  };\n" +
@@ -134,12 +141,69 @@ public class LoginServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder html = new StringBuilder(
-            "<div class='header'>Login Succeeded</div>" +
+        try {
+            // Get the enrolled user.
+            String userId = FWPCommon.getWalletCookie(request);
+            if (userId == null) {
+                FWPCommon.failed("User ID missing, have you enrolled?");
+            }
+            
+            // Lookup in database
+            DataBaseOperations.CoreClientData coreClientData;
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                // Get the anticipated public key
+                coreClientData = DataBaseOperations.getCoreClientData(userId, connection);
+            }
+            
+            HttpSession session = request.getSession();
+            
+            StringBuilder html = new StringBuilder(
+                    "<div class='header'>Login Succeeded!</div>" +
+            
+                    "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                      "<div class='comment'>" +
+                         "This is what the login returned from the user database." +
+                      "</div>" +
+                    "</div>" +
 
-            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                "You did it!" +
-            "</div>");
-        HTML.standardPage(response, null, html);
+                    "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                      "<table class='codetable'>" +
+
+                        "<tr><th>Card Holder</th></tr>" +
+                        "<tr><td style='text-align:center;font-family:Roboto,sans-serif,Segoe UI'>")
+                .append(coreClientData.cardHolder)
+                .append("</td></tr>" +
+
+                        "<tr><th>User ID</th></tr>" +
+                        "<tr><td style='text-align:center'><code>")
+                .append(userId)
+                .append("</code></td></tr>" +
+                
+                        "<tr><th>Web Session ID</th></tr>" +
+                        "<tr><td style='text-align:center'><code>")
+                .append(session.getId())
+                .append("</code></td></tr>" +
+                
+                        "<tr><th>FIDO Credential ID (B64U)</th></tr>" +
+                        "<tr><td style='text-align:center'><code>")
+                .append(coreClientData.credentialId)
+                .append("</code></td></tr>" +
+
+                        "<tr><th>FIDO Public Key (COSE)</th></tr>" +
+                        "<tr><td style='word-break:break-all;text-align:left'><code>")
+                .append(CBORPublicKey.encode(coreClientData.publicKey).toString()
+                            .replace("\n", "<br>").replace(" ", "&nbsp;"))
+                .append("</code></td></tr>" +
+
+                        "</table>" +
+                    "</div>");
+            
+            // In our case we have no application using the authentication...
+            session.invalidate();
+
+            HTML.standardPage(response, null, html);
+        } catch (Exception e) {
+            HTML.errorPage(response, e);
+        }
     }
 }
