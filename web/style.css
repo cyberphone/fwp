@@ -10,10 +10,15 @@ a {
   outline:none;
 }
 
-.codetable td {
-  text-align:center;
+.ctbl {
   padding-bottom:1em;
+  word-break:break-all;
   font-family:"Noto Mono",monospace;
+}
+
+.ctblhead {
+  padding-bottom:0.2em;
+  font-weight:bolder;
 }
 
 li {

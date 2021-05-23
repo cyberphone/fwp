@@ -167,39 +167,36 @@ public class LoginServlet extends HttpServlet {
                       "</div>" +
                     "</div>" +
 
-                    "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                      "<table class='codetable'>" +
-
-                        "<tr><th>Card Holder</th></tr>" +
-                        "<tr><td style='text-align:center;font-family:Roboto,sans-serif,Segoe UI'>")
+                    "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
+                        "<div class='ctblhead'>Card Holder</div>" +
+                        "<div style='padding-bottom:1em'>")
                 .append(coreClientData.cardHolder)
-                .append("</td></tr>" +
+                .append("</div>" +
 
-                        "<tr><th>User ID</th></tr>" +
-                        "<tr><td style='text-align:center'><code>")
+                        "<div class='ctblhead'>User ID</div>" +
+                        "<div class='ctbl'>")
                 .append(userId)
-                .append("</code></td></tr>" +
+                .append("</div>" +
                 
-                        "<tr><th>Web Session ID</th></tr>" +
-                        "<tr><td style='text-align:center'><code>")
+                        "<div class='ctblhead'>Web Session ID</div>" +
+                        "<div class='ctbl'>")
                 .append(session.getId())
-                .append("</code></td></tr>" +
+                .append("</div>" +
                 
-                        "<tr><th>FIDO Credential ID (B64U)</th></tr>" +
-                        "<tr><td style='text-align:center'><code>")
+                        "<div class='ctblhead'>FIDO Credential ID (B64U)</div>" +
+                        "<div class='ctbl'>")
                 .append(coreClientData.credentialId)
-                .append("</code></td></tr>" +
+                .append("</div>" +
 
-                        "<tr><th>FIDO Public Key (COSE)</th></tr>" +
-                        "<tr><td style='word-break:break-all;text-align:left'><code>")
+                        "<div class='ctblhead'>FIDO Public Key (COSE)</div>" +
+                        "<div class='ctbl'>")
                 .append("/ ")
                 .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
                 .append(" Key /<br>")
                 .append(CBORPublicKey.encode(coreClientData.publicKey).toString()
                             .replace("\n", "<br>").replace(" ", "&nbsp;"))
-                .append("</code></td></tr>" +
+                .append("</div>" +
 
-                        "</table>" +
                     "</div>");
             
             // In our case we have no application using the authentication...
