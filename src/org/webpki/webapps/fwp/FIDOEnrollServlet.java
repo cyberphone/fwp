@@ -16,8 +16,6 @@
  */
 package org.webpki.webapps.fwp;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 
