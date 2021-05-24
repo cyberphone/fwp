@@ -96,7 +96,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // We must also keep a copy of emitted data in a server session.
                 // The client can only partially be trusted!
                 session.setAttribute(FWPCommon.ATTR_REGISTER_DATA, 
-                		             new JSONObjectReader(resultJson));
+                                     new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
