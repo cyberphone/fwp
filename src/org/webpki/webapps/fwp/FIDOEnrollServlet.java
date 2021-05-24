@@ -89,12 +89,14 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] challenge = CryptoRandom.generateRandom(32);
                 resultJson.setBinary(FWPCommon.CHALLENGE, challenge);
 
-                // We use a UUID as the sole entry in the database and tie
-                // the credentials and (a single) FIDO authenticator to that.
+                // We use a UUID as the sole entry in the database and tie payment
+                // credentials and (a single) FIDO authenticator to that.
                 resultJson.setString(FWPCommon.USER_ID, userId);
                 
-                // This what we send but we must also 
-                session.setAttribute(FWPCommon.ATTR_REGISTER_DATA, new JSONObjectReader(resultJson));
+                // We must also keep a copy of emitted data in a server session.
+                // The client can only partially be trusted!
+                session.setAttribute(FWPCommon.ATTR_REGISTER_DATA, 
+                		             new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
@@ -143,7 +145,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] rawPublicKey = new byte[authData.length - offset];
                 System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
 
-                // Verify that we actually got a genuine public key.
+                // Verify that we actually got a genuine CBOR/COSE public key.
                 CBORPublicKey.decode(CBORObject.decode(rawPublicKey));
 
 // Test only
