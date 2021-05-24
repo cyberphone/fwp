@@ -72,7 +72,7 @@ public class LoginServlet extends HttpServlet {
             "<div id='" + FAILED_ID + "' class='errorText'></div>" +
 
             "<div style='display:flex;justify-content:center'>" +
-              "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"startLogin()\">" +
+              "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doLogin()\">" +
                 "Login..." +
               "</div>" +
             "</div>" +
@@ -81,41 +81,28 @@ public class LoginServlet extends HttpServlet {
         String js = new StringBuilder(
             "'use strict';\n" +
             
-            "let globalError = null;\n" +
-            
             "const serviceUrl = 'fidologin';\n" +
 
             FWPCommon.FWP_JAVASCRIPT +
 
-            "function setError(message) {\n" +
-            "  if (!globalError) {\n" +
-            "    console.log('Fail: ' + globalError);\n" +
-            "    globalError = message;\n" +
-            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
-            "    e.textContent = 'Fail: ' + globalError;\n" +
-            "    e.style.display = 'block';\n" +
-            "  }\n" +
-            "}\n" +
-            
-            "async function startLogin() {\n" +
-            "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
-            "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-            "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
-            "  if (globalError) return;\n" +
-
-            "  const options = {\n" +
-            "    challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
-
-            "    allowCredentials: [{type: 'public-key', " +
-                     "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
-
-            "    userVerification: 'preferred',\n" +
-
-            "    timeout: 120000\n" +
-            "  };\n" +
-            
-//            "  console.log(options);\n" +
+            "async function doLogin() {\n" +
             "  try {\n" +
+            "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+            "    const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
+
+            "    const options = {\n" +
+            "      challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
+
+            "      allowCredentials: [{type: 'public-key', " +
+                       "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
+
+            "      userVerification: 'preferred',\n" +
+
+            "      timeout: 120000\n" +
+            "    };\n" +
+            
+//            "    console.log(options);\n" +
             "    const result = await navigator.credentials.get({ publicKey: options });\n" +
 //            "    console.log(result);\n" +
             "    const finalizePhase = await exchangeJSON({" + 
@@ -131,10 +118,16 @@ public class LoginServlet extends HttpServlet {
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +
 
-            "    if (!globalError) document.forms.shoot.submit();\n" +
+            "    document.forms.shoot.submit();\n" +
 
+            // Errors are effectively aborting so a single try-catch does the trick.
             "  } catch (error) {\n" +
-            "    setError(error);\n" +
+            "    let message = 'Fail: ' + error;\n" +
+            "    console.log(message);\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
+            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+            "    e.textContent = message;\n" +
+            "    e.style.display = 'block';\n" +
             "  }\n" +
 
             "}\n").toString();

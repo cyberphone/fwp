@@ -85,7 +85,7 @@ public class EnrollServlet extends HttpServlet {
                   "</table></div>" +
     
                   "<div style='display:flex;justify-content:center'>" +
-                    "<div class='stdbtn' onclick=\"startEnroll()\">" +
+                    "<div class='stdbtn' onclick=\"doEnroll()\">" +
                       "Start Enrollment!" +
                     "</div>" +
                   "</div>" +
@@ -96,62 +96,48 @@ public class EnrollServlet extends HttpServlet {
             String js = alreadyEnrolled ? null : new StringBuilder(
                 "'use strict';\n" +
                 
-                "let globalError = null;\n" +
-                
                 "const serviceUrl = 'fidoenroll';\n" +
 
                 FWPCommon.FWP_JAVASCRIPT +
 
-                "function setError(message) {\n" +
-                "  if (!globalError) {\n" +
-                "    console.log('Fail: ' + message);\n" +
-                "    globalError = message;\n" +
-                "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
-                "    let e = document.getElementById('" + FAILED_ID + "');\n" +
-                "    e.textContent = 'Fail: ' + globalError;\n" +
-                "    e.style.display = 'block';\n" +
-                "  }\n" +
-                "}\n" +
-                
-                "async function startEnroll() {\n" +
-                "  document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
-                "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "  const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
-                "  if (globalError) return;\n" +
-    
-                "  let userId = initPhase." + FWPCommon.USER_ID + ";\n" +
-                "  let publicKey = {\n" +
-                "    challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
-                "    rp: {\n" +
-                "      name: 'FIDO Web Pay'\n" +
-                "    },\n" +
-                "    user: {\n" +
-                "      id: new TextEncoder().encode(userId),\n" +
-                "      name: userId,\n" +
-                "      displayName: 'FWP User'\n" +
-                "    },\n" +
-                "    pubKeyCredParams: [{\n" +
-                "      type: 'public-key',\n" +
-                "      alg: -7\n" +
-                "    },{\n" +
-                "      type: 'public-key',\n" +
-                "      alg: -8\n" +
-                "    },{\n" +
-                "      type: 'public-key',\n" +
-                "      alg: -257\n" +
-                "    }],\n" +
-                "    timeout: 360000,\n" +
-                "    excludeCredentials: [],\n" +
-                "    authenticatorSelection: {\n" +
-                "      residentKey: 'preferred',\n" +
-                "      userVerification: 'preferred'\n" +
-                "    },\n" +
-                "    attestation: 'direct',\n" +
-                "    extensions: {}\n" +
-                "  };\n" +
+                "async function doEnroll() {\n" +
+                "  try {\n" +
+                "    document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
+                "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+                "    const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
+     
+                "    let userId = initPhase." + FWPCommon.USER_ID + ";\n" +
+                "    let publicKey = {\n" +
+                "      challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
+                "      rp: {\n" +
+                "        name: 'FIDO Web Pay'\n" +
+                "      },\n" +
+                "      user: {\n" +
+                "        id: new TextEncoder().encode(userId),\n" +
+                "        name: userId,\n" +
+                "        displayName: 'FWP User'\n" +
+                "      },\n" +
+                "      pubKeyCredParams: [{\n" +
+                "        type: 'public-key',\n" +
+                "        alg: -7\n" +
+                "      },{\n" +
+                "        type: 'public-key',\n" +
+                "        alg: -8\n" +
+                "      },{\n" +
+                "        type: 'public-key',\n" +
+                "        alg: -257\n" +
+                "      }],\n" +
+                "      timeout: 360000,\n" +
+                "      excludeCredentials: [],\n" +
+                "      authenticatorSelection: {\n" +
+                "        residentKey: 'preferred',\n" +
+                "        userVerification: 'preferred'\n" +
+                "      },\n" +
+                "      attestation: 'direct',\n" +
+                "      extensions: {}\n" +
+                "    };\n" +
                 
 //                "  console.log(publicKey);\n" +
-                "  try {\n" +
                 "    const result = await navigator.credentials.create({publicKey});\n" +
 //                "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
@@ -170,10 +156,16 @@ public class EnrollServlet extends HttpServlet {
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +
 
-                "    if (!globalError) document.forms.shoot.submit();\n" +
+                "    document.forms.shoot.submit();\n" +
 
+                // Errors are effectively aborting so a single try-catch does the trick.
                 "  } catch (error) {\n" +
-                "    setError(error);\n" +
+                "    let message = 'Fail: ' + error;\n" +
+                "    console.log(message);\n" +
+                "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
+                "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+                "    e.textContent = message;\n" +
+                "    e.style.display = 'block';\n" +
                 "  }\n" +
                 
                 "}\n").toString();

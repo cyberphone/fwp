@@ -101,31 +101,28 @@ public class FWPCommon {
         "}\n" +
         
         "async function exchangeJSON(jsonObject, currentPhase) {\n" +
-        "  try {\n" +
-        "    jsonObject." + PHASE_JSON + " = currentPhase;\n" +
-        "    const response = await fetch(serviceUrl, {\n" +
-        "           headers: {\n" +
-        "             'Content-Type': 'application/json'\n" +
-        "           },\n" +
-        "           method: 'POST',\n" +
-        "           credentials: 'same-origin',\n" +
-        "           body: JSON.stringify(jsonObject)\n" +
-        "        });\n" +
-        "    if (response.ok) {\n" +
-        "      const jsonResult = await response.json();\n" +
-        "      if (jsonResult." + PHASE_JSON + "!= currentPhase) {\n" +
-        "        setError('Out of phase');\n" +
-        "      }\n" +
-        "      if (jsonResult." + ERROR_JSON + ") {\n" +
-        "        setError(jsonResult." + ERROR_JSON + ");\n" +
-        "      }\n" +
-        "      return jsonResult;\n" +
-        "    } else {\n" +
-        "      setError('Server/network failure');\n" +
-        "    }\n" + 
-        "  } catch (error) {\n" +
-        "    setError(error);\n" +
-        "  }\n" +
+        "  jsonObject." + PHASE_JSON + " = currentPhase;\n" +
+        "  const response = await fetch(serviceUrl, {\n" +
+        "         headers: {\n" +
+        "           'Content-Type': 'application/json'\n" +
+        "         },\n" +
+        "         method: 'POST',\n" +
+        "         credentials: 'same-origin',\n" +
+        "         body: JSON.stringify(jsonObject)\n" +
+        "      });\n" +
+        "  if (response.ok) {\n" +
+        "    const jsonResult = await response.json();\n" +
+        "    if (jsonResult." + PHASE_JSON + "!= currentPhase) {\n" +
+        "      throw 'Out of phase';\n" +
+        "    }\n" +
+        "    if (jsonResult." + ERROR_JSON + ") {\n" +
+        "      throw jsonResult." + ERROR_JSON + ";\n" +
+        "    }\n" +
+        "    return jsonResult;\n" +
+        "  } else {\n" +
+        "    throw 'Server/network failure';\n" +
+        "  }\n" + 
+
         "}\n";
 
     static final String GO_HOME_JAVASCRIPT =              
