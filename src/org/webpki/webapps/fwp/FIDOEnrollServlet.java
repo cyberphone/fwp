@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.PublicKey;
+
 import java.sql.Connection;
 
 import java.util.UUID;
@@ -38,11 +38,13 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+
 import org.webpki.crypto.CryptoRandom;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -133,9 +135,8 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] authData = CBORObject.decode(attestationObject)
                         .getTextStringMap().getObject("authData").getByteString();
                 if ((authData[32] & (FWPCommon.FLAG_AT + FWPCommon.FLAG_ED)) != FWPCommon.FLAG_AT) {
-                    FWPCommon.returnJSON(response, resultJson.setString(
-                        FWPCommon.ERROR_JSON, 
-                        "Unsupported authData flags: " + authData[32]));
+                    FWPCommon.softError(response, resultJson, 
+                                        "Unsupported authData flags: " + authData[32]);
                     return;
                 }
                 int i = 32 + 1 + 4 + 16;
@@ -150,8 +151,7 @@ public class FIDOEnrollServlet extends HttpServlet {
 // Test only
 if (cardHolder.equals("-1")) FWPCommon.failed(cardHolder);  // Hard server error
 if (cardHolder.equals("-2")) { // Soft server error
-    FWPCommon.returnJSON(response, resultJson.setString(FWPCommon.ERROR_JSON, 
-                                                        "Sorry, something isn't as it should"));
+    FWPCommon.softError(response, resultJson, "Sorry, something isn't as it should");
     return;
 }
                 
