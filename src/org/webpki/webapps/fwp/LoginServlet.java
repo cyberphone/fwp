@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.cbor.CBORPublicKey;
+
 import org.webpki.crypto.KeyAlgorithms;
 
 /**
@@ -156,7 +157,7 @@ public class LoginServlet extends HttpServlet {
                 coreClientData = DataBaseOperations.getCoreClientData(userId, connection);
             }
             
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(false);
             
             StringBuilder html = new StringBuilder(
                     "<div class='header'>Login Succeeded!</div>" +
@@ -168,27 +169,27 @@ public class LoginServlet extends HttpServlet {
                     "</div>" +
 
                     "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
-                        "<div class='ctblhead'>Card Holder</div>" +
+                        "<div class='ctblh'>Card Holder</div>" +
                         "<div style='padding-bottom:1em'>")
                 .append(HTML.encode(coreClientData.cardHolder, false))
                 .append("</div>" +
 
-                        "<div class='ctblhead'>User ID</div>" +
+                        "<div class='ctblh'>User ID</div>" +
                         "<div class='ctbl'>")
                 .append(userId)
                 .append("</div>" +
                 
-                        "<div class='ctblhead'>Web Session ID</div>" +
+                        "<div class='ctblh'>Web Session ID</div>" +
                         "<div class='ctbl'>")
-                .append(session.getId())
+                .append(session == null ? "Missing" : session.getId())
                 .append("</div>" +
                 
-                        "<div class='ctblhead'>FIDO Credential ID (B64U)</div>" +
+                        "<div class='ctblh'>FIDO Credential ID (B64U)</div>" +
                         "<div class='ctbl'>")
                 .append(coreClientData.credentialId)
                 .append("</div>" +
 
-                        "<div class='ctblhead'>FIDO Public Key (COSE)</div>" +
+                        "<div class='ctblh'>FIDO Public Key (COSE)</div>" +
                         "<div class='ctbl'>")
                 .append("/ ")
                 .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
@@ -202,7 +203,7 @@ public class LoginServlet extends HttpServlet {
             // In our case we have no application using the authentication...
             session.invalidate();
 
-            HTML.standardPage(response, null, html);
+            HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

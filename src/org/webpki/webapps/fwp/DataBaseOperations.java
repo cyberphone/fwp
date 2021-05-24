@@ -126,7 +126,7 @@ public class DataBaseOperations {
             stmt.execute();
             String credentialId = stmt.getString(1);
             if (credentialId == null) {
-                throw new IOException("Missing credentialId for user: " + userId);
+                return null;
             }
             CoreClientData coreClientData = new CoreClientData();
             coreClientData.credentialId = credentialId;

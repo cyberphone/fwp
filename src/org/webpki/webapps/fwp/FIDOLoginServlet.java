@@ -89,6 +89,10 @@ public class FIDOLoginServlet extends HttpServlet {
                     // Get FIDO credentialId.
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
+                    if (coreClientData == null) {
+                        FWPCommon.softError(response, resultJson, "User is missing, you need to reenroll");
+                        return;
+                    }
                     resultJson.setString(FWPCommon.CREDENTIAL_ID, coreClientData.credentialId);
                 }
  

@@ -128,6 +128,12 @@ public class FWPCommon {
         "  }\n" +
         "}\n";
 
+    static final String GO_HOME_JAVASCRIPT =              
+            "history.pushState(null, null, 'home');\n" +
+            "window.addEventListener('popstate', function(event) {\n" +
+            "  history.pushState(null, null, 'home');\n" +
+            "});\n";
+
     static Logger logger = Logger.getLogger(FWPCommon.class.getName());
 
     static String getWalletCookie(HttpServletRequest request) {

@@ -16,7 +16,7 @@ a {
   font-family:"Noto Mono",monospace;
 }
 
-.ctblhead {
+.ctblh {
   padding-bottom:0.2em;
   font-weight:bolder;
 }
@@ -54,7 +54,7 @@ li {
   border-width:1px 0 0 0;
   border-style:solid;
   position:absolute;
-  z-index:5;
+  z-index:-5;
   left:0px;
   bottom:0px;
   right:0px;
