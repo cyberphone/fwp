@@ -45,7 +45,7 @@ public class DataBaseOperations {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     static void initiateUserAccount(String userId,
                                     String cardHolder,
-                                    String keyHandle,
+                                    String credentialId,
                                     byte[] rawPublicKey,
                                     Connection connection)
             throws SQLException, IOException, GeneralSecurityException {
@@ -60,7 +60,7 @@ public class DataBaseOperations {
                 connection.prepareCall("{call InitiateUserAccountSP(?,?,?,?,?)}");) {
             stmt.setString(1, userId);
             stmt.setString(2, cardHolder);
-            stmt.setString(3, keyHandle);
+            stmt.setString(3, credentialId);
             stmt.setBytes(4, rawPublicKey);
             stmt.setBytes(5, HashAlgorithms.SHA256.digest(rawPublicKey));
             stmt.execute();
@@ -86,9 +86,9 @@ public class DataBaseOperations {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Check if the user (which may not exist) has payment cards                                  //
     ////////////////////////////////////////////////////////////////////////////////////////////////
-   static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
+    static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
 /*
-       CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
+        CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
 
 */
         try (CallableStatement stmt = connection.prepareCall("{call HasPaymentCardsSP(?,?)}");) {
@@ -99,11 +99,11 @@ public class DataBaseOperations {
         }
     }
    
-   static class CoreClientData {
-       String credentialId;
-       PublicKey publicKey;
-       String cardHolder;
-   }
+    static class CoreClientData {
+        String credentialId;
+        PublicKey publicKey;
+        String cardHolder;
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,10 +112,10 @@ public class DataBaseOperations {
     static CoreClientData getCoreClientData(String userId, Connection connection)
             throws IOException, SQLException, GeneralSecurityException {
 /*
-    CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
-                                          OUT p_PublicKey VARBINARY(300),
-                                          OUT p_CardHolder VARCHAR(50),
-                                          IN p_UserId CHAR(36))
+        CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
+                                              OUT p_PublicKey VARBINARY(300),
+                                              OUT p_CardHolder VARCHAR(50),
+                                              IN p_UserId CHAR(36))
 */
         try (CallableStatement stmt = 
                 connection.prepareCall("{call GetCoreClientDataSP(?,?,?,?)}");) {
@@ -135,4 +135,32 @@ public class DataBaseOperations {
             return coreClientData;
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Verify that the key hash of the public key matches the user Id                             //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static void authenticate(String userId, byte[] s256KeyHash, Connection connection)
+            throws IOException, SQLException, GeneralSecurityException {
+/*
+        CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
+                                         IN p_UserId CHAR(36),
+                                         IN p_S256KeyHash BINARY(32))
+*/
+        try (CallableStatement stmt = 
+                connection.prepareCall("{call AuthenticateSP(?,?,?)}");) {
+            stmt.registerOutParameter(1, java.sql.Types.INTEGER);
+            stmt.setString(2, userId);
+            stmt.setBytes(3, s256KeyHash);
+            stmt.execute();
+            switch (stmt.getInt(1)) {
+                case 0:
+                    return;
+                case 1:
+                    throw new GeneralSecurityException("No such user: " + userId);
+                default:
+                    throw new GeneralSecurityException("Non-matching key hash");
+            }
+        }
+    }
+
 }

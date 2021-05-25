@@ -37,7 +37,9 @@ import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
+
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /**
  * Core FWP assertion support.
@@ -160,6 +162,7 @@ public class FWPAssertion {
             throw new GeneralSecurityException("Signature validation failed");
         }
         authorization.checkObjectForUnread();
+        System.out.println(cborPublicKey.toString());
         return HashAlgorithms.SHA256.digest(cborPublicKey.encode());
     }
 }

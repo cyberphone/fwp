@@ -202,7 +202,7 @@ CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
     SELECT S256KeyHash INTO v_S256KeyHash FROM USERS
         WHERE USERS.UserId = p_UserId;
     IF v_S256KeyHash IS NULL THEN
-      SET p_Status = 1;    -- No such users
+      SET p_Status = 1;    -- No such user
     ELSEIF v_S256KeyHash <> p_S256KeyHash THEN
       SET p_Status = 2;    -- Non-matching key
     ELSE                       

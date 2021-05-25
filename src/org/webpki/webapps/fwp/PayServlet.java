@@ -17,7 +17,7 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
-
+import java.sql.Connection;
 import java.util.Base64;
 
 import java.util.logging.Logger;
@@ -155,12 +155,22 @@ public class PayServlet extends HttpServlet {
             if (fwpAssertionB64U == null) {
                 FWPCommon.failed("FWP assertion missing");
             }
-            
+
+            String userId = FWPCommon.getWalletCookie(request);
+            if (userId == null) {
+                FWPCommon.failed("User ID missing, have you enrolled?");
+            }
+
             CBORIntegerMap fwpAssertion = 
                     CBORObject.decode(
                             Base64.getUrlDecoder().decode(fwpAssertionB64U)).getIntegerMap();
             
             byte[] s256KeyHash = FWPAssertion.validateFwpAssertion(fwpAssertion);
+            
+            // Succeeded.  Is the key one of "ours"?
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+     //           DataBaseOperations.authenticate(userId, s256KeyHash, connection);
+            }
             
             StringBuilder html = new StringBuilder(
                     "<div class='header'>Login Succeeded!</div>" +
