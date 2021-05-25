@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.util.Base64;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,146 +28,158 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.crypto.AlgorithmPreferences;
-import org.webpki.crypto.HashAlgorithms;
+import org.webpki.cbor.CBORIntegerMap;
+import org.webpki.cbor.CBORObject;
 
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONParser;
-
-import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64URL;
-
+/**
+ * This is a temporary payment application.
+ *
+ */
 public class PayServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 1L;
-
+    
     static Logger logger = Logger.getLogger(PayServlet.class.getName());
 
-    // HTML form arguments
-    static final String JSON_DATA        = "json";
-
-    static final String HASH_ALGORITHM     = "alg";
+    private static final long serialVersionUID = 1L;
     
-    static String getParameter(HttpServletRequest request, String parameter) throws IOException {
-        String string = request.getParameter(parameter);
-        if (string == null) {
-            throw new IOException("Missing data for: "+ parameter);
-        }
-        return string.trim();
+    
+    // DIV elements to turn on and turn off.
+    private static final String WAITING_ID     = "wait";
+    private static final String FAILED_ID      = "fail";
+    private static final String ACTIVATE_ID    = "activate";
+
+    
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        StringBuilder html = new StringBuilder(
+            "<form name='shoot' method='POST' action='pay'>" +
+        
+            "<input type='hidden' id='" + FWPCommon.FWP_ASSERTION + 
+                "' name='" + FWPCommon.FWP_ASSERTION + "'/>" +
+
+            "<div class='header'>Checkout Time!</div>" +
+
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+              "<div class='comment'>" +
+                  "This is just a temporary arrangement where you pay 140 EUR." +
+              "</div>" +
+            "</div>" +
+            
+            "<div style='display:flex;justify-content:center'>" +
+              "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+                  "style='padding-top:2em;display:none' alt='waiting'/>" +
+            "</div>" +
+
+            "<div id='" + FAILED_ID + "' class='errorText'></div>" +
+
+            "<div style='display:flex;justify-content:center'>" +
+              "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doPay()\">" +
+                "Pay using FWP" +
+              "</div>" +
+            "</div>" +
+            "</form>");
+
+        String js = new StringBuilder(
+            "'use strict';\n" +
+        
+            "const paymentRequest = {\n" +
+            "  payee: 'Space Shop',\n" +
+            "  id: '43560765',\n" +
+            "  amount: '140.00',\n" +
+            "  currency: 'EUR'\n" +
+            "};\n" +
+            
+            "const fwpInput = {\n" +
+            "  paymentRequest: paymentRequest,\n" +
+            "  hostName: 'spaceshop.com'\n" +
+            "};\n" +
+            
+            "const serviceUrl = 'fidopay';\n" +
+
+            FWPCommon.FWP_JAVASCRIPT +
+
+            "async function doPay() {\n" +
+            "  try {\n" +
+            "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+            "    const initPhase = await exchangeJSON({fwpInput: fwpInput},'" + FWPCommon.INIT_PHASE + "');\n" +
+
+            "    const options = {\n" +
+            "      challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
+
+            "      allowCredentials: [{type: 'public-key', " +
+                       "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
+
+            "      userVerification: 'preferred',\n" +
+
+            "      timeout: 120000\n" +
+            "    };\n" +
+            
+//            "    console.log(options);\n" +
+            "    const result = await navigator.credentials.get({ publicKey: options });\n" +
+//            "    console.log(result);\n" +
+            "    const finalizePhase = await exchangeJSON({" + 
+
+                         FWPCommon.AUTHENTICATOR_DATA_JSON + 
+                         ":arrBufToB64url(result.response.authenticatorData)," +
+
+                         FWPCommon.SIGNATURE_JSON + 
+                         ":arrBufToB64url(result.response.signature)," +
+
+                         FWPCommon.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response.clientDataJSON)},'" +
+
+                         FWPCommon.FINALIZE_PHASE + "');\n" +
+
+            "    document.getElementById('" + FWPCommon.FWP_ASSERTION + 
+                "').value = finalizePhase." + FWPCommon.FWP_ASSERTION + ";\n" +
+            "    document.forms.shoot.submit();\n" +
+
+            // Errors are effectively aborting so a single try-catch does the trick.
+            "  } catch (error) {\n" +
+            "    let message = 'Fail: ' + error;\n" +
+            "    console.log(message);\n" +
+            "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +
+            "    let e = document.getElementById('" + FAILED_ID + "');\n" +
+            "    e.textContent = message;\n" +
+            "    e.style.display = 'block';\n" +
+            "  }\n" +
+
+            "}\n").toString();
+        HTML.standardPage(response, js, html);
     }
     
-    static byte[] getBinaryParameter(HttpServletRequest request, String parameter) throws IOException {
-        return getParameter(request, parameter).getBytes("utf-8");
-    }
-
-    static String getTextArea(HttpServletRequest request, String name)
-            throws IOException {
-        String string = getParameter(request, name);
-        StringBuilder s = new StringBuilder();
-        for (char c : string.toCharArray()) {
-            if (c != '\r') {
-                s.append(c);
-            }
-        }
-        return s.toString();
-    }
-
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            request.setCharacterEncoding("utf-8");
-            if (!request.getContentType().startsWith("application/x-www-form-urlencoded")) {
-                throw new IOException("Unexpected MIME type:" + request.getContentType());
+            String fwpAssertionB64U = request.getParameter(FWPCommon.FWP_ASSERTION);
+            if (fwpAssertionB64U == null) {
+                FWPCommon.failed("FWP assertion missing");
             }
-
-            // Get the input data items
-            JSONObjectReader parsedJson = JSONParser.parse(
-                    getParameter(request, JSON_DATA));
-            HashAlgorithms hashAlgorithm = HashAlgorithms.getAlgorithmFromId(
-                    getParameter(request, HASH_ALGORITHM), 
-                    AlgorithmPreferences.JOSE);
-
-            // Create a pretty-printed JSON object without canonicalization
-            String prettyJson = parsedJson.serializeToString(JSONOutputFormats.PRETTY_HTML);
             
-            // Create a canonicalized (RFC 8785) version of the JSON data
-            String canonicalJson = parsedJson.serializeToString(JSONOutputFormats.CANONICALIZED);
-            byte[] canonicalJsonBinary = canonicalJson.getBytes("utf-8");
+            CBORIntegerMap fwpAssertion = 
+                    CBORObject.decode(
+                            Base64.getUrlDecoder().decode(fwpAssertionB64U)).getIntegerMap();
             
-            // Hash the UTF-8
-            byte[] hashedJson = hashAlgorithm.digest(canonicalJsonBinary);
+            byte[] s256KeyHash = FWPAssertion.validateFwpAssertion(fwpAssertion);
             
             StringBuilder html = new StringBuilder(
-                    "<div class='header'>JSON Data Successfully Hashed</div>")
-                .append(HTML.fancyBox("pretty", 
-                                      prettyJson, 
-                                      "\"Pretty-printed\" JSON data"))           
-                .append(HTML.fancyCode("canonical", 
-                                       canonicalJson,
-                                       "Canonical (RFC 8785) version of the JSON data"))
-                .append(HTML.fancyBox("canonicalhex", 
-                                  ArrayUtil.toHexString(canonicalJsonBinary, 0, -1, false, ' '),
-                                      "Canonical data in hexadecimal"))
-                .append(HTML.fancyBox("algorithm", 
-                                       hashAlgorithm.getJoseAlgorithmId(),
-                                       "Hash algorithm in JOSE-like notation"))
-                 .append(HTML.fancyBox("hex",
-                                       ArrayUtil.toHexString(hashedJson, 0, -1, false, ' '),
-                                       "Hash in hexadecimal"))
-                 .append(HTML.fancyBox("b64u",
-                                       Base64URL.encode(hashedJson),
-                                       "Hash in Base64Url"));
+                    "<div class='header'>Login Succeeded!</div>" +
+            
+                    "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                      "<div class='comment'>" +
+                         "This is what the login returned from the user database." +
+                      "</div>" +
+                    "</div>" +
 
-            // Finally, print it out
-            HTML.standardPage(response, null, html.append("<div style='padding:10pt'></div>"));
+                    "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
+                        "<div class='ctbl'>")
+                .append(fwpAssertion.toString().replace("\n", "<br>").replace(" ", "&nbsp;"))
+                .append("</div>" +
+                    "</div>");
+            
+            HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }
-    }
-    
-    StringBuilder algorithmSelector() throws IOException {
-        StringBuilder html = new StringBuilder(
-                "<div style='display:flex;justify-content:center;margin-top:1.5em'>" + 
-                "<table><tr><td>Selected hash algoritm:</td></tr>" +
-                "<tr><td><select name='" + HASH_ALGORITHM + "'>");
-        
-        for (HashAlgorithms algorithm : HashAlgorithms.values()) {
-            if (algorithm == HashAlgorithms.SHA1) {
-                continue; // Deprecated these days...
-            }
-            String algId = algorithm.getAlgorithmId(AlgorithmPreferences.JOSE);
-            html.append("<option value='")
-                .append(algId)
-                .append("'")
-                .append(algorithm == HashAlgorithms.SHA256 ? " selected>" : ">")
-                .append(algId)
-                .append(" - ")
-                .append(algorithm.toString())
-                .append("</option>");
-        }
-        return html.append("</select></td></tr></table></div>");
-    }
-
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-
-        HTML.standardPage(response, null, new StringBuilder(
-                "<form name='shoot' method='POST' action='hash'>" +
-                "<div class='header'>Canonicalize and Hash JSON Data</div>")
-            .append(HTML.fancyText(true,
-                                   JSON_DATA,
-                                   10, 
-                                   FWPService.sampleJsonForHashing,
-                     "Paste JSON data in the text box or try with the default"))
-            .append(algorithmSelector())
-            .append(
-                "<div style='display:flex;justify-content:center'>" +
-                "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-                "Hash JSON Data" +
-                "</div>" +
-                "</div>" +
-                "</form>" +
-                "<div>&nbsp;</div>"));
     }
 }

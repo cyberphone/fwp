@@ -31,10 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.crypto.CryptoRandom;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -43,14 +40,14 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 
 /**
- * This Servlet is called by the LoginServlet SPA
+ * This Servlet is called by the PayServlet SPA
  *
  */
-public class FIDOLoginServlet extends HttpServlet {
+public class FIDOPayServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
    
-    static Logger logger = Logger.getLogger(FIDOLoginServlet.class.getName());
+    static Logger logger = Logger.getLogger(FIDOPayServlet.class.getName());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -81,13 +78,11 @@ public class FIDOLoginServlet extends HttpServlet {
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
-                // Clear existing login if any.
-                session.removeAttribute(FWPCommon.ATTR_LOGGED_IN_USER);
-
                 // We need to specify which FIDO key to use.                 
+                DataBaseOperations.CoreClientData coreClientData;
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
                     // Get FIDO credentialId.
-                    DataBaseOperations.CoreClientData coreClientData = 
+                    coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
                     if (coreClientData == null) {
                         FWPCommon.softError(response, resultJson, "User is missing, you need to reenroll");
@@ -96,12 +91,20 @@ public class FIDOLoginServlet extends HttpServlet {
                     resultJson.setString(FWPCommon.CREDENTIAL_ID, coreClientData.credentialId);
                 }
  
-                // - Provide FIDO challenge data
-                byte[] challenge = CryptoRandom.generateRandom(32);
-                resultJson.setBinary(FWPCommon.CHALLENGE, challenge);
+                // Create the preliminary FWP assertion.
+                byte[] unsignedAssertion = FWPAssertion.createDataToBeSigned(
+                        requestJson.getObject(FWPCommon.FWP_INPUT),
+                        coreClientData.publicKey);
 
-                // This what we send but we must also 
-                session.setAttribute(FWPCommon.ATTR_LOGIN_DATA, new JSONObjectReader(resultJson));
+                // Need to save it for completion by FIDO.
+                resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
+
+                // Make FIDO sign a hash of the raw assertion.
+                resultJson.setBinary(FWPCommon.CHALLENGE, 
+                                     HashAlgorithms.SHA256.digest(unsignedAssertion));
+
+                // This what we send but we must also read and verify it.
+                session.setAttribute(FWPCommon.ATTR_PAY_DATA, new JSONObjectReader(resultJson));
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
@@ -111,48 +114,32 @@ public class FIDOLoginServlet extends HttpServlet {
                     FWPCommon.failed("Missing finalize session");
                 }
                 
-                // Get the object holding the login session in progress.
-                JSONObjectReader loginData = 
-                        (JSONObjectReader) session.getAttribute(FWPCommon.ATTR_LOGIN_DATA);
-                if (loginData == null) {
-                    FWPCommon.failed("Login data missing");
+                // Get the object holding the payment authorization session in progress.
+                JSONObjectReader payData = 
+                        (JSONObjectReader) session.getAttribute(FWPCommon.ATTR_PAY_DATA);
+                if (payData == null) {
+                    FWPCommon.failed("Pay data missing");
                 }
 
                 // Check that we are in "sync".
                 byte[] clientDataJSON = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE),
-                    loginData.getBinary(FWPCommon.CHALLENGE))) {
+                    payData.getBinary(FWPCommon.CHALLENGE))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
-                // Here we are supposed to the check the signature....
+                // Now we need to assemble the completed FWP assertion.
                 byte[] authenticatorData = requestJson.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCommon.SIGNATURE_JSON);
+                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
+  
+                resultJson.setBinary(FWPCommon.FWP_ASSERTION,
+                                     FWPAssertion.finalizeAssertion(unsignedAssertion,
+                                                                    authenticatorData,
+                                                                    clientDataJSON,
+                                                                    signature));
                 
-                // Now, we have all client data needed to verify the signature.
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                    // Get the anticipated public key
-                    DataBaseOperations.CoreClientData coreClientData = 
-                            DataBaseOperations.getCoreClientData(userId, connection);
-                    KeyAlgorithms keyAlgorithm = 
-                            KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey);
-                    if (!new SignatureWrapper(keyAlgorithm.getRecommendedSignatureAlgorithm(),
-                                              coreClientData.publicKey)
-                            .setEcdsaSignatureEncoding(true)
-                            .update(ArrayUtil.add(authenticatorData,
-                                                  HashAlgorithms.SHA256.digest(clientDataJSON)))
-                            .verify(signature)) {
-                        FWPCommon.softError(response, resultJson, "Signature validation failed");
-                        return;
-                    }
-                }
-
-                // We did it, set logged-in attribute.
-                // Note that the session cookie is returned and set via the fetch() operation.
-                session.setAttribute(FWPCommon.ATTR_LOGGED_IN_USER, userId);
-                
-                logger.info("Logged-in user: " + userId);
             } else {
                 FWPCommon.failed("Unknown phase: " + phase);
             }

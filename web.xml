@@ -40,6 +40,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>FIDOPayServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.LoginServlet</servlet-class>
     </servlet>
@@ -72,6 +77,11 @@
     <servlet-mapping>
         <servlet-name>PayServlet</servlet-name>
         <url-pattern>/pay</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FIDOPayServlet</servlet-name>
+        <url-pattern>/fidopay</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

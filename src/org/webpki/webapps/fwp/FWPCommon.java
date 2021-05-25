@@ -68,18 +68,24 @@ public class FWPCommon {
     // Attribute returned to the client in case of a server-side error
     static final String ERROR_JSON               = "error";
     
-    // Returned
+    // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";
-    // Returned FIDO
+    static final String FWP_INPUT                = "fwpInput";
+
+    // Returned FIDO data
     static final String CREDENTIAL_ID            = "credentialId";
     static final String ATTESTATION_OBJECT       = "attestationObject";
     static final String CLIENT_DATA_JSON         = "clientDataJSON";
     static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
     static final String SIGNATURE_JSON           = "signature";
     
+    // "Wallet" core
+    static final String FWP_ASSERTION            = "fwpAssertion";
+    
     // Init/finalize phase session attributes
     static final String ATTR_REGISTER_DATA       = "registerdata";
     static final String ATTR_LOGIN_DATA          = "logindata";
+    static final String ATTR_PAY_DATA            = "paydata";
     
     // When logged in this attribute contain the user ID.
     static final String ATTR_LOGGED_IN_USER      = "user";

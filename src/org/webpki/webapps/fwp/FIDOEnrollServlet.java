@@ -46,7 +46,7 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 
 /**
- * This Servlet is called from the EnrollServlet SPA
+ * This Servlet is called by the EnrollServlet SPA
  *
  */
 public class FIDOEnrollServlet extends HttpServlet {
