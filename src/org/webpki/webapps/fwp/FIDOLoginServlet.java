@@ -32,9 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.CryptoRandom;
-import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -135,17 +132,14 @@ public class FIDOLoginServlet extends HttpServlet {
                     // Get the anticipated public key
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
-                    KeyAlgorithms keyAlgorithm = 
-                            KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey);
-                    if (!new SignatureWrapper(keyAlgorithm.getRecommendedSignatureAlgorithm(),
-                                              coreClientData.publicKey)
-                            .setEcdsaSignatureEncoding(true)
-                            .update(ArrayUtil.add(authenticatorData,
-                                                  HashAlgorithms.SHA256.digest(clientDataJSON)))
-                            .verify(signature)) {
-                        FWPCommon.softError(response, resultJson, "Signature validation failed");
-                        return;
-                    }
+                    FWPAssertion.validateFidoSignature(
+                            FWPAssertion.getWebPkiAlgorithm(
+                                    FWPAssertion.publicKey2CoseSignatureAlgorithm(
+                                            coreClientData.publicKey)), 
+                            coreClientData.publicKey, 
+                            authenticatorData, 
+                            clientDataJSON, 
+                            signature);
                 }
 
                 // We did it, set logged-in attribute.

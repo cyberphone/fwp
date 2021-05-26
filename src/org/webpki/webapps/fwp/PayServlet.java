@@ -17,7 +17,9 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
+
 import java.sql.Connection;
+
 import java.util.Base64;
 
 import java.util.logging.Logger;
@@ -169,15 +171,15 @@ public class PayServlet extends HttpServlet {
             
             // Succeeded.  Is the key one of "ours"?
             try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-     //           DataBaseOperations.authenticate(userId, s256KeyHash, connection);
+                DataBaseOperations.authenticate(userId, s256KeyHash, connection);
             }
             
             StringBuilder html = new StringBuilder(
-                    "<div class='header'>Login Succeeded!</div>" +
+                    "<div class='header'>Signed Authorization Created</div>" +
             
                     "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                       "<div class='comment'>" +
-                         "This is what the login returned from the user database." +
+                         "The following is what the browser (FWP implementation) generated internally." +
                       "</div>" +
                     "</div>" +
 

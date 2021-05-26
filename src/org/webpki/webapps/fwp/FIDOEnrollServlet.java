@@ -130,25 +130,11 @@ public class FIDOEnrollServlet extends HttpServlet {
                 
                 // The object that holds it all but we don't care about attestations yet...
                 byte[] attestationObject = requestJson.getBinary(FWPCommon.ATTESTATION_OBJECT);
+                
+                // Non-trivial operation ahead!
+                byte[] rawPublicKey = FWPAssertion.extractFidoPublicKey(attestationObject);
 
-                // Digging out the COSE public key is somewhat difficult...
-                byte[] authData = CBORObject.decode(attestationObject)
-                        .getTextStringMap().getObject("authData").getByteString();
-                if ((authData[32] & (FWPCommon.FLAG_AT + FWPCommon.FLAG_ED)) != FWPCommon.FLAG_AT) {
-                    FWPCommon.softError(response, resultJson, 
-                                        "Unsupported authData flags: " + authData[32]);
-                    return;
-                }
-                int i = 32 + 1 + 4 + 16;
-                int credentialIdLength = (authData[i++] << 8) + authData[i++];
-                int offset = i + credentialIdLength;
-                byte[] rawPublicKey = new byte[authData.length - offset];
-                System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
-
-                // Verify that we actually got a genuine CBOR/COSE public key.
-                CBORPublicKey.decode(CBORObject.decode(rawPublicKey));
-
-// Test only
+ // Test only
 if (cardHolder.equals("-1")) FWPCommon.failed(cardHolder);  // Hard server error
 if (cardHolder.equals("-2")) { // Soft server error
     FWPCommon.softError(response, resultJson, "Sorry, something isn't as it should");
