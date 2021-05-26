@@ -139,7 +139,7 @@ public class DataBaseOperations {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Verify that the key hash of the public key matches the user Id                             //
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    static void authenticate(String userId, byte[] s256KeyHash, Connection connection)
+    static void authenticate(String userId, byte[] rawPublicKey, Connection connection)
             throws IOException, SQLException, GeneralSecurityException {
 /*
         CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
@@ -150,7 +150,7 @@ public class DataBaseOperations {
                 connection.prepareCall("{call AuthenticateSP(?,?,?)}");) {
             stmt.registerOutParameter(1, java.sql.Types.INTEGER);
             stmt.setString(2, userId);
-            stmt.setBytes(3, s256KeyHash);
+            stmt.setBytes(3, HashAlgorithms.SHA256.digest(rawPublicKey));
             stmt.execute();
             switch (stmt.getInt(1)) {
                 case 0:

@@ -45,6 +45,8 @@ import org.webpki.util.ArrayUtil;
  */
 public class FWPAssertion {
     
+    private FWPAssertion() {}
+    
     // JSON payment request properties and their CBOR correspondents
     static final String JSON_PR_PAYEE     = "payee";
     static final int PR_PAYEE             = -1;
@@ -66,16 +68,24 @@ public class FWPAssertion {
     private static final int OUTER_HOST_NAME       = 2;
     private static final int OUTER_AUTHORIZATION   = 3;
     
-    // Authorization signature container
-    private static final int AC_ALGORITHM          = -1;
-    private static final int AC_PUBLIC_KEY         = -2;
-    private static final int AC_AUTHENTICATOR_DATA = -3;
-    private static final int AC_CLIENT_DATA_JSON   = -4;
-    private static final int AC_SIGNATURE          = -5;
+    // Authorization Signature (AS) container
+    private static final int AS_ALGORITHM          = -1;
+    private static final int AS_PUBLIC_KEY         = -2;
+    private static final int AS_AUTHENTICATOR_DATA = -3;
+    private static final int AS_CLIENT_DATA_JSON   = -4;
+    private static final int AS_SIGNATURE          = -5;
     
     private static final int COSE_ALGORITHM_HOLDER = 3;
-    
-    static int publicKey2CoseSignatureAlgorithm(PublicKey publicKey) {
+
+    /**
+     * Public key to to COSE signature algorithm.
+     * 
+     * FIDO does currently not permit multiple signature algorithms per key algorithm.
+     * 
+     * @param publicKey Public key in Java notation
+     * @return COSE signature algorithm
+     */
+    public static int publicKey2CoseSignatureAlgorithm(PublicKey publicKey) {
         if (publicKey instanceof RSAKey) {
             return -257;
         }
@@ -84,21 +94,23 @@ public class FWPAssertion {
         }
         return -8;
     }
-    
-    static AsymSignatureAlgorithms getWebPkiAlgorithm(int coseAlgorithm) {
-        switch (coseAlgorithm) {
-            case -7: 
-                return AsymSignatureAlgorithms.ECDSA_SHA256;
 
-            case -257: 
-                return AsymSignatureAlgorithms.RSA_SHA256;
-
-            default:
-                return AsymSignatureAlgorithms.ED25519;
+    /**
+     * COSE algorithm to WebPKI algorithm.
+     * 
+     * @param coseAlgorithm COSE signature algorithm
+     * @return WebPKI signature algorithm
+     */
+    public static AsymSignatureAlgorithms getWebPkiAlgorithm(int coseAlgorithm) {
+        if (coseAlgorithm == -257) {
+            return AsymSignatureAlgorithms.RSA_SHA256;
+        } else if (coseAlgorithm == -7) {
+            return AsymSignatureAlgorithms.ECDSA_SHA256;
         }
+        return AsymSignatureAlgorithms.ED25519;
     }
     
-    private static void algorithmComplianceTest(PublicKey publicKey, int algorithm)
+    static void algorithmComplianceTest(PublicKey publicKey, int algorithm)
             throws GeneralSecurityException {
         if (publicKey2CoseSignatureAlgorithm(publicKey) != algorithm) {
             throw new GeneralSecurityException("Algorithm ("  + algorithm + 
@@ -106,7 +118,14 @@ public class FWPAssertion {
         }
     }
     
-    static CBORIntegerMap convertPaymentRequest(JSONObjectReader paymentRequestJson)
+    /**
+     * Convert a payment request in JSON to CBOR.
+     * 
+     * @param paymentRequestJson
+     * @return CBOR representation
+     * @throws IOException
+     */
+    public static CBORIntegerMap convertPaymentRequest(JSONObjectReader paymentRequestJson)
             throws IOException {
         CBORIntegerMap paymentRequest = new CBORIntegerMap()
             .setObject(PR_PAYEE, 
@@ -121,30 +140,42 @@ public class FWPAssertion {
         return paymentRequest;
     }
 
-    static byte[] createDataToBeSigned(JSONObjectReader fwpInput, PublicKey publicKey) 
+    public static byte[] createDataToBeSigned(JSONObjectReader fwpInput, 
+                                              PublicKey publicKey) 
             throws IOException, GeneralSecurityException {
         CBORIntegerMap unsignedAssertion = new CBORIntegerMap()
             .setObject(OUTER_PAYMENT_REQUEST, 
                        convertPaymentRequest(fwpInput.getObject(JSON_PAYMENT_REQUEST)))
             .setObject(OUTER_HOST_NAME, new CBORTextString(fwpInput.getString(JSON_HOST_NAME)))
             .setObject(OUTER_AUTHORIZATION, new CBORIntegerMap()
-                .setObject(AC_ALGORITHM, new CBORInteger(publicKey2CoseSignatureAlgorithm(publicKey)))
-                .setObject(AC_PUBLIC_KEY, CBORPublicKey.encode(publicKey)));
+                .setObject(AS_ALGORITHM, 
+                           new CBORInteger(publicKey2CoseSignatureAlgorithm(publicKey)))
+                .setObject(AS_PUBLIC_KEY, CBORPublicKey.encode(publicKey)));
         return unsignedAssertion.encode();
     }
 
-    static byte[] finalizeAssertion(byte[] unsignedAssertion,
-                                    byte[] authenticatorData,
-                                    byte[] clientDataJSON,
-                                    byte[] signature) throws IOException {
-        CBORIntegerMap fwpAssertion = CBORObject.decode(unsignedAssertion).getIntegerMap();
-        fwpAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap()
-            .setObject(AC_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
-            .setObject(AC_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
-            .setObject(AC_SIGNATURE, new CBORByteString(signature));
-        return fwpAssertion.encode();
+    public static byte[] finalizeAssertion(CBORIntegerMap unsignedAssertion,
+                                           byte[] authenticatorData,
+                                           byte[] clientDataJSON,
+                                           byte[] signature) throws IOException {
+        unsignedAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap()
+            .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
+            .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
+            .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        return unsignedAssertion.encode();
     }
 
+    /**
+     * Validate FIDO signature.
+     * 
+     * @param algorithm Signature algorithm in WebPKI notation
+     * @param publicKey Public key in Java format
+     * @param authenticatorData FIDO core data
+     * @param clientDataJSON FIDO core data
+     * @param signature FIDO core data
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
     static void validateFidoSignature(AsymSignatureAlgorithms algorithm, 
                                       PublicKey publicKey,
                                       byte[] authenticatorData,
@@ -160,16 +191,24 @@ public class FWPAssertion {
         }       
     }
 
-    static byte[] validateFwpAssertion(CBORIntegerMap fwpAssertion)
+    /**
+     * Validate FWP assertion with respect to crypto.
+     * 
+     * @param fwpAssertion FWP assertion
+     * @return Public key in COSE format
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
+    public static byte[] validateFwpAssertion(CBORIntegerMap fwpAssertion)
             throws IOException, GeneralSecurityException {
         CBORIntegerMap authorization = 
                 fwpAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap();
-        byte[] signature = authorization.getObject(AC_SIGNATURE).getByteString();
-        byte[] clientDataJSON = authorization.getObject(AC_CLIENT_DATA_JSON).getByteString();
-        byte[] authenticatorData = authorization.getObject(AC_AUTHENTICATOR_DATA).getByteString();
-        CBORObject cborPublicKey = authorization.getObject(AC_PUBLIC_KEY);
+        byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
+        byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
+        byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
+        CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
         PublicKey publicKey = CBORPublicKey.decode(cborPublicKey);
-        int signatureAlgorithm = authorization.getObject(AC_ALGORITHM).getInt();
+        int signatureAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
         authorization.checkObjectForUnread();
         algorithmComplianceTest(publicKey, signatureAlgorithm);
         
@@ -181,11 +220,11 @@ public class FWPAssertion {
         // The following element do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having
         // been fetched).
-        copyOfAuthorization.removeObject(AC_AUTHENTICATOR_DATA);
-        copyOfAuthorization.removeObject(AC_CLIENT_DATA_JSON);
-        copyOfAuthorization.removeObject(AC_SIGNATURE);
+        copyOfAuthorization.removeObject(AS_AUTHENTICATOR_DATA);
+        copyOfAuthorization.removeObject(AS_CLIENT_DATA_JSON);
+        copyOfAuthorization.removeObject(AS_SIGNATURE);
         
-        // This is not WebAuthn, it is FIDO Web Pay.
+        // This is not WebAuthn, this is FIDO Web Pay.
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(copyOfAssertion.encode()),
                                JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
@@ -198,17 +237,26 @@ public class FWPAssertion {
                               clientDataJSON,
                               signature);
 
-        // Return a hash of the public key for looking up in the RP database.
-        return HashAlgorithms.SHA256.digest(cborPublicKey.encode());
+        // Return the public key for looking up in an RP database.
+        return cborPublicKey.encode();
     }
 
-    static byte[] extractFidoPublicKey(byte[] attestationObject) throws IOException,
-                                                                        GeneralSecurityException {
-        // Digging out the COSE public key is somewhat difficult...
+    /**
+     * Extract the public key from a FIDO attestation.
+     * 
+     * @param attestationObject Created by the registration call
+     * @return Public key in COSE format
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
+    public static byte[] extractFidoPublicKey(byte[] attestationObject) 
+            throws IOException, GeneralSecurityException {
+        // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
                 .getTextStringMap().getObject("authData").getByteString();
         if ((authData[32] & (FWPCommon.FLAG_AT + FWPCommon.FLAG_ED)) != FWPCommon.FLAG_AT) {
-            throw new GeneralSecurityException("Unsupported authData flags: " + authData[32]);
+            throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
+                                               String.format("%2x", authData[32] & 0xff));
         }
         int i = 32 + 1 + 4 + 16;
         int credentialIdLength = (authData[i++] << 8) + authData[i++];
@@ -217,7 +265,7 @@ public class FWPAssertion {
         System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
 
         // Verify that we actually got a genuine FIDO public key.
-        // Verify the algorithm but remove it from the public key object.
+        // Then verify the algorithm but remove it from the public key object.
         CBORIntegerMap fidoPublicKey = CBORObject.decode(rawPublicKey).getIntegerMap();
         int algorithm = fidoPublicKey.getObject(COSE_ALGORITHM_HOLDER).getInt();
         fidoPublicKey.removeObject(COSE_ALGORITHM_HOLDER);

@@ -31,6 +31,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.cbor.CBORIntegerMap;
+import org.webpki.cbor.CBORObject;
+
 import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.json.JSONObjectReader;
@@ -99,7 +102,7 @@ public class FIDOPayServlet extends HttpServlet {
                 // Need to save it for completion by FIDO.
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
 
-                // Make FIDO sign a hash of the raw assertion.
+                // Make FIDO sign a hash of the unsigned assertion.
                 resultJson.setBinary(FWPCommon.CHALLENGE, 
                                      HashAlgorithms.SHA256.digest(unsignedAssertion));
 
@@ -132,7 +135,8 @@ public class FIDOPayServlet extends HttpServlet {
                 // Now we need to assemble the completed FWP assertion.
                 byte[] authenticatorData = requestJson.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCommon.SIGNATURE_JSON);
-                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
+                CBORIntegerMap unsignedAssertion = 
+                        CBORObject.decode(payData.getBinary(FWPCommon.FWP_ASSERTION)).getIntegerMap();
   
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,
                                      FWPAssertion.finalizeAssertion(unsignedAssertion,

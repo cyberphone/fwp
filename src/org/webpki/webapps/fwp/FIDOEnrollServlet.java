@@ -34,9 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.cbor.CBORObject;
-import org.webpki.cbor.CBORPublicKey;
-
 import org.webpki.crypto.CryptoRandom;
 
 import org.webpki.json.JSONObjectReader;
