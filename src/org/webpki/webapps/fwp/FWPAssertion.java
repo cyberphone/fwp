@@ -102,19 +102,27 @@ public class FWPAssertion {
      * @param coseAlgorithm COSE signature algorithm
      * @return WebPKI signature algorithm
      */
-    public static AsymSignatureAlgorithms getWebPkiAlgorithm(int coseAlgorithm) {
-        if (coseAlgorithm == -257) {
-            return AsymSignatureAlgorithms.RSA_SHA256;
-        } else if (coseAlgorithm == -7) {
-            return AsymSignatureAlgorithms.ECDSA_SHA256;
+    public static AsymSignatureAlgorithms getWebPkiAlgorithm(int coseAlgorithm) 
+            throws GeneralSecurityException {
+        switch (coseAlgorithm) {
+            case -257:
+                return AsymSignatureAlgorithms.RSA_SHA256;
+    
+            case  -7:
+                return AsymSignatureAlgorithms.ECDSA_SHA256;
+            
+            case -8:
+                return AsymSignatureAlgorithms.ED25519;
+    
+            default:
+                throw new GeneralSecurityException("Unexpected signature algorithm: " + coseAlgorithm);
         }
-        return AsymSignatureAlgorithms.ED25519;
     }
     
-    static void algorithmComplianceTest(PublicKey publicKey, int algorithm)
+    static void algorithmComplianceTest(PublicKey publicKey, int coseAlgorithm)
             throws GeneralSecurityException {
-        if (publicKey2CoseSignatureAlgorithm(publicKey) != algorithm) {
-            throw new GeneralSecurityException("Algorithm ("  + algorithm + 
+        if (publicKey2CoseSignatureAlgorithm(publicKey) != coseAlgorithm) {
+            throw new GeneralSecurityException("Algorithm ("  + coseAlgorithm + 
                     ") does not match public key type: " + publicKey.getAlgorithm());
         }
     }
@@ -209,9 +217,9 @@ public class FWPAssertion {
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
         CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
         PublicKey publicKey = CBORPublicKey.decode(cborPublicKey);
-        int signatureAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
+        int coseAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
         authorization.checkObjectForUnread();
-        algorithmComplianceTest(publicKey, signatureAlgorithm);
+        algorithmComplianceTest(publicKey, coseAlgorithm);
         
         // We are nice and do not touch the original assertion.
         CBORIntegerMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getIntegerMap();
@@ -225,14 +233,14 @@ public class FWPAssertion {
         copyOfAuthorization.removeObject(AS_CLIENT_DATA_JSON);
         copyOfAuthorization.removeObject(AS_SIGNATURE);
         
-        // This is not WebAuthn, this is FIDO Web Pay.
+        // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(copyOfAssertion.encode()),
                                JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         
         // Everything is good so far, now take on the signature.
-        validateFidoSignature(getWebPkiAlgorithm(signatureAlgorithm),
+        validateFidoSignature(getWebPkiAlgorithm(coseAlgorithm),
                               publicKey,
                               authenticatorData,
                               clientDataJSON,
@@ -252,6 +260,7 @@ public class FWPAssertion {
      */
     public static byte[] extractFidoPublicKey(byte[] attestationObject) 
             throws IOException, GeneralSecurityException {
+
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
                 .getTextStringMap().getObject("authData").getByteString();
