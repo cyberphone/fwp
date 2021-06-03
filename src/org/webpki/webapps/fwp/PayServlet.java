@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.cbor.CBORIntegerMap;
+import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
 /**
@@ -163,9 +163,9 @@ public class PayServlet extends HttpServlet {
                 FWPCommon.failed("User ID missing, have you enrolled?");
             }
 
-            CBORIntegerMap fwpAssertion = 
+            CBORMap fwpAssertion = 
                     CBORObject.decode(
-                            Base64.getUrlDecoder().decode(fwpAssertionB64U)).getIntegerMap();
+                            Base64.getUrlDecoder().decode(fwpAssertionB64U)).getMap();
             
             byte[] publicKey = FWPAssertion.validateFwpAssertion(fwpAssertion);
             

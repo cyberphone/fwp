@@ -26,7 +26,7 @@ import java.security.interfaces.RSAKey;
 
 import org.webpki.cbor.CBORByteString;
 import org.webpki.cbor.CBORInteger;
-import org.webpki.cbor.CBORIntegerMap;
+import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 import org.webpki.cbor.CBORTextString;
@@ -76,7 +76,7 @@ public class FWPAssertion {
     private static final int AS_CLIENT_DATA_JSON   = -4;
     private static final int AS_SIGNATURE          = -5;
     
-    private static final int COSE_ALGORITHM_HOLDER = 3;
+    private static final int COSE_ALGORITHM_LABEL  = 3;
 
     /**
      * Public key to to COSE signature algorithm.
@@ -134,9 +134,9 @@ public class FWPAssertion {
      * @return CBOR representation
      * @throws IOException
      */
-    public static CBORIntegerMap convertPaymentRequest(JSONObjectReader paymentRequestJson)
+    public static CBORMap convertPaymentRequest(JSONObjectReader paymentRequestJson)
             throws IOException {
-        CBORIntegerMap paymentRequest = new CBORIntegerMap()
+        CBORMap paymentRequest = new CBORMap()
             .setObject(PR_PAYEE, 
                        new CBORTextString(paymentRequestJson.getString(JSON_PR_PAYEE)))
             .setObject(PR_ID, 
@@ -152,22 +152,22 @@ public class FWPAssertion {
     public static byte[] createDataToBeSigned(JSONObjectReader fwpInput, 
                                               PublicKey publicKey) 
             throws IOException, GeneralSecurityException {
-        CBORIntegerMap unsignedAssertion = new CBORIntegerMap()
+        CBORMap unsignedAssertion = new CBORMap()
             .setObject(OUTER_PAYMENT_REQUEST, 
                        convertPaymentRequest(fwpInput.getObject(JSON_PAYMENT_REQUEST)))
             .setObject(OUTER_HOST_NAME, new CBORTextString(fwpInput.getString(JSON_HOST_NAME)))
-            .setObject(OUTER_AUTHORIZATION, new CBORIntegerMap()
+            .setObject(OUTER_AUTHORIZATION, new CBORMap()
                 .setObject(AS_ALGORITHM, 
                            new CBORInteger(publicKey2CoseSignatureAlgorithm(publicKey)))
                 .setObject(AS_PUBLIC_KEY, CBORPublicKey.encode(publicKey)));
         return unsignedAssertion.encode();
     }
 
-    public static byte[] finalizeAssertion(CBORIntegerMap unsignedAssertion,
+    public static byte[] finalizeAssertion(CBORMap unsignedAssertion,
                                            byte[] authenticatorData,
                                            byte[] clientDataJSON,
                                            byte[] signature) throws IOException {
-        unsignedAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap()
+        unsignedAssertion.getObject(OUTER_AUTHORIZATION).getMap()
             .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
             .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
             .setObject(AS_SIGNATURE, new CBORByteString(signature));
@@ -208,10 +208,10 @@ public class FWPAssertion {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpAssertion(CBORIntegerMap fwpAssertion)
+    public static byte[] validateFwpAssertion(CBORMap fwpAssertion)
             throws IOException, GeneralSecurityException {
-        CBORIntegerMap authorization = 
-                fwpAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap();
+        CBORMap authorization = 
+                fwpAssertion.getObject(OUTER_AUTHORIZATION).getMap();
         byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
@@ -222,9 +222,9 @@ public class FWPAssertion {
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
         // We are nice and do not touch the original assertion.
-        CBORIntegerMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getIntegerMap();
-        CBORIntegerMap copyOfAuthorization = 
-                copyOfAssertion.getObject(OUTER_AUTHORIZATION).getIntegerMap();
+        CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
+        CBORMap copyOfAuthorization = 
+                copyOfAssertion.getObject(OUTER_AUTHORIZATION).getMap();
 
         // The following element do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having
@@ -263,24 +263,37 @@ public class FWPAssertion {
 
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
-                .getTextStringMap().getObject("authData").getByteString();
-        if ((authData[32] & (FWPCommon.FLAG_AT + FWPCommon.FLAG_ED)) != FWPCommon.FLAG_AT) {
+                .getMap().getObject("authData").getByteString();
+        if ((authData[32] & FWPCommon.FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[32] & 0xff));
         }
         int i = 32 + 1 + 4 + 16;
         int credentialIdLength = (authData[i++] << 8) + authData[i++];
         int offset = i + credentialIdLength;
-        byte[] rawPublicKey = new byte[authData.length - offset];
-        System.arraycopy(authData, offset, rawPublicKey, 0, rawPublicKey.length);
+        byte[] rawPublicKeyAndOptionalExtensionData = new byte[authData.length - offset];
+        System.arraycopy(authData,
+                         offset, 
+                         rawPublicKeyAndOptionalExtensionData, 
+                         0,
+                         rawPublicKeyAndOptionalExtensionData.length);
 
-        // Verify that we actually got a genuine FIDO public key.
-        // Then verify the algorithm but remove it from the public key object.
-        CBORIntegerMap fidoPublicKey = CBORObject.decode(rawPublicKey).getIntegerMap();
-        int algorithm = fidoPublicKey.getObject(COSE_ALGORITHM_HOLDER).getInt();
-        fidoPublicKey.removeObject(COSE_ALGORITHM_HOLDER);
+        // We silently drop possible Extension Data (ED).
+        CBORMap fidoPublicKey = 
+                CBORObject.decodeWithOptions(rawPublicKeyAndOptionalExtensionData,
+                                             true, 
+                                             false).getMap();
+
+        // Fetch the signature algorithm but remove it from the public key object.
+        int signatureAlgorithm = fidoPublicKey.getObject(COSE_ALGORITHM_LABEL).getInt();
+        fidoPublicKey.removeObject(COSE_ALGORITHM_LABEL);
+
+        // Verify that we got a genuine FIDO/COSE public key and
+        // that the associated signature algorithm matches.
         PublicKey publicKey = CBORPublicKey.decode(fidoPublicKey);
-        algorithmComplianceTest(publicKey, algorithm);
+        algorithmComplianceTest(publicKey, signatureAlgorithm);
+        
+        // Back to black (raw) :)
         return fidoPublicKey.encode();
     }
 }

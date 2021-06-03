@@ -66,7 +66,7 @@ public class FIDOTest {
                            String rpUrl,
                            byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
-        byte[] authData = attestation.getTextStringMap().getObject("authData").getByteString();
+        byte[] authData = attestation.getMap().getObject("authData").getByteString();
 // System.out.println(DebugFormatter.getHexDebugData(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));

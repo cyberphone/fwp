@@ -60,6 +60,8 @@ li {
   right:0px;
   font-size: 8pt;
   padding:0.5em 0.7em;
+  border-color:#c85000;
+  background-color:##fffdf2;
 }
 
 .stdbtn, .multibtn {
@@ -70,11 +72,6 @@ li {
   border-color:#a9a9a9;
   border-radius:5pt;
   padding:3pt 10pt;
-}
-
-.sitefooter {
-  border-color:#c85000;
-  background-color:##fffdf2;
 }
 
 .important {
