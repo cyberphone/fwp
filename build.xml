@@ -7,6 +7,7 @@
   <property name="test.dir" value="test"/>
   <property name="temp.dir" value=".tmp"/>
   <property name="dist.dir" value="dist"/>
+  <property name="svg.dir" location="svg"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
 
   <property name="logging" value="false"/>
@@ -41,7 +42,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat testfido"/>
+      <echo message="build tomcat testfido cryptosvg"/>
   </target>
 
   <target name="tomcat">
@@ -147,5 +148,42 @@
     </junit>
 
   </target>
-   
+
+  <target name="cryptosvg">
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+    <fixcrlf srcdir="."
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
+    <javac debug="${debug}"
+           srcdir="${src.dir}:${test.dir}"
+           destdir="${temp.dir}"
+           includeAntRuntime="false">
+        <classpath>
+              <fileset dir="${webpki.lib.dir}">
+                <include name="*.jar"/>
+             </fileset>
+             <fileset dir="${third.party.lib.dir}">
+                <include name="*.jar"/>
+              </fileset>
+        </classpath>
+    </javac>
+    <java fork="yes"
+          classname="org.webpki.webapps.fwp.CryptoImages"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${svg.dir}"/>
+     </java>
+  </target>
 </project>

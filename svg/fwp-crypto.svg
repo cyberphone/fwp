@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg viewBox='0 0 989 680' xmlns='http://www.w3.org/2000/svg'>
+<title>FWP Encryption Layout</title>
+<!-- Anders Rundgren 2021 -->
+<g stroke='#4366bf' stroke-width='3' fill='none'>
+<rect x='20' y='180' width='360' height='80' rx='8'/>
+<rect x='20' y='280' width='360' height='80' rx='8'/>
+<rect x='20' y='380' width='360' height='80' rx='8'/>
+<rect x='20' y='480' width='360' height='80' rx='8'/>
+<rect x='20' y='580' width='360' height='80' rx='8'/>
+<rect x='505' y='180' width='464' height='80' rx='8'/>
+<rect x='505' y='280' width='464' height='80' stroke-dasharray='8' rx='8'/>
+<rect x='505' y='380' width='464' height='80' stroke-dasharray='8' rx='8'/>
+<rect x='505' y='480' width='464' height='80' rx='8'/>
+<rect x='505' y='580' width='464' height='80' stroke-dasharray='8' rx='8'/>
+</g>
+<g font-size='40' font-family='Roboto,sans-serif'>
+<text x='200' y='70' font-size='50' text-anchor='middle'>Main Map</text>
+<text x='200' y='120' text-anchor='middle'>(Content Encryption)</text>
+<text x='44' y='234'><tspan>Algorithm (1)</tspan></text>
+<text x='44' y='334'><tspan>KeyEncryption (2)</tspan></text>
+<text x='44' y='434'><tspan>Tag (7)</tspan></text>
+<text x='44' y='534'><tspan>IV (8)</tspan></text>
+<text x='44' y='634'><tspan>CipherText (9)</tspan></text>
+<text x='737' y='70' font-size='50' text-anchor='middle'>Sub Map</text>
+<text x='737' y='120' text-anchor='middle'>(Key Encryption)</text>
+<text x='529' y='234'><tspan>Algorithm (1)</tspan></text>
+<text x='529' y='334'><tspan font-style='italic'>Optional</tspan><tspan>: KeyId (3)</tspan></text>
+<text x='529' y='434'><tspan font-style='italic'>Optional</tspan><tspan>: PublicKey (4)</tspan></text>
+<text x='529' y='534'><tspan>EphemeralKey (5)</tspan></text>
+<text x='529' y='634'><tspan font-style='italic'>Optional</tspan><tspan>: CipherText (9)</tspan></text>
+</g>
+<path fill='none' stroke='#aa0000' stroke-width='3' stroke-linecap='round' d='M400,180  m 85,0 c -33,0 -35,68 -35,68 0,30 -18,68 -48,72 30,8 48,35 48,80 v 186 c 0,0 0,74 36,74'/>
+</svg>
