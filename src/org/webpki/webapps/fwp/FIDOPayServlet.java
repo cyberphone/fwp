@@ -95,7 +95,7 @@ public class FIDOPayServlet extends HttpServlet {
                 }
  
                 // Create the preliminary FWP assertion.
-                byte[] unsignedAssertion = FWPAssertion.createDataToBeSigned(
+                byte[] unsignedAssertion = FWPCrypto.createDataToBeSigned(
                         requestJson.getObject(FWPCommon.FWP_INPUT),
                         coreClientData.publicKey);
 
@@ -139,7 +139,7 @@ public class FIDOPayServlet extends HttpServlet {
                         CBORObject.decode(payData.getBinary(FWPCommon.FWP_ASSERTION)).getMap();
   
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,
-                                     FWPAssertion.finalizeAssertion(unsignedAssertion,
+                                     FWPCrypto.finalizeAssertion(unsignedAssertion,
                                                                     authenticatorData,
                                                                     clientDataJSON,
                                                                     signature));

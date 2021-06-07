@@ -42,11 +42,11 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 
 /**
- * Core FWP assertion support.
+ * FWP and FIDO crypto support.
  */
-public class FWPAssertion {
+public class FWPCrypto {
     
-    private FWPAssertion() {}
+    private FWPCrypto() {}
     
     // JSON payment request properties and their CBOR correspondents
     static final String JSON_PR_PAYEE     = "payee";
@@ -210,8 +210,7 @@ public class FWPAssertion {
      */
     public static byte[] validateFwpAssertion(CBORMap fwpAssertion)
             throws IOException, GeneralSecurityException {
-        CBORMap authorization = 
-                fwpAssertion.getObject(OUTER_AUTHORIZATION).getMap();
+        CBORMap authorization = fwpAssertion.getObject(OUTER_AUTHORIZATION).getMap();
         byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
@@ -223,8 +222,7 @@ public class FWPAssertion {
         
         // We are nice and do not touch the original assertion.
         CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
-        CBORMap copyOfAuthorization = 
-                copyOfAssertion.getObject(OUTER_AUTHORIZATION).getMap();
+        CBORMap copyOfAuthorization = copyOfAssertion.getObject(OUTER_AUTHORIZATION).getMap();
 
         // The following element do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having
@@ -279,10 +277,9 @@ public class FWPAssertion {
                          rawPublicKeyAndOptionalExtensionData.length);
 
         // We silently drop possible Extension Data (ED).
-        CBORMap fidoPublicKey = 
-                CBORObject.decodeWithOptions(rawPublicKeyAndOptionalExtensionData,
-                                             true, 
-                                             false).getMap();
+        CBORMap fidoPublicKey = CBORObject.decodeWithOptions(rawPublicKeyAndOptionalExtensionData,
+                                                             true, 
+                                                             false).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
         int signatureAlgorithm = fidoPublicKey.getObject(COSE_ALGORITHM_LABEL).getInt();

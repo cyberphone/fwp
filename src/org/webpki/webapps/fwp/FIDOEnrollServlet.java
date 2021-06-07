@@ -129,7 +129,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] attestationObject = requestJson.getBinary(FWPCommon.ATTESTATION_OBJECT);
                 
                 // Non-trivial operation ahead!
-                byte[] rawPublicKey = FWPAssertion.extractFidoPublicKey(attestationObject);
+                byte[] rawPublicKey = FWPCrypto.extractFidoPublicKey(attestationObject);
 
  // Test only
 if (cardHolder.equals("-1")) FWPCommon.failed(cardHolder);  // Hard server error

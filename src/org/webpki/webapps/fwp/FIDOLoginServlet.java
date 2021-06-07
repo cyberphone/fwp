@@ -132,9 +132,9 @@ public class FIDOLoginServlet extends HttpServlet {
                     // Get the anticipated public key
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
-                    FWPAssertion.validateFidoSignature(
-                            FWPAssertion.getWebPkiAlgorithm(
-                                    FWPAssertion.publicKey2CoseSignatureAlgorithm(
+                    FWPCrypto.validateFidoSignature(
+                            FWPCrypto.getWebPkiAlgorithm(
+                                    FWPCrypto.publicKey2CoseSignatureAlgorithm(
                                             coreClientData.publicKey)), 
                             coreClientData.publicKey, 
                             authenticatorData, 

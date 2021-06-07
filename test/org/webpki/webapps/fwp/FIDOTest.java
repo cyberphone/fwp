@@ -17,7 +17,9 @@
 package org.webpki.webapps.fwp;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.net.URL;
 import java.security.PublicKey;
 
@@ -32,6 +34,8 @@ import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
@@ -40,7 +44,7 @@ import org.webpki.util.ArrayUtil;
  * JSON JUnit suite
  */
 public class FIDOTest {
-
+    
     static JSONObjectReader testVectors;
 
     @BeforeClass
@@ -48,6 +52,17 @@ public class FIDOTest {
         // Start deprecating Bouncycastle since Android will remove most of it anyway
         CustomCryptoProvider.forcedLoad(false);
         testVectors = JSONParser.parse(ArrayUtil.readFile(System.getProperty("json.data")));
+    }
+    
+    void checkException(Exception e, String compareMessage) {
+        String m = e.getMessage();
+        String full = m;
+        if (compareMessage.length() < m.length()) {
+            m = m.substring(0, compareMessage.length());
+        }
+        if (!m.equals(compareMessage)) {
+            fail("Exception: " + full + "\ncompare: " + compareMessage);
+        }
     }
 
     byte[] clientDataJson(JSONObjectReader response,
@@ -71,7 +86,7 @@ public class FIDOTest {
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));
         return CBORPublicKey.decode(CBORObject.decode(
-                FWPAssertion.extractFidoPublicKey(attestation.encode())));
+                FWPCrypto.extractFidoPublicKey(attestation.encode())));
     }
     
  
@@ -102,9 +117,9 @@ public class FIDOTest {
                                                   "webauthn.get", 
                                                   rpUrl, 
                                                   getChallenge);
-        FWPAssertion.validateFidoSignature(
-                FWPAssertion.getWebPkiAlgorithm(
-                        FWPAssertion.publicKey2CoseSignatureAlgorithm(publicKey)),
+        FWPCrypto.validateFidoSignature(
+                FWPCrypto.getWebPkiAlgorithm(
+                        FWPCrypto.publicKey2CoseSignatureAlgorithm(publicKey)),
                 publicKey,
                 authenticatorData, 
                 getClientDataJSON, 
@@ -118,5 +133,62 @@ public class FIDOTest {
             test(vectors.getObject());
         }
         testVectors.checkForUnread();
+    }
+    
+    String getPaymentRequest(boolean goodName, boolean allIsThere) throws IOException {
+        return new JSONObjectWriter()
+            .setString(FWPElements.JSON_PR_PAYEE, goodName ? "Space Shop" : "Evil Merchant")
+            .setDynamic((wr)-> allIsThere ? wr.setString(FWPElements.JSON_PR_ID, "65656") : wr)
+            .setString(FWPElements.JSON_PR_AMOUNT, "140.00")
+            .setString(FWPElements.JSON_PR_CURRENCY, "EUR")
+            .serializeToString(JSONOutputFormats.NORMALIZED);
+    }
+    
+    @Test
+    public void CreateAssertions() throws Exception {
+        try {
+            new FWPAssertionBuilder()
+                .addPaymentRequest(getPaymentRequest(true, false))
+                .create();
+            fail("Must not execute");
+        } catch (Exception e) {
+            checkException(e, "Property \"id\" is missing");
+        }
+
+        try {
+            new FWPAssertionBuilder()
+                .addPaymentRequest(getPaymentRequest(true, true))
+                .create();
+            fail("Must not execute");
+        } catch (Exception e) {
+            checkException(e, "Missing element: HOST_NAME");
+        }
+
+        try {
+            new FWPAssertionBuilder()
+                .addPaymentRequest(getPaymentRequest(true, true))
+                .addHostName("example.com")
+                .addHostName("example.com")
+                .create();
+            fail("Must not execute");
+        } catch (Exception e) {
+            checkException(e, "Duplicate: HOST_NAME");
+        }
+        
+    }
+    
+    @Test
+    public void DecodeAssertions() throws Exception {
+        FWPAssertionDecoder decoder = new FWPAssertionDecoder(new FWPAssertionBuilder()
+                .addPaymentRequest(getPaymentRequest(true, true))
+                .addHostName("example.com")
+                .create().encode());
+        decoder.verifyClaimedPaymentRequest(getPaymentRequest(true, true));
+        try {
+            decoder.verifyClaimedPaymentRequest(getPaymentRequest(false, true));
+            fail("should not execute");
+        } catch (Exception e) {
+            assertTrue("claimed", e.getMessage().contains("Claimed"));
+        }
     }
 }
