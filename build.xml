@@ -9,6 +9,7 @@
   <property name="temp.dir" value=".tmp"/>
   <property name="dist.dir" value="dist"/>
   <property name="svg.dir" location="svg"/>
+  <property name="testdata.dir" location="testdata"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
 
   <property name="logging" value="false"/>
@@ -43,7 +44,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat testfido cryptosvg"/>
+      <echo message="build tomcat testfido cryptosvg testdatagen"/>
   </target>
 
   <target name="tomcat">
@@ -96,16 +97,7 @@
         <include name="thelab.svg"/>
       </zipfileset>
       <zipfileset dir="${openkeystore.dir}/testdata/keys" prefix="${class_war_path}">
-        <include name="a*.hex"/>
-        <exclude name="*128*"/>
-        <include name="ed25519*.pem"/>
-        <include name="ed448*.pem"/>
-        <include name="p256*.pem"/>
-        <include name="p384*.pem"/>
-        <include name="p521*.pem"/>
-        <include name="r2048*.pem"/>
-        <exclude name="*-key.pem"/>
-        <exclude name="*-2*"/>
+        <include name="ed25519"/>
       </zipfileset>
     </war>
   </target>
@@ -175,4 +167,37 @@
        <arg line="${svg.dir}"/>
      </java>
   </target>
+
+  <target name="testdatagen">
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+    <javac debug="${debug}"
+           srcdir="${test.dir}:${lib.dir}"
+           destdir="${temp.dir}"
+           includeAntRuntime="false">
+        <classpath>
+              <fileset dir="${webpki.lib.dir}">
+                <include name="*.jar"/>
+             </fileset>
+             <fileset dir="${third.party.lib.dir}">
+                <include name="*.jar"/>
+              </fileset>
+        </classpath>
+    </javac>
+    <java fork="yes"
+          classname="org.webpki.fwp.TestDataGeneration"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${testdata.dir} ${openkeystore.dir}/testdata/keys"/>
+     </java>
+  </target>
+    
 </project>

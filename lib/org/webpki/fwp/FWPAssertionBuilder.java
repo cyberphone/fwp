@@ -115,7 +115,9 @@ public class FWPAssertionBuilder {
         }
         for (FWPElements name : FWPElements.values()) {
             // Only NETWORK_DATA is optional.
-            if (!elementList.contains(name) && name != FWPElements.NETWORK_DATA) {
+            if (!elementList.contains(name) &&
+                name != FWPElements.NETWORK_DATA &&
+                name != FWPElements.AUTHORIZATION) {
                 throw new IOException("Missing element: " + name.toString());
             }
         }

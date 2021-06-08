@@ -131,7 +131,8 @@ public class FWPCrypto {
                 return AsymSignatureAlgorithms.ED25519;
     
             default:
-                throw new GeneralSecurityException("Unexpected signature algorithm: " + coseAlgorithm);
+                throw new GeneralSecurityException("Unexpected signature algorithm: " + 
+                                                   coseAlgorithm);
         }
     }
     

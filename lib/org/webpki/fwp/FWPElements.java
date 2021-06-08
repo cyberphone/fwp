@@ -50,7 +50,8 @@ timeStamp
     NETWORK_DATA              (7),
     USER_AUTHORIZATION_METHOD (8),
     PLATFORM_DATA             (9),
-    TIME_STAMP                (10);
+    TIME_STAMP                (10),
+    AUTHORIZATION             (11);
     
     
     int cborLabel;
