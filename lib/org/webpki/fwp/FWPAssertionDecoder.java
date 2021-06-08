@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.fwp;
+package org.webpki.fwp;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
 /**
- * FWP replying party side assertion support.
+ * FWP relying party side assertion support.
  */
 public class FWPAssertionDecoder {
 
@@ -74,6 +74,21 @@ public class FWPAssertionDecoder {
         return hostName;
     }
     
+    String accountId;
+    public String getAccountId() {
+        return accountId;
+    }
+
+    String serialNumber;
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    String paymentMethod;
+    public String getPaymentMethod() {
+        return paymentMethod;
+    } 
+
     CBORMap map;
   
     public void verifyClaimedPaymentRequest(String jsonString) throws IOException {
@@ -88,21 +103,45 @@ public class FWPAssertionDecoder {
         return map.getObject(name.cborLabel).getTextString();
     }
     
-    public FWPAssertionDecoder(byte[] cborData) throws IOException {
-        map = CBORObject.decode(cborData).getMap();
+    public CBORMap getDecoded() {
+        return map;
+    }
+    
+    public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException {
+        map = CBORObject.decode(signedFwpAssertion).getMap();
         
         // Are we compatible?
-        String version = getString(FWPElements.VERSION);
+        String version = getString(FWPElements.FWP_VERSION);
         if (!version.equals(FWPElements.CURRENT_VERSION)) {
             throw new IOException("Received version: " + version + 
                                   " expected: " + FWPElements.CURRENT_VERSION);
         }
         
-        // Decode payment request.
+        // Decode Payment Request.
         paymentRequest = new PaymentRequest(map.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
         
+        // Account data.
+        accountId = getString(FWPElements.ACCOUNT_ID);
+        serialNumber = getString(FWPElements.SERIAL_NUMBER);
+        paymentMethod = getString(FWPElements.PAYMENT_METHOD);
+        
+        // Platform Data
+        CBORMap platformData = map.getObject(FWPElements.PLATFORM_DATA.cborLabel).getMap();
+        platformData.scan();
+        
+        // User Authorization Method
+        map.getObject(FWPElements.USER_AUTHORIZATION_METHOD.cborLabel).scan();
+        
+        // Date Time
+        map.getObject(FWPElements.TIME_STAMP.cborLabel).scan();
+
         // Host information from the browser.
-        hostName = getString(FWPElements.HOST_NAME);
+        hostName = getString(FWPElements.PAYEE_HOST_NAME);
+        
+        // Optional Network Data.
+        if (map.hasKey(FWPElements.NETWORK_DATA.cborLabel)) {
+            map.getObject(FWPElements.NETWORK_DATA.cborLabel).scan();
+        }
         
         // Check that we didn't forgot anything or that there is other data there as well.
         map.checkObjectForUnread();

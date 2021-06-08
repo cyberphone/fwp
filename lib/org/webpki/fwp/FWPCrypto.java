@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.fwp;
+package org.webpki.fwp;
 
 import java.io.IOException;
 
@@ -48,6 +48,22 @@ public class FWPCrypto {
     
     private FWPCrypto() {}
     
+    // FIDO call data
+    public static final String USER_ID                  = "userId";
+    public static final String CHALLENGE                = "challenge";
+
+    // Returned FIDO data
+    public static final String CREDENTIAL_ID            = "credentialId";
+    public static final String ATTESTATION_OBJECT       = "attestationObject";
+    public static final String CLIENT_DATA_JSON         = "clientDataJSON";
+    public static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
+    public static final String SIGNATURE_JSON           = "signature";
+
+    // Attestation Object flags
+    static final int    FLAG_ED                  = 0x80;
+    static final int    FLAG_AT                  = 0x40;
+    
+   
     // JSON payment request properties and their CBOR correspondents
     static final String JSON_PR_PAYEE     = "payee";
     static final int PR_PAYEE             = -1;
@@ -185,12 +201,12 @@ public class FWPCrypto {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    static void validateFidoSignature(AsymSignatureAlgorithms algorithm, 
-                                      PublicKey publicKey,
-                                      byte[] authenticatorData,
-                                      byte[] clientDataJSON,
-                                      byte[] signature) throws IOException,
-                                                               GeneralSecurityException  {
+    public static void validateFidoSignature(AsymSignatureAlgorithms algorithm, 
+                                             PublicKey publicKey,
+                                             byte[] authenticatorData,
+                                             byte[] clientDataJSON,
+                                             byte[] signature) throws IOException,
+                                                                      GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
                 .setEcdsaSignatureEncoding(true)
                 .update(ArrayUtil.add(authenticatorData,
@@ -233,7 +249,7 @@ public class FWPCrypto {
         
         // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(copyOfAssertion.encode()),
-                               JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE))) {
+                               JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         
@@ -262,7 +278,7 @@ public class FWPCrypto {
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
                 .getMap().getObject("authData").getByteString();
-        if ((authData[32] & FWPCommon.FLAG_AT) == 0) {
+        if ((authData[32] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[32] & 0xff));
         }

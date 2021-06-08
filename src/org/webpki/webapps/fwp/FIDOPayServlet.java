@@ -36,6 +36,8 @@ import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.HashAlgorithms;
 
+import org.webpki.fwp.FWPCrypto;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
@@ -91,7 +93,7 @@ public class FIDOPayServlet extends HttpServlet {
                         FWPCommon.softError(response, resultJson, "User is missing, you need to reenroll");
                         return;
                     }
-                    resultJson.setString(FWPCommon.CREDENTIAL_ID, coreClientData.credentialId);
+                    resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
  
                 // Create the preliminary FWP assertion.
@@ -103,7 +105,7 @@ public class FIDOPayServlet extends HttpServlet {
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
 
                 // Make FIDO sign a hash of the unsigned assertion.
-                resultJson.setBinary(FWPCommon.CHALLENGE, 
+                resultJson.setBinary(FWPCrypto.CHALLENGE, 
                                      HashAlgorithms.SHA256.digest(unsignedAssertion));
 
                 // This what we send but we must also read and verify it.
@@ -125,16 +127,16 @@ public class FIDOPayServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
-                        JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE),
-                    payData.getBinary(FWPCommon.CHALLENGE))) {
+                        JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
+                    payData.getBinary(FWPCrypto.CHALLENGE))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
                 // Now we need to assemble the completed FWP assertion.
-                byte[] authenticatorData = requestJson.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
-                byte[] signature = requestJson.getBinary(FWPCommon.SIGNATURE_JSON);
+                byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
+                byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
                 CBORMap unsignedAssertion = 
                         CBORObject.decode(payData.getBinary(FWPCommon.FWP_ASSERTION)).getMap();
   

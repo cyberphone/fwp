@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.fwp;
+package org.webpki.fwp;
 
 import java.io.IOException;
 
@@ -29,9 +29,29 @@ import org.webpki.json.JSONParser;
  * 
  */
 public enum FWPElements {
-    VERSION (1),
-    PAYMENT_REQUEST(2),
-    HOST_NAME(3);
+/*
+accountId.
+serialNumber
+paymentMethod
+networkData Optional.
+userAuthorizationMethod
+Currently FINGERPRINT, FACERECOGNITION, and PIN are supported. Included for security and logging purposes.
+
+platformData
+timeStamp
+ */
+    
+    FWP_VERSION               (1),
+    PAYMENT_REQUEST           (2),
+    PAYEE_HOST_NAME           (3),
+    ACCOUNT_ID                (4),
+    SERIAL_NUMBER             (5),
+    PAYMENT_METHOD            (6),
+    NETWORK_DATA              (7),
+    USER_AUTHORIZATION_METHOD (8),
+    PLATFORM_DATA             (9),
+    TIME_STAMP                (10);
+    
     
     int cborLabel;
 
@@ -41,6 +61,7 @@ public enum FWPElements {
     
     public static final String CURRENT_VERSION = "1.00";
     
+    // Payment Request
     public static final int CBOR_PR_PAYEE       = 1;
     public static final int CBOR_PR_ID          = 2;
     public static final int CBOR_PR_AMOUNT      = 3;
@@ -50,6 +71,19 @@ public enum FWPElements {
     public static final String JSON_PR_ID       = "id";
     public static final String JSON_PR_AMOUNT   = "amount";
     public static final String JSON_PR_CURRENCY = "currency";
+    
+    // Platform Data
+    public static final int CBOR_PD_OPERATING_SYSTEM = 1;
+    public static final int CBOR_PD_USER_AGENT       = 2;
+    // Platform Data sub elements
+    public static final int CBOR_PDSUB_NAME          = 1;
+    public static final int CBOR_PDSUB_VERSION       = 2;
+    
+    public static enum UserAuthorizationMethods {UNSPECIFIED,   // order=0
+                                                 FINGERPRINT,
+                                                 FACERECOGNITION,
+                                                 PIN}
+    
 
     /**
      * Convert a payment request in JSON to CBOR.

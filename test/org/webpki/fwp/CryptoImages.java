@@ -14,12 +14,13 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.fwp;
+package org.webpki.fwp;
 
 import java.io.File;
 
 import org.webpki.cbor.CBOREncrypter;
 import org.webpki.cbor.CBORInteger;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -162,7 +163,7 @@ public class CryptoImages {
            .append("  m " + IMAGE_WIDTH + ",0 c -33,0 -35,68 -35,68 0,30 -18,68 "+
                    "-48,72 30,8 48,35 48,80 v 186 c 0,0 0,74 36,74'/>\n");
         
-        ArrayUtil.writeFile(fileName, svg.append("</svg>").toString().getBytes("utf-8"));
+        ArrayUtil.writeFile(fileName, svg.append("</svg>\n").toString().getBytes("utf-8"));
     }
     
     public CryptoImages(String svgDirectory) throws Exception {

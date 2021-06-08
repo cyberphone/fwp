@@ -38,7 +38,7 @@ import org.webpki.json.JSONParser;
 import org.webpki.webutil.ServletUtil;
 
 /**
- * Common FWP functions and constants.
+ * Common FWP wallet emulator functions and constants.
  */
 public class FWPCommon {
 
@@ -58,13 +58,6 @@ public class FWPCommon {
     static final String INIT_PHASE               = "init";
     static final String FINALIZE_PHASE           = "finalize";
     
-    static final int    FLAG_ED                  = 0x80;
-    static final int    FLAG_AT                  = 0x40;
-    
-    // FIDO call data
-    static final String CHALLENGE                = "challenge";
-    static final String USER_ID                  = "userId";
-    
     // Attribute returned to the client in case of a server-side error
     static final String ERROR_JSON               = "error";
     
@@ -72,13 +65,6 @@ public class FWPCommon {
     static final String CARD_HOLDER_JSON         = "cardHolder";
     static final String FWP_INPUT                = "fwpInput";
 
-    // Returned FIDO data
-    static final String CREDENTIAL_ID            = "credentialId";
-    static final String ATTESTATION_OBJECT       = "attestationObject";
-    static final String CLIENT_DATA_JSON         = "clientDataJSON";
-    static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
-    static final String SIGNATURE_JSON           = "signature";
-    
     // "Wallet" core
     static final String FWP_ASSERTION            = "fwpAssertion";
     

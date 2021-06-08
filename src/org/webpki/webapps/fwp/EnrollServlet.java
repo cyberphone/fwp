@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.fwp.FWPCrypto;
+
 public class EnrollServlet extends HttpServlet {
     
     static Logger logger = Logger.getLogger(EnrollServlet.class.getName());
@@ -106,9 +108,9 @@ public class EnrollServlet extends HttpServlet {
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
                 "    const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
      
-                "    let userId = initPhase." + FWPCommon.USER_ID + ";\n" +
+                "    let userId = initPhase." + FWPCrypto.USER_ID + ";\n" +
                 "    let publicKey = {\n" +
-                "      challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
+                "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
                 "      rp: {\n" +
                 "        name: 'FIDO Web Pay'\n" +
                 "      },\n" +
@@ -146,13 +148,13 @@ public class EnrollServlet extends HttpServlet {
                          "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
 
                          // Core FIDO return data
-                         FWPCommon.CREDENTIAL_ID + ":result.id," +
+                         FWPCrypto.CREDENTIAL_ID + ":result.id," +
 
-                         FWPCommon.ATTESTATION_OBJECT + 
-                         ":arrBufToB64url(result.response." + FWPCommon.ATTESTATION_OBJECT + ")," +
+                         FWPCrypto.ATTESTATION_OBJECT + 
+                         ":arrBufToB64url(result.response." + FWPCrypto.ATTESTATION_OBJECT + ")," +
 
-                         FWPCommon.CLIENT_DATA_JSON + 
-                         ":arrBufToB64url(result.response." + FWPCommon.CLIENT_DATA_JSON + ")},'" +
+                         FWPCrypto.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response." + FWPCrypto.CLIENT_DATA_JSON + ")},'" +
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +
 

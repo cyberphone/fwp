@@ -5,6 +5,7 @@
   <property name="openkeystore.dir" location="${openkeystore}"/>
   <property name="src.dir" value="src"/>
   <property name="test.dir" value="test"/>
+  <property name="lib.dir" value="lib"/>
   <property name="temp.dir" value=".tmp"/>
   <property name="dist.dir" value="dist"/>
   <property name="svg.dir" location="svg"/>
@@ -64,7 +65,7 @@
        includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
     <copy file="web.xml" todir="${temp.dir}"/>
     <javac debug="${debug}"
-           srcdir="${src.dir}"
+           srcdir="${src.dir};${lib.dir}"
            destdir="${temp.dir}"
            includeAntRuntime="false">
         <classpath>
@@ -112,14 +113,8 @@
   <target name="testfido">
     <delete dir="${temp.dir}"/>
     <mkdir dir="${temp.dir}"/>
-    <fixcrlf srcdir="."
-       tab="remove"
-       tablength="4"
-       eol="lf"
-       eof="remove"
-       includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
     <javac debug="${debug}"
-           srcdir="${src.dir}:${test.dir}"
+           srcdir="${src.dir}:${test.dir}:${lib.dir}"
            destdir="${temp.dir}"
            includeAntRuntime="false">
         <classpath>
@@ -133,7 +128,7 @@
     </javac>
     <property name="testvectors" location="fido2testvectors.json"/>
     <junit fork="no" haltonfailure="yes">
-       <test name="org.webpki.webapps.fwp.FIDOTest"/>
+       <test name="org.webpki.fwp.FIDOTest"/>
        <formatter type="plain" usefile="false"/>
        <sysproperty key="json.data" value="${testvectors}"/>
        <classpath>
@@ -152,14 +147,8 @@
   <target name="cryptosvg">
     <delete dir="${temp.dir}"/>
     <mkdir dir="${temp.dir}"/>
-    <fixcrlf srcdir="."
-       tab="remove"
-       tablength="4"
-       eol="lf"
-       eof="remove"
-       includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
     <javac debug="${debug}"
-           srcdir="${src.dir}:${test.dir}"
+           srcdir="${test.dir}:${lib.dir}"
            destdir="${temp.dir}"
            includeAntRuntime="false">
         <classpath>
@@ -172,7 +161,7 @@
         </classpath>
     </javac>
     <java fork="yes"
-          classname="org.webpki.webapps.fwp.CryptoImages"
+          classname="org.webpki.fwp.CryptoImages"
           failonerror="true">
        <classpath>
           <pathelement path="${temp.dir}"/>

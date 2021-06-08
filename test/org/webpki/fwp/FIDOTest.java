@@ -14,18 +14,21 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webapps.fwp;
+package org.webpki.fwp;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+
 import java.net.URL;
+
 import java.security.PublicKey;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
@@ -69,7 +72,7 @@ public class FIDOTest {
                           String subType,
                           String rpUrl,
                           byte[] challenge) throws Exception {
-        byte[] clientDataJSON = response.getBinary(FWPCommon.CLIENT_DATA_JSON);
+        byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON);
         JSONObjectReader json = JSONParser.parse(clientDataJSON);
         assertTrue("type", json.getString("type").equals(subType));
         assertTrue("origin", json.getString("origin").equals(rpUrl));
@@ -95,24 +98,24 @@ public class FIDOTest {
         String token = vector.getString("token");
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");
-        byte[] createChallenge = create.getBinary(FWPCommon.CHALLENGE);
-        String userId = create.getString(FWPCommon.USER_ID);
+        byte[] createChallenge = create.getBinary(FWPCrypto.CHALLENGE);
+        String userId = create.getString(FWPCrypto.USER_ID);
         JSONObjectReader createResponse = vector.getObject("create.response");
-        byte[] createCredentialId = createResponse.getBinary(FWPCommon.CREDENTIAL_ID);
+        byte[] createCredentialId = createResponse.getBinary(FWPCrypto.CREDENTIAL_ID);
         CBORObject attestation = 
-                CBORObject.decode(createResponse.getBinary(FWPCommon.ATTESTATION_OBJECT));
+                CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
         byte[] createClientDataJSON = clientDataJson(createResponse, 
                                                      "webauthn.create", 
                                                      rpUrl, 
                                                      createChallenge);
         JSONObjectReader get = vector.getObject("get");
-        byte[] getCredentialId = get.getBinary(FWPCommon.CREDENTIAL_ID);
+        byte[] getCredentialId = get.getBinary(FWPCrypto.CREDENTIAL_ID);
         assertTrue("keyHandle", ArrayUtil.compare(createCredentialId, getCredentialId));
-        byte[] getChallenge = get.getBinary(FWPCommon.CHALLENGE);
+        byte[] getChallenge = get.getBinary(FWPCrypto.CHALLENGE);
         JSONObjectReader getResponse = vector.getObject("get.response");
-        byte[] authenticatorData = getResponse.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
-        byte[] signature = getResponse.getBinary(FWPCommon.SIGNATURE_JSON);
+        byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
+        byte[] signature = getResponse.getBinary(FWPCrypto.SIGNATURE_JSON);
         byte[] getClientDataJSON = clientDataJson(getResponse, 
                                                   "webauthn.get", 
                                                   rpUrl, 
@@ -144,6 +147,19 @@ public class FIDOTest {
             .serializeToString(JSONOutputFormats.NORMALIZED);
     }
     
+    CBORMap buildGoodPaymenRequest(String networkData) throws IOException {
+        return new FWPAssertionBuilder()
+            .addPaymentRequest(getPaymentRequest(true, true))
+            .addPayeeHostName("spaceshop.com")
+            .addAccountData("FR7630002111110020050014382",
+                            "057862932",
+                            "https://bankdirect.com")
+            .addPlatformData("Android", "10.0", "Chrome", "103")
+            .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
+            .addOptionalNetworkData(networkData)
+            .create();
+    }
+    
     @Test
     public void CreateAssertions() throws Exception {
         try {
@@ -161,28 +177,28 @@ public class FIDOTest {
                 .create();
             fail("Must not execute");
         } catch (Exception e) {
-            checkException(e, "Missing element: HOST_NAME");
+            checkException(e, "Missing element: PAYEE_HOST_NAME");
         }
 
         try {
             new FWPAssertionBuilder()
                 .addPaymentRequest(getPaymentRequest(true, true))
-                .addHostName("example.com")
-                .addHostName("example.com")
+                .addPayeeHostName("example.com")
+                .addPayeeHostName("example.com")
                 .create();
             fail("Must not execute");
         } catch (Exception e) {
-            checkException(e, "Duplicate: HOST_NAME");
+            checkException(e, "Duplicate: PAYEE_HOST_NAME");
         }
         
     }
     
     @Test
     public void DecodeAssertions() throws Exception {
-        FWPAssertionDecoder decoder = new FWPAssertionDecoder(new FWPAssertionBuilder()
-                .addPaymentRequest(getPaymentRequest(true, true))
-                .addHostName("example.com")
-                .create().encode());
+        FWPAssertionDecoder decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(null).encode());
+        decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(
+                "{\"service\":\"https://mybank.com/fwp\"}").encode());
+System.out.println(decoder.getDecoded().toString());
         decoder.verifyClaimedPaymentRequest(getPaymentRequest(true, true));
         try {
             decoder.verifyClaimedPaymentRequest(getPaymentRequest(false, true));

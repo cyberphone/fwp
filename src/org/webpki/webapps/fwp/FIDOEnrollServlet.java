@@ -36,6 +36,8 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.CryptoRandom;
 
+import org.webpki.fwp.FWPCrypto;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
@@ -84,11 +86,11 @@ public class FIDOEnrollServlet extends HttpServlet {
 
                 // - Provide FIDO register challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
-                resultJson.setBinary(FWPCommon.CHALLENGE, challenge);
+                resultJson.setBinary(FWPCrypto.CHALLENGE, challenge);
 
                 // We use a UUID as the sole entry in the database and tie payment
                 // credentials and (a single) FIDO authenticator to that.
-                resultJson.setString(FWPCommon.USER_ID, userId);
+                resultJson.setString(FWPCrypto.USER_ID, userId);
                 
                 // We must also keep a copy of emitted data in a server session.
                 // The client can only partially be trusted!
@@ -109,24 +111,24 @@ public class FIDOEnrollServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
-                        JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE),
-                        registerData.getBinary(FWPCommon.CHALLENGE))) {
+                        JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
+                        registerData.getBinary(FWPCrypto.CHALLENGE))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
                 // User ID is central.
-                String userId = registerData.getString(FWPCommon.USER_ID);
+                String userId = registerData.getString(FWPCrypto.USER_ID);
 
                 // Get card holder name.
                 String cardHolder = requestJson.getString(FWPCommon.CARD_HOLDER_JSON);
                 
                 // Get credintialId.  To simplify things a bit we keep it in B64U notation.
-                String credentialId = requestJson.getString(FWPCommon.CREDENTIAL_ID);
+                String credentialId = requestJson.getString(FWPCrypto.CREDENTIAL_ID);
                 
                 // The object that holds it all but we don't care about attestations yet...
-                byte[] attestationObject = requestJson.getBinary(FWPCommon.ATTESTATION_OBJECT);
+                byte[] attestationObject = requestJson.getBinary(FWPCrypto.ATTESTATION_OBJECT);
                 
                 // Non-trivial operation ahead!
                 byte[] rawPublicKey = FWPCrypto.extractFidoPublicKey(attestationObject);

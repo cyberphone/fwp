@@ -33,6 +33,8 @@ import org.webpki.cbor.CBORPublicKey;
 
 import org.webpki.crypto.KeyAlgorithms;
 
+import org.webpki.fwp.FWPCrypto;
+
 /**
  * This is just for testing enrolled credentials
  *
@@ -92,10 +94,10 @@ public class LoginServlet extends HttpServlet {
             "    const initPhase = await exchangeJSON({},'" + FWPCommon.INIT_PHASE + "');\n" +
 
             "    const options = {\n" +
-            "      challenge: b64urlToU8arr(initPhase." + FWPCommon.CHALLENGE + "),\n" +
+            "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
 
             "      allowCredentials: [{type: 'public-key', " +
-                       "id: b64urlToU8arr(initPhase." + FWPCommon.CREDENTIAL_ID + ")}],\n" +
+                       "id: b64urlToU8arr(initPhase." + FWPCrypto.CREDENTIAL_ID + ")}],\n" +
 
             "      userVerification: 'preferred',\n" +
 
@@ -107,13 +109,13 @@ public class LoginServlet extends HttpServlet {
 //            "    console.log(result);\n" +
             "    const finalizePhase = await exchangeJSON({" + 
 
-                         FWPCommon.AUTHENTICATOR_DATA_JSON + 
+                         FWPCrypto.AUTHENTICATOR_DATA_JSON + 
                          ":arrBufToB64url(result.response.authenticatorData)," +
 
-                         FWPCommon.SIGNATURE_JSON + 
+                         FWPCrypto.SIGNATURE_JSON + 
                          ":arrBufToB64url(result.response.signature)," +
 
-                         FWPCommon.CLIENT_DATA_JSON + 
+                         FWPCrypto.CLIENT_DATA_JSON + 
                          ":arrBufToB64url(result.response.clientDataJSON)},'" +
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +

@@ -33,6 +33,8 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.CryptoRandom;
 
+import org.webpki.fwp.FWPCrypto;
+
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
@@ -90,12 +92,12 @@ public class FIDOLoginServlet extends HttpServlet {
                         FWPCommon.softError(response, resultJson, "User is missing, you need to reenroll");
                         return;
                     }
-                    resultJson.setString(FWPCommon.CREDENTIAL_ID, coreClientData.credentialId);
+                    resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
  
                 // - Provide FIDO challenge data
                 byte[] challenge = CryptoRandom.generateRandom(32);
-                resultJson.setBinary(FWPCommon.CHALLENGE, challenge);
+                resultJson.setBinary(FWPCrypto.CHALLENGE, challenge);
 
                 // This what we send but we must also 
                 session.setAttribute(FWPCommon.ATTR_LOGIN_DATA, new JSONObjectReader(resultJson));
@@ -116,16 +118,16 @@ public class FIDOLoginServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCommon.CLIENT_DATA_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
-                        JSONParser.parse(clientDataJSON).getBinary(FWPCommon.CHALLENGE),
-                    loginData.getBinary(FWPCommon.CHALLENGE))) {
+                        JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
+                    loginData.getBinary(FWPCrypto.CHALLENGE))) {
                     FWPCommon.failed("Challenge mismatch");
                 }
 
                 // Here we are supposed to the check the signature....
-                byte[] authenticatorData = requestJson.getBinary(FWPCommon.AUTHENTICATOR_DATA_JSON);
-                byte[] signature = requestJson.getBinary(FWPCommon.SIGNATURE_JSON);
+                byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
+                byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
                 
                 // Now, we have all client data needed to verify the signature.
                 try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
