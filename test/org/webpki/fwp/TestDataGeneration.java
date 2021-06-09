@@ -136,12 +136,12 @@ public class TestDataGeneration {
               .append(Base64UrlEncoder.encodeToString(fwpSigner.getAuthenticatorData()))
               .append("\n(here using the UP flag and a zero counter value)\n");
 
+        fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR,
+                                                fwpAssertion);
+
         result.append("\n\nSigned FWP assertion, here in CBOR 'diagnostic notation':\n")
               .append(CBORObject.decode(fwpAssertion).toString());
   
-        fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR,
-        		                                fwpAssertion);
-
 	    byte[] unsignedFwpAssertion = CBORObject.decode(fwpAssertion)
 	      		  .getMap().removeObject(FWPElements.AUTHORIZATION.cborLabel).encode();
 		    
