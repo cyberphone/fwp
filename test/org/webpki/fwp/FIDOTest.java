@@ -150,7 +150,7 @@ public class FIDOTest {
             .serializeToString(JSONOutputFormats.NORMALIZED);
     }
     
-    CBORMap buildGoodPaymenRequest(String networkData) throws IOException,
+    byte[] buildGoodPaymenRequest(String networkData) throws IOException,
                                                               GeneralSecurityException {
         return new FWPAssertionBuilder()
             .addPaymentRequest(getPaymentRequest(true, true))
@@ -199,9 +199,9 @@ public class FIDOTest {
     
     @Test
     public void DecodeAssertions() throws Exception {
-        FWPAssertionDecoder decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(null).encode());
+        FWPAssertionDecoder decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(null));
         decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(
-                "{\"service\":\"https://mybank.com/fwp\"}").encode());
+                "{\"service\":\"https://mybank.com/fwp\"}"));
 System.out.println(decoder.getDecoded().toString());
         decoder.verifyClaimedPaymentRequest(getPaymentRequest(true, true));
         try {

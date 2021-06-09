@@ -117,7 +117,7 @@ public class FWPAssertionBuilder {
                           new CBORInteger(userAuthz.ordinal()));
     }
 
-    public CBORMap create(FWPSigner fwpSigner) throws IOException, GeneralSecurityException {
+    public byte[] create(FWPSigner fwpSigner) throws IOException, GeneralSecurityException {
         // Default time is now.
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
             addOptionalTimeStamp(new GregorianCalendar());
@@ -131,7 +131,8 @@ public class FWPAssertionBuilder {
             }
         }
         elementList.add(FWPElements.AUTHORIZATION);
-        return fwpSigner.appendSignatureObject(fwpAssertion, FWPElements.AUTHORIZATION.cborLabel);
+        return fwpSigner.appendSignatureObject(fwpAssertion,
+        		                               FWPElements.AUTHORIZATION.cborLabel).encode();
     }
 }
 

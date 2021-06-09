@@ -1,0 +1,130 @@
+FWP Test Vectors
+
+
+
+User FIDO key in JWK format:
+{
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "6BKxpty8cI-exDzCkh-goU6dXq3MbcY0cd1LaAxiNrU",
+  "y": "mCbcvUzm44j3Lt2b5BPyQloQ91tf2D2V-gzeUxWaUdg",
+  "d": "6XxMFXhcYT5QN9w5TIg2aSKsbcj-pj4BnZkK7ZOt4B8"
+}
+
+
+Merchant 'W3C PaymentRequest' data:
+{
+  "payee": "Space Shop",
+  "id": "012345678",
+  "amount": "140.50",
+  "currency": "EUR"
+}
+
+Merchant 'hostname' according to the browser: spaceshop.com
+
+The FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
+Xhhzel_nHb32ptLVTQsx0w4B2vqERuWZc2vXJu56eoM
+This is subsequently used as FIDO 'challenge'.
+
+FIDO 'ClientDataJSON', here shown in clear:
+{"type":"webauthn.get","origin":"https://fwp.mybank.com","challenge":"Xhhzel_nHb32ptLVTQsx0w4B2vqERuWZc2vXJu56eoM"}Relying party URL: https://fwp.mybank.com
+
+FIDO Authenticator Data in Base64Url notation:
+gZfij_IAyPo4OtNqec5IPC9WiN27LVFQLyLCP2DY5UIBAAAAAA
+(here using the UP flag and a zero counter value)
+
+
+Signed FWP assertion, here in CBOR 'diagnostic notation':
+{
+  1: "1.00",
+  2: {
+    1: "Space Shop",
+    2: "012345678",
+    3: "140.50",
+    4: "EUR"
+  },
+  3: "spaceshop.com",
+  4: "FR7630002111110020050014382",
+  5: "0057162932",
+  6: "https://bankdirect.com",
+  8: 1,
+  9: {
+    1: {
+      1: "Android",
+      2: "10.0"
+    },
+    2: {
+      1: "Chrome",
+      2: "103"
+    }
+  },
+  10: 0("2021-06-10T08:34:21+02:00"),
+  11: {
+    1: -7,
+    2: {
+      1: 2,
+      -1: 1,
+      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
+      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
+    },
+    3: h'8197e28ff200c8fa383ad36a79ce483c2f5688ddbb2d51502f22c23f60d8e5420100000000',
+    4: h'7b2274797065223a22776562617574686e2e676574222c226f726967696e223a2268747470733a2f2f6677702e6d7962616e6b2e636f6d222c226368616c6c656e6765223a225868687a656c5f6e4862333270744c565451737830773442327671455275575a633276584a753536656f4d227d',
+    5: h'3045022100914084df34be2cb02b99f4cb51fdc41833f587ec3c96ff51617c99b0783896410220618013b0ab2fe5ad247f7968f8af4672b5791bc18c3084d1196bf888d0cbb645'
+  }
+}
+
+
+Unsigned FWP assertion, here in CBOR 'diagnostic notation':
+{
+  1: "1.00",
+  2: {
+    1: "Space Shop",
+    2: "012345678",
+    3: "140.50",
+    4: "EUR"
+  },
+  3: "spaceshop.com",
+  4: "FR7630002111110020050014382",
+  5: "0057162932",
+  6: "https://bankdirect.com",
+  8: 1,
+  9: {
+    1: {
+      1: "Android",
+      2: "10.0"
+    },
+    2: {
+      1: "Chrome",
+      2: "103"
+    }
+  },
+  10: 0("2021-06-10T08:34:21+02:00")
+}
+
+Issuer encryption key in JWK format:
+{
+  "kty": "OKP",
+  "crv": "X25519",
+  "x": "o16U773QQYaQB4eegNCldg6huoIZLsOQIYkFWvbZ5lA",
+  "d": "8AMLEwmHm83XsNZ-ZfMxqa4mrPzIuIXOZfQshTJrX2g"
+}
+
+
+
+Encrypted FWP assertion, here in CBOR 'diagnostic notation:
+{
+  1: 3,
+  2: {
+    1: -31,
+    3: "x25519:2021:3",
+    5: {
+      1: 1,
+      -1: 4,
+      -2: h'06e0ddbe8a8e1fc0c1053c3e891ecc660c250063a132645fb04fc4b9c27b2f42'
+    },
+    9: h'd2e0c4cec0d6665df1539a37e1c37662639025bfd25b96f2a8b3f7e8939d4ec7865edb1fa1e074ff'
+  },
+  7: h'5d609c6f5cc7bacb7b8c0cf5c8b95a3a',
+  8: h'9679df9e0ca25c7b386254c3',
+  9: h'cd23426e1aaea67ee9ac6387a302fc1fc2785c03c8b2eb54d5011b83652f5230f359cf315a725d7794b5ff603cc5c70b756ce89cec1ab39ec5b545a906f53d00ee54f2e58123381302ce9a2af9d024f96517a19294423fb0352eff70250f057771681b34268ed0dde375396543469fd2a232a166fb38793a5cead25e4cc947a5819378cfbd6fdb60287f35d2588144c5669d3b6a4ca94e372e19daf42ac8af1a7de1e5bdbdd3b8a22f9bbff10be806106e1195790da11b10c64a67a281f2e1052411181c27db05113d8d6fabadf41d16787e36cb2b8faf4d1fd78dce019bdce5996a02ae0e380a60afbaa27827ca316df0fb4a29187ca2b07876f0fcb66c74f25358a8dacc71e84b56d1432d73e7c4296c06053393e9100ee0da8c2e0c4b2aa5110911e8dddb25953c320d3cf9e6c8cf1f9b89363cdd2d6bd65c72bfc68e99a4bb09762e0f2d21a9289dee48b8f444b3b61d8169b4a602586f006bde8111647824831f4e65892c85bb1e0875e97431b71aa7f3786e6cb5f4fe7c496759626f0513ceeef57683a0447dd8b8514debdbfa41a47325268517e71892e7d42494315c7cd7280542c8f5c283945d33c9fa8ec51f6c457588f0210f4bbba26bd73d6937a99482215e9a6100a4f8a2bbd9c06333c82f50d24bdabe1a536fafc80abff4d09a3cc0f5ca0c375ee3579858b2f1313265e5cd384f40d8'
+}

@@ -150,13 +150,13 @@ public class FWPCrypto {
     public static final String CDJ_GET_ARGUMENT         = "webauthn.get";
     
     // Authorization Signature (AS) container
-    private static final int AS_ALGORITHM          = 1;
-    private static final int AS_PUBLIC_KEY         = 2;
-    private static final int AS_AUTHENTICATOR_DATA = 3;
-    private static final int AS_CLIENT_DATA_JSON   = 4;
-    private static final int AS_SIGNATURE          = 5;
+    static final int AS_ALGORITHM          = 1;
+    static final int AS_PUBLIC_KEY         = 2;
+    static final int AS_AUTHENTICATOR_DATA = 3;
+    static final int AS_CLIENT_DATA_JSON   = 4;
+    static final int AS_SIGNATURE          = 5;
     
-    private static final int COSE_ALGORITHM_LABEL  = 3;
+    static final int COSE_ALGORITHM_LABEL  = 3;
 
     /**
      * Public key to to COSE signature algorithm.
