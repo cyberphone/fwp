@@ -95,11 +95,13 @@ public class FIDOPayServlet extends HttpServlet {
                     }
                     resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
- 
+/* 
                 // Create the preliminary FWP assertion.
                 byte[] unsignedAssertion = FWPCrypto.createDataToBeSigned(
                         requestJson.getObject(FWPCommon.FWP_INPUT),
                         coreClientData.publicKey);
+*/
+ byte[]unsignedAssertion = null;
 
                 // Need to save it for completion by FIDO.
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
@@ -139,13 +141,13 @@ public class FIDOPayServlet extends HttpServlet {
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
                 CBORMap unsignedAssertion = 
                         CBORObject.decode(payData.getBinary(FWPCommon.FWP_ASSERTION)).getMap();
-  
+/*  
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,
                                      FWPCrypto.finalizeAssertion(unsignedAssertion,
                                                                     authenticatorData,
                                                                     clientDataJSON,
                                                                     signature));
-                
+*/                
             } else {
                 FWPCommon.failed("Unknown phase: " + phase);
             }

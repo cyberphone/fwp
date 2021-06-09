@@ -18,7 +18,10 @@ package org.webpki.fwp;
 
 import java.io.IOException;
 
+import java.net.URL;
+
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import java.security.interfaces.ECKey;
@@ -29,14 +32,14 @@ import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
-import org.webpki.cbor.CBORTextString;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.crypto.signatures.SignatureWrapper;
 
-import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
@@ -45,6 +48,83 @@ import org.webpki.util.ArrayUtil;
  * FWP and FIDO crypto support.
  */
 public class FWPCrypto {
+	
+	public static class FWPSigner {
+		
+		byte[] signature;
+		byte[] challenge;
+		byte[] clientDataJSON;
+		byte[] authenticatorData;
+		
+		PrivateKey privateKey;
+		PublicKey publicKey;
+		String origin;
+		
+		public FWPSigner(PrivateKey privateKey,
+				         PublicKey publicKey,
+				         String origin) {
+			this.privateKey = privateKey;
+			this.publicKey = publicKey;
+			this.origin = origin;
+		}
+		
+		CBORMap appendSignatureObject(CBORMap fwpAssertion, int authorizationLabel) 
+				throws IOException, GeneralSecurityException {
+			int coseAlgorithm = publicKey2CoseSignatureAlgorithm(publicKey);
+			
+			// Add the authorization container map including the members that
+			// also are signed.
+			CBORMap authorizationSignature = new CBORMap()
+					.setObject(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
+					.setObject(AS_PUBLIC_KEY,
+							   CBORPublicKey.encode(publicKey));
+			fwpAssertion.setObject(authorizationLabel, authorizationSignature);
+			
+			// FIDO Challenge = hash of unsigned FWP assertion (binary).
+			challenge = HashAlgorithms.SHA256.digest(fwpAssertion.encode());
+			
+			// Now we have the data needed for creating the FIDI ClientDataJSON object.
+			clientDataJSON = new JSONObjectWriter()
+					.setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
+					.setString(CDJ_ORIGIN, origin)
+			        .setBinary(CHALLENGE, challenge)
+			        .serializeToBytes(JSONOutputFormats.NORMALIZED);
+			
+			// Hard-coded FIDO Authenticator Data
+	        authenticatorData = ArrayUtil.add(
+	        		HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
+	        		                             new byte[] {1, 0, 0 ,0, 0});
+	        
+	        // Create FIDO signature.
+			signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
+					.setEcdsaSignatureEncoding(true)
+					.update(authenticatorData)
+					.update(HashAlgorithms.SHA256.digest(clientDataJSON))
+					.sign();
+			
+			// Add the remaining elements to the authorization container.
+	        authorizationSignature.setObject(AS_CLIENT_DATA_JSON, 
+	        		                         new CBORByteString(clientDataJSON))
+	                              .setObject(AS_AUTHENTICATOR_DATA,
+	                            		     new CBORByteString(authenticatorData))
+					              .setObject(AS_SIGNATURE,
+					       		             new CBORByteString(signature));
+	        // We are done!
+			return fwpAssertion;
+		}
+
+		public byte[] getChallenge() {
+			return challenge;
+		}
+
+		public byte[] getAuthenticatorData() {
+			return authenticatorData;
+		}
+
+		public byte[] getClientDataJSON() {
+			return clientDataJSON;
+		}
+	}
     
     private FWPCrypto() {}
     
@@ -60,37 +140,21 @@ public class FWPCrypto {
     public static final String SIGNATURE_JSON           = "signature";
 
     // Attestation Object flags
-    static final int    FLAG_ED                  = 0x80;
-    static final int    FLAG_AT                  = 0x40;
+    public static final int    FLAG_ED                  = 0x80;
+    public static final int    FLAG_AT                  = 0x40;
     
-   
-    // JSON payment request properties and their CBOR correspondents
-    static final String JSON_PR_PAYEE     = "payee";
-    static final int PR_PAYEE             = -1;
-    
-    static final String JSON_PR_ID        = "id";
-    static final int PR_ID                = -2;
-
-    static final String JSON_PR_AMOUNT    = "amount";
-    static final int PR_AMOUNT            = -3;
-    
-    static final String JSON_PR_CURRENCY  = "currency";
-    static final int PR_CURRENCY          = -4;
-    
-    static final String JSON_HOST_NAME       = "hostName";
-    static final String JSON_PAYMENT_REQUEST = "paymentRequest";
-
-    // Outermost CBOR keys
-    private static final int OUTER_PAYMENT_REQUEST = 1;
-    private static final int OUTER_HOST_NAME       = 2;
-    private static final int OUTER_AUTHORIZATION   = 3;
+    // ClientDataJSON
+    public static final String CDJ_TYPE                 = "type";
+    public static final String CDJ_ORIGIN               = "origin";
+    public static final String CDJ_CREATE_ARGUMENT      = "webauthn.create";
+    public static final String CDJ_GET_ARGUMENT         = "webauthn.get";
     
     // Authorization Signature (AS) container
-    private static final int AS_ALGORITHM          = -1;
-    private static final int AS_PUBLIC_KEY         = -2;
-    private static final int AS_AUTHENTICATOR_DATA = -3;
-    private static final int AS_CLIENT_DATA_JSON   = -4;
-    private static final int AS_SIGNATURE          = -5;
+    private static final int AS_ALGORITHM          = 1;
+    private static final int AS_PUBLIC_KEY         = 2;
+    private static final int AS_AUTHENTICATOR_DATA = 3;
+    private static final int AS_CLIENT_DATA_JSON   = 4;
+    private static final int AS_SIGNATURE          = 5;
     
     private static final int COSE_ALGORITHM_LABEL  = 3;
 
@@ -145,53 +209,6 @@ public class FWPCrypto {
     }
     
     /**
-     * Convert a payment request in JSON to CBOR.
-     * 
-     * @param paymentRequestJson
-     * @return CBOR representation
-     * @throws IOException
-     */
-    public static CBORMap convertPaymentRequest(JSONObjectReader paymentRequestJson)
-            throws IOException {
-        CBORMap paymentRequest = new CBORMap()
-            .setObject(PR_PAYEE, 
-                       new CBORTextString(paymentRequestJson.getString(JSON_PR_PAYEE)))
-            .setObject(PR_ID, 
-                       new CBORTextString(paymentRequestJson.getString(JSON_PR_ID)))
-            .setObject(PR_AMOUNT, 
-                       new CBORTextString(paymentRequestJson.getString(JSON_PR_AMOUNT)))
-            .setObject(PR_CURRENCY, 
-                       new CBORTextString(paymentRequestJson.getString(JSON_PR_CURRENCY)));
-        paymentRequestJson.checkForUnread();
-        return paymentRequest;
-    }
-
-    public static byte[] createDataToBeSigned(JSONObjectReader fwpInput, 
-                                              PublicKey publicKey) 
-            throws IOException, GeneralSecurityException {
-        CBORMap unsignedAssertion = new CBORMap()
-            .setObject(OUTER_PAYMENT_REQUEST, 
-                       convertPaymentRequest(fwpInput.getObject(JSON_PAYMENT_REQUEST)))
-            .setObject(OUTER_HOST_NAME, new CBORTextString(fwpInput.getString(JSON_HOST_NAME)))
-            .setObject(OUTER_AUTHORIZATION, new CBORMap()
-                .setObject(AS_ALGORITHM, 
-                           new CBORInteger(publicKey2CoseSignatureAlgorithm(publicKey)))
-                .setObject(AS_PUBLIC_KEY, CBORPublicKey.encode(publicKey)));
-        return unsignedAssertion.encode();
-    }
-
-    public static byte[] finalizeAssertion(CBORMap unsignedAssertion,
-                                           byte[] authenticatorData,
-                                           byte[] clientDataJSON,
-                                           byte[] signature) throws IOException {
-        unsignedAssertion.getObject(OUTER_AUTHORIZATION).getMap()
-            .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
-            .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
-            .setObject(AS_SIGNATURE, new CBORByteString(signature));
-        return unsignedAssertion.encode();
-    }
-
-    /**
      * Validate FIDO signature.
      * 
      * @param algorithm Signature algorithm in WebPKI notation
@@ -225,21 +242,21 @@ public class FWPCrypto {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpAssertion(CBORMap fwpAssertion)
+    public static byte[] validateFwpAssertion(CBORMap fwpAssertion,
+    		                                  int authorizationLabel)
             throws IOException, GeneralSecurityException {
-        CBORMap authorization = fwpAssertion.getObject(OUTER_AUTHORIZATION).getMap();
+        CBORMap authorization = fwpAssertion.getObject(authorizationLabel).getMap();
         byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
         CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
         PublicKey publicKey = CBORPublicKey.decode(cborPublicKey);
         int coseAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
-        authorization.checkObjectForUnread();
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
         // We are nice and do not touch the original assertion.
         CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
-        CBORMap copyOfAuthorization = copyOfAssertion.getObject(OUTER_AUTHORIZATION).getMap();
+        CBORMap copyOfAuthorization = copyOfAssertion.getObject(authorizationLabel).getMap();
 
         // The following element do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having

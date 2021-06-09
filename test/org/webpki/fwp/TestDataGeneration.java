@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+
 import java.util.Base64;
 
 import org.webpki.cbor.CBOREncrypter;
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
-
+import org.webpki.cbor.CBORObject;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 
@@ -51,16 +53,10 @@ public class TestDataGeneration {
 
 	static final String MERCHANT_HOST = "spaceshop.com";
 
-	static byte[] authenticatorData;
-	
-	static byte[] challenge;
-    
     String testDataDir;
     String keyDir;
     
     String currPrivateKey;
-    
-    String paymentRequestJson;
     
     StringBuilder result = new StringBuilder("FWP Test Vectors\n\n");
     
@@ -77,35 +73,26 @@ public class TestDataGeneration {
                                                                  GeneralSecurityException {
         this.testDataDir = testDataDir;
         this.keyDir = keyDir;
-        
-        authenticatorData = ArrayUtil.add(HashAlgorithms.SHA256.digest(
-        		new URL(RELYING_PARTY_URL).getHost().getBytes()), new byte[] {1, 0, 0 ,0, 0});
-              
-        result.append("Relying party URL: " + RELYING_PARTY_URL + "\n" +
-                      "\nFIDO Authenticator Data in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(authenticatorData))
-              .append("\n(here using the UP flag and a zero counter value)\n");
-
+            
         KeyPair p256 = readKey("p256");
         result.append("\n\nUser FIDO key in JWK format:\n")
               .append(currPrivateKey);
-
-        KeyPair x25519 = readKey("x25519");
-        result.append("\n\nIssuer encryption key in JWK format:\n")
-              .append(currPrivateKey);
-
-        JSONObjectWriter paymentRequest = new JSONObjectWriter()
-        		.setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
-        		.setString(FWPElements.JSON_PR_ID, "012345678")
-        		.setString(FWPElements.JSON_PR_AMOUNT, "140.00")
-        		.setString(FWPElements.JSON_PR_CURRENCY, "EUR");
         
+        FWPCrypto.FWPSigner fwpSigner = new FWPCrypto.FWPSigner(p256.getPrivate(),
+                                                                p256.getPublic(),
+                                                                RELYING_PARTY_URL);
+       
+        JSONObjectWriter paymentRequest = new JSONObjectWriter()
+          		.setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
+          		.setString(FWPElements.JSON_PR_ID, "012345678")
+          		.setString(FWPElements.JSON_PR_AMOUNT, "140.00")
+          		.setString(FWPElements.JSON_PR_CURRENCY, "EUR");
         result.append("\n\nMerchant 'W3C PaymentRequest' data:\n")
               .append(paymentRequest.toString())
               .append("\nMerchant 'hostname' according to the browser: " + MERCHANT_HOST);
-        paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
+        String paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
         
-        CBORMap unsigedFwpAssertion = new FWPAssertionBuilder()
+        CBORMap fwpAssertion = new FWPAssertionBuilder()
         		.addPaymentRequest(paymentRequestJson)
         		.addOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
         				                                        ISODateTime.LOCAL_NO_SUBSECONDS))
@@ -115,14 +102,37 @@ public class TestDataGeneration {
                 .addPlatformData("Android", "10.0", "Chrome", "103")
                 .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
         		.addPayeeHostName(MERCHANT_HOST)
-        		.create();
+        		.create(fwpSigner);
         
-        challenge = HashAlgorithms.SHA256.digest(unsigedFwpAssertion.encode());
-        result.append("\n\n\nUnsigned FWP assertion, here in CBOR 'diagnostic notation':\n")
-              .append(unsigedFwpAssertion.toString())
-              .append("\n\nThe FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(challenge))
+        result.append("Relying party URL: " + RELYING_PARTY_URL + "\n" +
+                      "\nFIDO Authenticator Data in Base64Url notation:\n")
+              .append(Base64UrlEncoder.encodeToString(fwpSigner.getAuthenticatorData()))
+              .append("\n(here using the UP flag and a zero counter value)\n");
+
+	    KeyPair x25519 = readKey("x25519");
+	    result.append("\n\nIssuer encryption key in JWK format:\n")
+	          .append(currPrivateKey);
+
+ 
+
+         result.append("\n\n\nUnsigned FWP assertion, here in CBOR 'diagnostic notation':\n")
+              .append(CBORObject.decode(fwpAssertion.encode())
+            		  .getMap().removeObject(FWPElements.AUTHORIZATION.cborLabel).toString());
+        
+        
+        result.append("\n\nThe FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:\n")
+              .append(Base64UrlEncoder.encodeToString(fwpSigner.getChallenge()))
               .append("\nThis is subsequently used as FIDO 'challenge'.");
+
+        JSONObjectReader clientDataJSON = JSONParser.parse(fwpSigner.getClientDataJSON());
+
+        result.append("\n\nFIDO 'ClientDataJSON', here shown in clear:\n")
+              .append(clientDataJSON.serializeToString(JSONOutputFormats.NORMALIZED));
+         
+        result.append("\n\nThe complete FWP assertion:\n")
+              .append(fwpAssertion.toString());
+        
+        new FWPAssertionDecoder(fwpAssertion.encode());
         
         ArrayUtil.writeFile(testDataDir + "vectors.txt", result.toString().getBytes("utf-8"));
     }

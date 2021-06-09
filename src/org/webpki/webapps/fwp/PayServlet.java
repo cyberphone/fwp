@@ -169,8 +169,8 @@ public class PayServlet extends HttpServlet {
                     CBORObject.decode(
                             Base64.getUrlDecoder().decode(fwpAssertionB64U)).getMap();
             
-            byte[] publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion);
-            
+//            byte[] publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion);
+  byte[] publicKey = null;          
             // Succeeded.  Is the key one of "ours"?
             try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
                 DataBaseOperations.authenticate(userId, publicKey, connection);

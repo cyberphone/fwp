@@ -18,6 +18,8 @@ package org.webpki.fwp;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 
@@ -27,6 +29,9 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
 import org.webpki.cbor.JSONReader;
+
+import org.webpki.fwp.FWPCrypto.FWPSigner;
+
 import org.webpki.util.ISODateTime;
 
 /**
@@ -44,6 +49,10 @@ public class FWPAssertionBuilder {
     
     private FWPAssertionBuilder addElement(FWPElements name,
                                            CBORObject value) throws IOException {
+        if (elementList.contains(FWPElements.AUTHORIZATION)) {
+        	throw new IOException("Nothing can be added after: " + 
+                                  FWPElements.AUTHORIZATION.toString());
+        }
         if (!elementList.add(name)) {
             throw new IOException("Duplicate: " + name.toString());
         }
@@ -107,8 +116,8 @@ public class FWPAssertionBuilder {
         return addElement(FWPElements.USER_AUTHORIZATION_METHOD,
                           new CBORInteger(userAuthz.ordinal()));
     }
-    
-    public CBORMap create() throws IOException {
+
+    public CBORMap create(FWPSigner fwpSigner) throws IOException, GeneralSecurityException {
         // Default time is now.
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
             addOptionalTimeStamp(new GregorianCalendar());
@@ -121,7 +130,8 @@ public class FWPAssertionBuilder {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
-        return fwpAssertion;
+        elementList.add(FWPElements.AUTHORIZATION);
+        return fwpSigner.appendSignatureObject(fwpAssertion, FWPElements.AUTHORIZATION.cborLabel);
     }
 }
 

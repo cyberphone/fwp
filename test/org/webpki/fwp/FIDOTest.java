@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 
 import java.net.URL;
-
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import org.junit.BeforeClass;
@@ -49,6 +49,8 @@ import org.webpki.util.ArrayUtil;
 public class FIDOTest {
     
     static JSONObjectReader testVectors;
+    
+    static FWPCrypto.FWPSigner fwpSigner;
 
     @BeforeClass
     public static void openFile() throws Exception {
@@ -74,9 +76,10 @@ public class FIDOTest {
                           byte[] challenge) throws Exception {
         byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON);
         JSONObjectReader json = JSONParser.parse(clientDataJSON);
-        assertTrue("type", json.getString("type").equals(subType));
-        assertTrue("origin", json.getString("origin").equals(rpUrl));
-        assertTrue("challenge", ArrayUtil.compare(challenge, json.getBinary("challenge")));
+        assertTrue(FWPCrypto.CDJ_TYPE, json.getString(FWPCrypto.CDJ_TYPE).equals(subType));
+        assertTrue(FWPCrypto.CDJ_ORIGIN, json.getString(FWPCrypto.CDJ_ORIGIN).equals(rpUrl));
+        assertTrue(FWPCrypto.CHALLENGE, ArrayUtil.compare(challenge, 
+        		                                          json.getBinary(FWPCrypto.CHALLENGE)));
         return clientDataJSON;
     }
     
@@ -106,7 +109,7 @@ public class FIDOTest {
                 CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
         byte[] createClientDataJSON = clientDataJson(createResponse, 
-                                                     "webauthn.create", 
+        		                                     FWPCrypto.CDJ_CREATE_ARGUMENT, 
                                                      rpUrl, 
                                                      createChallenge);
         JSONObjectReader get = vector.getObject("get");
@@ -117,7 +120,7 @@ public class FIDOTest {
         byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
         byte[] signature = getResponse.getBinary(FWPCrypto.SIGNATURE_JSON);
         byte[] getClientDataJSON = clientDataJson(getResponse, 
-                                                  "webauthn.get", 
+        		                                  FWPCrypto.CDJ_GET_ARGUMENT, 
                                                   rpUrl, 
                                                   getChallenge);
         FWPCrypto.validateFidoSignature(
@@ -147,7 +150,8 @@ public class FIDOTest {
             .serializeToString(JSONOutputFormats.NORMALIZED);
     }
     
-    CBORMap buildGoodPaymenRequest(String networkData) throws IOException {
+    CBORMap buildGoodPaymenRequest(String networkData) throws IOException,
+                                                              GeneralSecurityException {
         return new FWPAssertionBuilder()
             .addPaymentRequest(getPaymentRequest(true, true))
             .addPayeeHostName("spaceshop.com")
@@ -157,7 +161,7 @@ public class FIDOTest {
             .addPlatformData("Android", "10.0", "Chrome", "103")
             .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
             .addOptionalNetworkData(networkData)
-            .create();
+            .create(fwpSigner);
     }
     
     @Test
@@ -165,7 +169,7 @@ public class FIDOTest {
         try {
             new FWPAssertionBuilder()
                 .addPaymentRequest(getPaymentRequest(true, false))
-                .create();
+                .create(fwpSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Property \"id\" is missing");
@@ -174,7 +178,7 @@ public class FIDOTest {
         try {
             new FWPAssertionBuilder()
                 .addPaymentRequest(getPaymentRequest(true, true))
-                .create();
+                .create(fwpSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Missing element: PAYEE_HOST_NAME");
@@ -185,7 +189,7 @@ public class FIDOTest {
                 .addPaymentRequest(getPaymentRequest(true, true))
                 .addPayeeHostName("example.com")
                 .addPayeeHostName("example.com")
-                .create();
+                .create(fwpSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Duplicate: PAYEE_HOST_NAME");
