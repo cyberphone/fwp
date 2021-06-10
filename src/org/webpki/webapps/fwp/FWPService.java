@@ -32,6 +32,10 @@ import javax.servlet.ServletContextListener;
 
 import org.webpki.crypto.CustomCryptoProvider;
 
+import org.webpki.fwp.FWPElements;
+
+import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
@@ -51,6 +55,10 @@ public class FWPService extends InitPropertyReader implements ServletContextList
     static String keyDeclarations;
     
     static DataSource jdbcDataSource;
+    
+    static JSONObjectWriter samplePaymentRequest;
+    
+    static String samplePayeeHostname = "spaceshop.com";
 
     static boolean logging;
 
@@ -80,7 +88,13 @@ public class FWPService extends InitPropertyReader implements ServletContextList
             // Logging?
             /////////////////////////////////////////////////////////////////////////////////////////////
             logging = getPropertyBoolean("logging");
-
+            
+            samplePaymentRequest = new JSONObjectWriter()
+                    .setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
+                    .setString(FWPElements.JSON_PR_ID, "0447723")
+                    .setString(FWPElements.JSON_PR_AMOUNT, "140.00")
+                    .setString(FWPElements.JSON_PR_CURRENCY, "EUR");
+ 
             ////////////////////////////////////////////////////////////////////////////////////////////
             // Database
             ////////////////////////////////////////////////////////////////////////////////////////////

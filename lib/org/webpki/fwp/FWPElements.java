@@ -29,17 +29,6 @@ import org.webpki.json.JSONParser;
  * 
  */
 public enum FWPElements {
-/*
-accountId.
-serialNumber
-paymentMethod
-networkData Optional.
-userAuthorizationMethod
-Currently FINGERPRINT, FACERECOGNITION, and PIN are supported. Included for security and logging purposes.
-
-platformData
-timeStamp
- */
     
     FWP_VERSION               (1),
     PAYMENT_REQUEST           (2),
@@ -80,11 +69,30 @@ timeStamp
     public static final int CBOR_PDSUB_NAME          = 1;
     public static final int CBOR_PDSUB_VERSION       = 2;
     
-    public static enum UserAuthorizationMethods {UNSPECIFIED,   // order=0
-                                                 FINGERPRINT,
-                                                 FACERECOGNITION,
-                                                 PIN}
+    public static enum UserAuthorizationMethods {
     
+        UNSPECIFIED     (0),
+        FINGERPRINT     (1),
+        FACERECOGNITION (2),
+        PIN             (3);
+        
+        int cborValue;
+
+        UserAuthorizationMethods(int cborValue) {
+            this.cborValue = cborValue;
+        }
+    
+    }
+
+    static UserAuthorizationMethods getUserAuthorizationMethod(int cborValue) throws IOException {
+        for (UserAuthorizationMethods userAuthMeth : UserAuthorizationMethods.values()) {
+            if (userAuthMeth.cborValue == cborValue) {
+                return userAuthMeth;
+            }
+        }
+        throw new IOException("Unrecognized user authorization method: " + cborValue);
+    }
+
 
     /**
      * Convert a payment request in JSON to CBOR.
@@ -104,6 +112,8 @@ timeStamp
                        new CBORTextString(jsonPaymentRequest.getString(JSON_PR_AMOUNT)))
             .setObject(CBOR_PR_CURRENCY, 
                        new CBORTextString(jsonPaymentRequest.getString(JSON_PR_CURRENCY)));
+        
+        // Additional data is not permitted.
         jsonPaymentRequest.checkForUnread();
         return cborPaymentRequest;
     }

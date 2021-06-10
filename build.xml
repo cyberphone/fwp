@@ -44,7 +44,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat testfido cryptosvg testdatagen"/>
+      <echo message="build tomcat testfido cryptosvg vectors"/>
   </target>
 
   <target name="tomcat">
@@ -123,6 +123,7 @@
        <test name="org.webpki.fwp.FIDOTest"/>
        <formatter type="plain" usefile="false"/>
        <sysproperty key="json.data" value="${testvectors}"/>
+       <sysproperty key="sample.keys" value="${openkeystore.dir}/testdata/keys"/>
        <classpath>
             <pathelement path="${temp.dir}"/>
             <fileset dir="${webpki.lib.dir}">
@@ -168,7 +169,7 @@
      </java>
   </target>
 
-  <target name="testdatagen">
+  <target name="vectors">
     <delete dir="${temp.dir}"/>
     <mkdir dir="${temp.dir}"/>
     <javac debug="${debug}"
@@ -185,7 +186,7 @@
         </classpath>
     </javac>
     <java fork="yes"
-          classname="org.webpki.fwp.TestDataGeneration"
+          classname="org.webpki.fwp.TestVectorGeneration"
           failonerror="true">
        <classpath>
           <pathelement path="${temp.dir}"/>

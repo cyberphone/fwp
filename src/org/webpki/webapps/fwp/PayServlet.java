@@ -34,6 +34,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
 import org.webpki.fwp.FWPCrypto;
+import org.webpki.json.JSONOutputFormats;
 
 /**
  * This is a temporary payment application.
@@ -85,17 +86,10 @@ public class PayServlet extends HttpServlet {
         String js = new StringBuilder(
             "'use strict';\n" +
         
-            "const paymentRequest = {\n" +
-            "  payee: 'Space Shop',\n" +
-            "  id: '43560765',\n" +
-            "  amount: '140.00',\n" +
-            "  currency: 'EUR'\n" +
-            "};\n" +
-            
-            "const fwpInput = {\n" +
-            "  paymentRequest: paymentRequest,\n" +
-            "  hostName: 'spaceshop.com'\n" +
-            "};\n" +
+            "const paymentRequest = ")
+        .append(FWPService.samplePaymentRequest.serializeToString(JSONOutputFormats.PRETTY_JS_NATIVE))
+        .append(
+            ";\n" +
             
             "const serviceUrl = 'fidopay';\n" +
 
@@ -105,7 +99,8 @@ public class PayServlet extends HttpServlet {
             "  try {\n" +
             "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
             "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-            "    const initPhase = await exchangeJSON({fwpInput: fwpInput},'" + FWPCommon.INIT_PHASE + "');\n" +
+            "    const initPhase = await exchangeJSON({'" +
+              FWPCommon.PAYMENT_REQUEST + "': paymentRequest},'" + FWPCommon.INIT_PHASE + "');\n" +
 
             "    const options = {\n" +
             "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +

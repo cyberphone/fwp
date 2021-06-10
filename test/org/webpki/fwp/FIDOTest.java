@@ -19,21 +19,28 @@ package org.webpki.fwp;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.net.URL;
+
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import java.util.GregorianCalendar;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
+
+import org.webpki.jose.JOSEKeyWords;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
@@ -50,13 +57,26 @@ public class FIDOTest {
     
     static JSONObjectReader testVectors;
     
-    static FWPCrypto.FWPSigner fwpSigner;
+    static FWPCrypto.FWPPreSigner fwpPreSigner;
+    
+    static String keyDir;
+    String currPrivateKey;
+    
+    KeyPair readKey(String keyAlg) throws IOException {
+        JSONObjectReader key = 
+                JSONParser.parse(ArrayUtil.readFile(keyDir + keyAlg + "privatekey.jwk"));
+        key.removeProperty(JOSEKeyWords.KID_JSON);
+        currPrivateKey = key.toString();
+        return key.getKeyPair();
+    }
+    
 
     @BeforeClass
     public static void openFile() throws Exception {
         // Start deprecating Bouncycastle since Android will remove most of it anyway
         CustomCryptoProvider.forcedLoad(false);
         testVectors = JSONParser.parse(ArrayUtil.readFile(System.getProperty("json.data")));
+        keyDir = System.getProperty("sample.keys") + File.separatorChar;
     }
     
     void checkException(Exception e, String compareMessage) {
@@ -79,7 +99,7 @@ public class FIDOTest {
         assertTrue(FWPCrypto.CDJ_TYPE, json.getString(FWPCrypto.CDJ_TYPE).equals(subType));
         assertTrue(FWPCrypto.CDJ_ORIGIN, json.getString(FWPCrypto.CDJ_ORIGIN).equals(rpUrl));
         assertTrue(FWPCrypto.CHALLENGE, ArrayUtil.compare(challenge, 
-        		                                          json.getBinary(FWPCrypto.CHALLENGE)));
+                                                          json.getBinary(FWPCrypto.CHALLENGE)));
         return clientDataJSON;
     }
     
@@ -109,7 +129,7 @@ public class FIDOTest {
                 CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
         byte[] createClientDataJSON = clientDataJson(createResponse, 
-        		                                     FWPCrypto.CDJ_CREATE_ARGUMENT, 
+                                                     FWPCrypto.CDJ_CREATE_ARGUMENT, 
                                                      rpUrl, 
                                                      createChallenge);
         JSONObjectReader get = vector.getObject("get");
@@ -120,7 +140,7 @@ public class FIDOTest {
         byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
         byte[] signature = getResponse.getBinary(FWPCrypto.SIGNATURE_JSON);
         byte[] getClientDataJSON = clientDataJson(getResponse, 
-        		                                  FWPCrypto.CDJ_GET_ARGUMENT, 
+                                                  FWPCrypto.CDJ_GET_ARGUMENT, 
                                                   rpUrl, 
                                                   getChallenge);
         FWPCrypto.validateFidoSignature(
@@ -150,9 +170,11 @@ public class FIDOTest {
             .serializeToString(JSONOutputFormats.NORMALIZED);
     }
     
-    byte[] buildGoodPaymenRequest(String networkData) throws IOException,
-                                                              GeneralSecurityException {
-        return new FWPAssertionBuilder()
+    byte[] buildGoodPaymenRequest(String networkData,
+                                  PrivateKey privateKey) throws IOException,
+                                                                GeneralSecurityException {
+        return FWPCrypto.directSign(
+                new FWPAssertionBuilder()
             .addPaymentRequest(getPaymentRequest(true, true))
             .addPayeeHostName("spaceshop.com")
             .addAccountData("FR7630002111110020050014382",
@@ -161,7 +183,8 @@ public class FIDOTest {
             .addPlatformData("Android", "10.0", "Chrome", "103")
             .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
             .addOptionalNetworkData(networkData)
-            .create(fwpSigner);
+            .create(fwpPreSigner),
+            privateKey, "https://mybank.com");
     }
     
     @Test
@@ -169,7 +192,7 @@ public class FIDOTest {
         try {
             new FWPAssertionBuilder()
                 .addPaymentRequest(getPaymentRequest(true, false))
-                .create(fwpSigner);
+                .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Property \"id\" is missing");
@@ -178,7 +201,7 @@ public class FIDOTest {
         try {
             new FWPAssertionBuilder()
                 .addPaymentRequest(getPaymentRequest(true, true))
-                .create(fwpSigner);
+                .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Missing element: PAYEE_HOST_NAME");
@@ -189,7 +212,7 @@ public class FIDOTest {
                 .addPaymentRequest(getPaymentRequest(true, true))
                 .addPayeeHostName("example.com")
                 .addPayeeHostName("example.com")
-                .create(fwpSigner);
+                .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
             checkException(e, "Duplicate: PAYEE_HOST_NAME");
@@ -199,10 +222,29 @@ public class FIDOTest {
     
     @Test
     public void DecodeAssertions() throws Exception {
-        FWPAssertionDecoder decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(null));
+        KeyPair keyPair = readKey("p256");
+        fwpPreSigner = new FWPCrypto.FWPPreSigner(keyPair.getPublic());
+        FWPAssertionDecoder decoder = 
+                new FWPAssertionDecoder(buildGoodPaymenRequest(null, keyPair.getPrivate()));
+        FWPAssertionDecoder.PaymentRequest paymentRequest = decoder.getPaymentRequest();
+        assertTrue("payee", paymentRequest.getPayee().equals("Space Shop"));
+        assertTrue("id", paymentRequest.getId().equals("65656"));
+        assertTrue("amount", paymentRequest.getAmount().equals("140.00"));
+        assertTrue("currency", paymentRequest.getCurrency().equals("EUR"));
+        assertTrue("host", decoder.getHostName().equals("spaceshop.com"));
+        assertTrue("fp", decoder.getUserAuthorizationMethod().equals(
+                FWPElements.UserAuthorizationMethods.FINGERPRINT));
+        assertTrue("nd", decoder.getNetworkData() == null);
+        assertTrue("account", decoder.getAccountId().equals("FR7630002111110020050014382"));
+        assertTrue("sn", decoder.getSerialNumber().equals("057862932"));
+        assertTrue("pm", decoder.getPaymentMethod().equals("https://bankdirect.com"));
+        long now = new GregorianCalendar().getTimeInMillis();
+        long then = decoder.getTimeStamp().getTimeInMillis();
+        assertTrue("time", now >= then && now - then < 10000);
         decoder = new FWPAssertionDecoder(buildGoodPaymenRequest(
-                "{\"service\":\"https://mybank.com/fwp\"}"));
-System.out.println(decoder.getDecoded().toString());
+                "{\"service\":\"https://mybank.com/fwp\"}", keyPair.getPrivate()));
+        assertTrue("nd", decoder.getNetworkData().toString()
+                .equals("{\n  \"service\": \"https://mybank.com/fwp\"\n}"));
         decoder.verifyClaimedPaymentRequest(getPaymentRequest(true, true));
         try {
             decoder.verifyClaimedPaymentRequest(getPaymentRequest(false, true));

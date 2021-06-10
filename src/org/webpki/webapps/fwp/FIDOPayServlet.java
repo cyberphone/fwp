@@ -36,7 +36,9 @@ import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.HashAlgorithms;
 
+import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
+import org.webpki.fwp.FWPElements;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -95,13 +97,16 @@ public class FIDOPayServlet extends HttpServlet {
                     }
                     resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
-/* 
-                // Create the preliminary FWP assertion.
-                byte[] unsignedAssertion = FWPCrypto.createDataToBeSigned(
-                        requestJson.getObject(FWPCommon.FWP_INPUT),
-                        coreClientData.publicKey);
-*/
- byte[]unsignedAssertion = null;
+
+                byte[]unsignedAssertion = new FWPAssertionBuilder()
+                .addPaymentRequest(requestJson.getObject(FWPCommon.PAYMENT_REQUEST).toString())
+                .addPayeeHostName("spaceshop.com")
+                .addAccountData("FR7630002111110020050014382",
+                                "057862932",
+                                "https://bankdirect.com")
+                .addPlatformData("Android", "10.0", "Chrome", "103")
+                .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
+                .create(new FWPCrypto.FWPPreSigner(coreClientData.publicKey));
 
                 // Need to save it for completion by FIDO.
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
@@ -139,15 +144,13 @@ public class FIDOPayServlet extends HttpServlet {
                 // Now we need to assemble the completed FWP assertion.
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
-                CBORMap unsignedAssertion = 
-                        CBORObject.decode(payData.getBinary(FWPCommon.FWP_ASSERTION)).getMap();
-/*  
+                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,
-                                     FWPCrypto.finalizeAssertion(unsignedAssertion,
-                                                                    authenticatorData,
-                                                                    clientDataJSON,
-                                                                    signature));
-*/                
+                                     FWPCrypto.AddPostSignature(unsignedAssertion,
+                                                                authenticatorData,
+                                                                clientDataJSON,
+                                                                signature));
+                
             } else {
                 FWPCommon.failed("Unknown phase: " + phase);
             }

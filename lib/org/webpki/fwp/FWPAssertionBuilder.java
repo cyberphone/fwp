@@ -30,7 +30,7 @@ import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
 import org.webpki.cbor.JSONReader;
 
-import org.webpki.fwp.FWPCrypto.FWPSigner;
+import org.webpki.fwp.FWPCrypto.FWPPreSigner;
 
 import org.webpki.util.ISODateTime;
 
@@ -50,7 +50,7 @@ public class FWPAssertionBuilder {
     private FWPAssertionBuilder addElement(FWPElements name,
                                            CBORObject value) throws IOException {
         if (elementList.contains(FWPElements.AUTHORIZATION)) {
-        	throw new IOException("Nothing can be added after: " + 
+            throw new IOException("Nothing can be added after: " + 
                                   FWPElements.AUTHORIZATION.toString());
         }
         if (!elementList.add(name)) {
@@ -114,10 +114,10 @@ public class FWPAssertionBuilder {
     public FWPAssertionBuilder addUserAuthorizationMethod(
                           FWPElements.UserAuthorizationMethods userAuthz) throws IOException {
         return addElement(FWPElements.USER_AUTHORIZATION_METHOD,
-                          new CBORInteger(userAuthz.ordinal()));
+                          new CBORInteger(userAuthz.cborValue));
     }
 
-    public byte[] create(FWPSigner fwpSigner) throws IOException, GeneralSecurityException {
+    public byte[] create(FWPPreSigner fwpPreSigner) throws IOException, GeneralSecurityException {
         // Default time is now.
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
             addOptionalTimeStamp(new GregorianCalendar());
@@ -130,9 +130,9 @@ public class FWPAssertionBuilder {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
-        elementList.add(FWPElements.AUTHORIZATION);
-        return fwpSigner.appendSignatureObject(fwpAssertion,
-        		                               FWPElements.AUTHORIZATION.cborLabel).encode();
+        addElement(FWPElements.AUTHORIZATION,
+                   fwpPreSigner.appendSignatureObject(fwpAssertion));
+        return fwpAssertion.encode();
     }
 }
 

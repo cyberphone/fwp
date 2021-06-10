@@ -19,6 +19,7 @@ package org.webpki.fwp;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.util.GregorianCalendar;
 
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -66,6 +67,21 @@ public class FWPAssertionDecoder {
 
     }
     
+    GregorianCalendar timeStamp;
+    public GregorianCalendar getTimeStamp() {
+        return timeStamp;
+    }
+    
+    FWPElements.UserAuthorizationMethods userAuthorizationMethod;
+    public FWPElements.UserAuthorizationMethods getUserAuthorizationMethod() {
+        return userAuthorizationMethod;
+    }
+    
+    CBORObject networkData;
+    public CBORObject getNetworkData() {
+        return networkData;
+    }
+    
     PaymentRequest paymentRequest;
     public PaymentRequest getPaymentRequest() {
         return paymentRequest;
@@ -111,7 +127,7 @@ public class FWPAssertionDecoder {
     
     byte[] publicKey;
     public byte[] getPublicKey() {
-    	return publicKey;
+        return publicKey;
     }
     
     public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
@@ -126,7 +142,8 @@ public class FWPAssertionDecoder {
         }
 
         // Decode Payment Request.
-        paymentRequest = new PaymentRequest(fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
+        paymentRequest = 
+                new PaymentRequest(fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
 
         // Account data.
         accountId = getString(FWPElements.ACCOUNT_ID);
@@ -134,27 +151,33 @@ public class FWPAssertionDecoder {
         paymentMethod = getString(FWPElements.PAYMENT_METHOD);
 
         // Platform Data
-        CBORMap platformData = fwpAssertion.getObject(FWPElements.PLATFORM_DATA.cborLabel).getMap();
+        CBORMap platformData = 
+                fwpAssertion.getObject(FWPElements.PLATFORM_DATA.cborLabel).getMap();
         platformData.scan();
 
         // User Authorization Method
-        fwpAssertion.getObject(FWPElements.USER_AUTHORIZATION_METHOD.cborLabel).scan();
-
+        userAuthorizationMethod = FWPElements.getUserAuthorizationMethod(fwpAssertion.getObject(
+                FWPElements.USER_AUTHORIZATION_METHOD.cborLabel).getInt());
+        
         // Date Time
-        fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).scan();
+        timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
 
         // Host information from the browser.
         hostName = getString(FWPElements.PAYEE_HOST_NAME);
 
         // Optional Network Data.
         if (fwpAssertion.hasKey(FWPElements.NETWORK_DATA.cborLabel)) {
-            fwpAssertion.getObject(FWPElements.NETWORK_DATA.cborLabel).scan();
+            // There is such data, get it!  It can be any CBOR data
+            // that has a 1-2-1 translation to JSON.
+            networkData = fwpAssertion.getObject(FWPElements.NETWORK_DATA.cborLabel);
+            // We mark it as "read" to not get a problem with checkObjectForUnread().
+            networkData.scan();
         }
 
         // Finally, the authorization signature
         publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion,
-        		                                   FWPElements.AUTHORIZATION.cborLabel);
-        // Check that we didn't forgot anything or that there is other data there as well.
+                                                   FWPElements.AUTHORIZATION.cborLabel);
+        // Check that we didn't forgot anything or that there is "other" data.
         fwpAssertion.checkObjectForUnread();
     }
 }

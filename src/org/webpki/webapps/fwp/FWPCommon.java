@@ -63,7 +63,7 @@ public class FWPCommon {
     
     // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";
-    static final String FWP_INPUT                = "fwpInput";
+    static final String PAYMENT_REQUEST          = "paymentRequest";
 
     // "Wallet" core
     static final String FWP_ASSERTION            = "fwpAssertion";
