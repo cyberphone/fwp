@@ -94,7 +94,7 @@ public class FIDOTest {
                           String subType,
                           String rpUrl,
                           byte[] challenge) throws Exception {
-        byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON);
+        byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
         JSONObjectReader json = JSONParser.parse(clientDataJSON);
         assertTrue(FWPCrypto.CDJ_TYPE, json.getString(FWPCrypto.CDJ_TYPE).equals(subType));
         assertTrue(FWPCrypto.CDJ_ORIGIN, json.getString(FWPCrypto.CDJ_ORIGIN).equals(rpUrl));

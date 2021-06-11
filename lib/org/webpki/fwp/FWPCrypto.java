@@ -58,7 +58,7 @@ public class FWPCrypto {
     // Returned FIDO data
     public static final String CREDENTIAL_ID            = "credentialId";
     public static final String ATTESTATION_OBJECT       = "attestationObject";
-    public static final String CLIENT_DATA_JSON         = "clientDataJSON";
+    public static final String CLIENT_DATA_JSON_JSON    = "clientDataJSON";
     public static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
     public static final String SIGNATURE_JSON           = "signature";
 
@@ -85,9 +85,9 @@ public class FWPCrypto {
     static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
 
     private static byte[] addRemainingElements(CBORMap fwpAssertionInProgress,
-    		                                  byte[] clientDataJSON,
-    		                                  byte[] authenticatorData, 
-    		                                  byte[] signature) throws IOException {
+                                              byte[] clientDataJSON,
+                                              byte[] authenticatorData, 
+                                              byte[] signature) throws IOException {
         fwpAssertionInProgress.getObject(FWP_AUTHORIZATION_LABEL).getMap()
                 .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
                 .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
@@ -109,8 +109,8 @@ public class FWPCrypto {
     }
 
     public static byte[] directSign(byte[] unsignedFwpAssertion, 
-    		                        PrivateKey privateKey, 
-    		                        String origin)
+                                    PrivateKey privateKey, 
+                                    String origin)
             throws IOException, GeneralSecurityException {
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
         int coseAlgorithm = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()

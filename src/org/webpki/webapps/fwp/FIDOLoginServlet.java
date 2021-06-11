@@ -118,7 +118,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                     loginData.getBinary(FWPCrypto.CHALLENGE))) {

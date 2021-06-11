@@ -1,4 +1,6 @@
-FWP Test Vectors
+|===================================|
+| FIDO Web Pay (FWP) - Test Vectors |
+|===================================|
 
 
 
@@ -12,35 +14,83 @@ User FIDO key in JWK format:
 }
 
 
-Merchant 'W3C PaymentRequest' data:
+Merchant 'W3C PaymentRequest' (PRCD) data in pretty-printed JSON notation:
 {
   "payee": "Space Shop",
-  "id": "012345678",
-  "amount": "140.50",
+  "id": "7040566321",
+  "amount": "435.00",
   "currency": "EUR"
 }
 
 Merchant 'hostname' according to the browser: spaceshop.com
 
-The unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
-Xhhzel_nHb32ptLVTQsx0w4B2vqERuWZc2vXJu56eoM
-This is subsequently used as FIDO 'challenge'.
 
-FIDO 'ClientDataJSON', here shown in clear:
-{"type":"webauthn.get","origin":"https://fwp.mybank.com","challenge":"Xhhzel_nHb32ptLVTQsx0w4B2vqERuWZc2vXJu56eoM"}Relying party URL: https://fwp.mybank.com
-
-FIDO Authenticator Data in Base64Url notation:
-gZfij_IAyPo4OtNqec5IPC9WiN27LVFQLyLCP2DY5UIBAAAAAA
-(here using the UP flag and a zero counter value)
-
-
-Signed FWP assertion, here in CBOR 'diagnostic notation':
+Unsigned FWP assertion, here in CBOR 'diagnostic notation':
 {
   1: "1.00",
   2: {
     1: "Space Shop",
-    2: "012345678",
-    3: "140.50",
+    2: "7040566321",
+    3: "435.00",
+    4: "EUR"
+  },
+  3: "spaceshop.com",
+  4: "FR7630002111110020050014382",
+  5: "0057162932",
+  6: "https://bankdirect.com",
+  8: 1,
+  9: {
+    1: {
+      1: "Android",
+      2: "10.0"
+    },
+    2: {
+      1: "Chrome",
+      2: "103"
+    }
+  },
+  10: 0("2021-06-10T08:34:21+02:00"),
+  11: {
+    1: -7,
+    2: {
+      1: 2,
+      -1: 1,
+      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
+      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
+    }
+  }
+}
+
+Note that the last element (11) contains the COSE signature algorithm (ES256) and the FIDO public key (EC/P256) which is also is part of the data to be signed.
+
+
+The unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
+kJr4-vEYeMv0497OJEoHSz9n1b2U3kIsTGEUlQJhB1k
+This is subsequently used as FIDO 'challenge'.
+
+
+****************************************
+* FIDO/WebAuthn assertion happens here *
+****************************************
+
+Returned FIDO 'clientDataJSON', here shown in clear:
+{"type":"webauthn.get","origin":"https://fwp.mybank.com","challenge":"kJr4-vEYeMv0497OJEoHSz9n1b2U3kIsTGEUlQJhB1k"}
+Relying party URL: https://fwp.mybank.com
+
+Returned FIDO 'authenticatorData' in hexadecimal notation:
+8197e28ff200c8fa383ad36a79ce483c2f5688ddbb2d51502f22c23f60d8e5420100000000
+(here using the UP flag and a zero counter value)
+
+Returned FIDO 'signature' in hexadecimal notation:
+304502207a1651395e603dcb50e9cffc8d3b93227903e3882998ee82427d3c1ca3365934022100d1f85226e1ceec7355262525e74e3b288df6d13203e617f0d0f489e8e65e06e2
+
+Signed FWP assertion (SAD), here in CBOR 'diagnostic notation':
+{
+  1: "1.00",
+  2: {
+    1: "Space Shop",
+    2: "7040566321",
+    3: "435.00",
     4: "EUR"
   },
   3: "spaceshop.com",
@@ -68,47 +118,20 @@ Signed FWP assertion, here in CBOR 'diagnostic notation':
       -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
     },
     3: h'8197e28ff200c8fa383ad36a79ce483c2f5688ddbb2d51502f22c23f60d8e5420100000000',
-    4: h'7b2274797065223a22776562617574686e2e676574222c226f726967696e223a2268747470733a2f2f6677702e6d7962616e6b2e636f6d222c226368616c6c656e6765223a225868687a656c5f6e4862333270744c565451737830773442327671455275575a633276584a753536656f4d227d',
-    5: h'3045022100f50810e6a8b703fd015ffaec103ad5b88dc1b35f22291fac1c8eff5291714cfb0220299641b13ac4bbd3a1277797164a859aa65105bc2c4fac2f68b068ada35f70ae'
+    4: h'7b2274797065223a22776562617574686e2e676574222c226f726967696e223a2268747470733a2f2f6677702e6d7962616e6b2e636f6d222c226368616c6c656e6765223a226b4a72342d764559654d76303439374f4a456f48537a396e31623255336b4973544745556c514a6842316b227d',
+    5: h'304502207a1651395e603dcb50e9cffc8d3b93227903e3882998ee82427d3c1ca3365934022100d1f85226e1ceec7355262525e74e3b288df6d13203e617f0d0f489e8e65e06e2'
   }
 }
 
+The added elements 3,4,5 represent FIDO's 'authenticatorData','clientDataJSON' and 'signature' respectively.
 
-Unsigned FWP assertion, here in CBOR 'diagnostic notation':
-{
-  1: "1.00",
-  2: {
-    1: "Space Shop",
-    2: "012345678",
-    3: "140.50",
-    4: "EUR"
-  },
-  3: "spaceshop.com",
-  4: "FR7630002111110020050014382",
-  5: "0057162932",
-  6: "https://bankdirect.com",
-  8: 1,
-  9: {
-    1: {
-      1: "Android",
-      2: "10.0"
-    },
-    2: {
-      1: "Chrome",
-      2: "103"
-    }
-  },
-  10: 0("2021-06-10T08:34:21+02:00"),
-  11: {
-    1: -7,
-    2: {
-      1: 2,
-      -1: 1,
-      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
-      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
-    }
-  }
-}
+
+The signed FWP assertion as a hex-encoded binary: aa0164312e303002a4016a53706163652053686f70026a3730343035363633323103663433352e30300463455552036d737061636573686f702e636f6d04781b465237363330303032313131313130303230303530303134333832056a30303537313632393332067668747470733a2f2f62616e6b6469726563742e636f6d080109a201a20167416e64726f6964026431302e3002a201664368726f6d6502633130330ac07819323032312d30362d31305430383a33343a32312b30323a30300ba5012602a401022001215820e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b52258209826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d80358258197e28ff200c8fa383ad36a79ce483c2f5688ddbb2d51502f22c23f60d8e54201000000000458737b2274797065223a22776562617574686e2e676574222c226f726967696e223a2268747470733a2f2f6677702e6d7962616e6b2e636f6d222c226368616c6c656e6765223a226b4a72342d764559654d76303439374f4a456f48537a396e31623255336b4973544745556c514a6842316b227d055847304502207a1651395e603dcb50e9cffc8d3b93227903e3882998ee82427d3c1ca3365934022100d1f85226e1ceec7355262525e74e3b288df6d13203e617f0d0f489e8e65e06e2
+
+
+*******************************
+* FWP encryption happens here *
+*******************************
 
 Issuer encryption key in JWK format:
 {
@@ -119,8 +142,7 @@ Issuer encryption key in JWK format:
 }
 
 
-
-Encrypted FWP assertion, here in CBOR 'diagnostic notation:
+Encrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:
 {
   1: 3,
   2: {
@@ -129,11 +151,13 @@ Encrypted FWP assertion, here in CBOR 'diagnostic notation:
     5: {
       1: 1,
       -1: 4,
-      -2: h'06e0ddbe8a8e1fc0c1053c3e891ecc660c250063a132645fb04fc4b9c27b2f42'
+      -2: h'35d33737c56a1ce0a1858fa00676e322809eef3b6b01e3310a97cb551137bf12'
     },
-    9: h'd2e0c4cec0d6665df1539a37e1c37662639025bfd25b96f2a8b3f7e8939d4ec7865edb1fa1e074ff'
+    9: h'c65a38324dbdf343a4758f752f672c2f937ded980485651bd51d66aca88f5a8fe96fa8e41a73e2b6'
   },
-  7: h'5d609c6f5cc7bacb7b8c0cf5c8b95a3a',
-  8: h'9679df9e0ca25c7b386254c3',
-  9: h'cd23426e1aaea67ee9ac6387a302fc1fc2785c03c8b2eb54d5011b83652f5230f359cf315a725d7794b5ff603cc5c70b756ce89cec1ab39ec5b545a906f53d00ee54f2e58123381302ce9a2af9d024f96517a19294423fb0352eff70250f057771681b34268ed0dde375396543469fd2a232a166fb38793a5cead25e4cc947a5819378cfbd6fdb60287f35d2588144c5669d3b6a4ca94e372e19daf42ac8af1a7de1e5bdbdd3b8a22f9bbff10be806106e1195790da11b10c64a67a281f2e1052411181c27db05113d8d6fabadf41d16787e36cb2b8faf4d1fd78dce019bdce5996a02ae0e380a60afbaa27827ca316df0fb4a29187ca2b07876f0fcb66c74f25358a8dacc71e84b56d1432d73e7c4296c06053393e9100ee0da8c2e0c4b2aa5110911e8dddb25953c320d3cf9e6c8cf1f9b89363cdd2d6bd65c72bfc68e99a4bb09762e0f2d21a9289dee48b8f444b3b61d8169b4a602586f006bde8111647824831f4e65892c85bb1e0875e97431b71aa7f3786e6cb5f4fe7c496759626f0513ceeef57683a0447dd8b8514debdbfa41a47325268517e71892e7d42494315c7cd7280542c8f5c283945d33c9fa8ec51f6c457588f0210f4bbba26bd73d6937a99482215e9a6100a4f8a2bbd9c06333c82f50d24bdabe1a536fafc80abff4d09a3cc0f5ca0c375ee3579858b2f1313265e5cd384f40d8'
+  7: h'822d72db27e1e5a48e9e321de8a0ea05',
+  8: h'5aee184750d5a36f77e729bb',
+  9: h'f2d3aa9de110bd5f218ef2aed43ead57389c7feee64dc05f8f3bb4f9ef6ce1812ac0e69338247bc64cb7c70c54227034d21995ecd53ae4e791568351760627e0affc221fc65fd20948f490d785b8afaf37eaba9f06d85c8c557b6914be09904decf78f06ca445f39493a10a66add0f44e7f356a253ec0898f9ad158d6956433f136fe259d86af7bbf7d0e9c64534a5bc361e6561b7f6ea7bf371cad0d0a5120f9862df2adbc2385360dc7160f8d7a78d473e780bcf35b97c9744ee27e84cf94e1710dfc9527bdd4c0eded65b1f666bdb8430ec8ef9604bed03539ae654c0a3bf1ccab87ff64f554dd5b02d2d021f14eecf04dcb5974fce45032310cc06bf848856776ee8f0c165a0add1bf70c374cf612dad98b8fde81192ef0ffdae9e9112f4e5774a36918ed69bcb7e61bc106ac501e1284c3ccaa2d9015b24cdd14fc896d0aa73ec7f345dbb916132757a9745c52a26c61ac6258efe3d936ba666756aa53d7c119eb72f75fe3e12065afe879e5bf74daae36a1008d32dd1f06ec70abbd7b5f4cfb1703f04070448f760d4cd26d7da289959419f737077d446bc131695a1bec1f884dd46aa950d0456b9ab85c992f6baa54dbb6e31a22caed047b668ffb4a0ae2bb72363f88e3bd90d303ede91b471a7a7f8005610272fdf1cd22c5d1e4eaaba2f689dd33fba4b281e21ba07b6d1e4aa51583fa55fb07e'
 }
+
+And as a hex-encoded binary: a5010302a401381e036d7832353531393a323032313a3305a30101200421582035d33737c56a1ce0a1858fa00676e322809eef3b6b01e3310a97cb551137bf12095828c65a38324dbdf343a4758f752f672c2f937ded980485651bd51d66aca88f5a8fe96fa8e41a73e2b60750822d72db27e1e5a48e9e321de8a0ea05084c5aee184750d5a36f77e729bb095901f8f2d3aa9de110bd5f218ef2aed43ead57389c7feee64dc05f8f3bb4f9ef6ce1812ac0e69338247bc64cb7c70c54227034d21995ecd53ae4e791568351760627e0affc221fc65fd20948f490d785b8afaf37eaba9f06d85c8c557b6914be09904decf78f06ca445f39493a10a66add0f44e7f356a253ec0898f9ad158d6956433f136fe259d86af7bbf7d0e9c64534a5bc361e6561b7f6ea7bf371cad0d0a5120f9862df2adbc2385360dc7160f8d7a78d473e780bcf35b97c9744ee27e84cf94e1710dfc9527bdd4c0eded65b1f666bdb8430ec8ef9604bed03539ae654c0a3bf1ccab87ff64f554dd5b02d2d021f14eecf04dcb5974fce45032310cc06bf848856776ee8f0c165a0add1bf70c374cf612dad98b8fde81192ef0ffdae9e9112f4e5774a36918ed69bcb7e61bc106ac501e1284c3ccaa2d9015b24cdd14fc896d0aa73ec7f345dbb916132757a9745c52a26c61ac6258efe3d936ba666756aa53d7c119eb72f75fe3e12065afe879e5bf74daae36a1008d32dd1f06ec70abbd7b5f4cfb1703f04070448f760d4cd26d7da289959419f737077d446bc131695a1bec1f884dd46aa950d0456b9ab85c992f6baa54dbb6e31a22caed047b668ffb4a0ae2bb72363f88e3bd90d303ede91b471a7a7f8005610272fdf1cd22c5d1e4eaaba2f689dd33fba4b281e21ba07b6d1e4aa51583fa55fb07e

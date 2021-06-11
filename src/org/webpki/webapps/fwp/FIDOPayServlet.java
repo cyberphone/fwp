@@ -131,7 +131,7 @@ public class FIDOPayServlet extends HttpServlet {
                 byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
 
                 // Add the missing pieces from the associated FIDO/WebAuthn assertion.
-                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,

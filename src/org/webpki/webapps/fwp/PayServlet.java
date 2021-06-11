@@ -123,7 +123,7 @@ public class PayServlet extends HttpServlet {
                          FWPCrypto.SIGNATURE_JSON + 
                          ":arrBufToB64url(result.response.signature)," +
 
-                         FWPCrypto.CLIENT_DATA_JSON + 
+                         FWPCrypto.CLIENT_DATA_JSON_JSON + 
                          ":arrBufToB64url(result.response.clientDataJSON)},'" +
 
                          FWPCommon.FINALIZE_PHASE + "');\n" +
