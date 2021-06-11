@@ -30,10 +30,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.cbor.CBORMap;
-import org.webpki.cbor.CBORObject;
-
+import org.webpki.fwp.FWPAssertionDecoder;
 import org.webpki.fwp.FWPCrypto;
+
 import org.webpki.json.JSONOutputFormats;
 
 /**
@@ -160,15 +159,13 @@ public class PayServlet extends HttpServlet {
                 FWPCommon.failed("User ID missing, have you enrolled?");
             }
 
-            CBORMap fwpAssertion = 
-                    CBORObject.decode(
-                            Base64.getUrlDecoder().decode(fwpAssertionB64U)).getMap();
+            // Decode and validate the assertion.
+            FWPAssertionDecoder decodedFwp = 
+                    new FWPAssertionDecoder(Base64.getUrlDecoder().decode(fwpAssertionB64U));
             
-//            byte[] publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion);
-  byte[] publicKey = null;          
             // Succeeded.  Is the key one of "ours"?
             try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                DataBaseOperations.authenticate(userId, publicKey, connection);
+                DataBaseOperations.authenticate(userId, decodedFwp.getPublicKey(), connection);
             }
             
             StringBuilder html = new StringBuilder(
@@ -182,7 +179,7 @@ public class PayServlet extends HttpServlet {
 
                     "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
                         "<div class='ctbl'>")
-                .append(fwpAssertion.toString().replace("\n", "<br>").replace(" ", "&nbsp;"))
+                .append(decodedFwp.getDecoded().toString().replace("\n", "<br>").replace(" ", "&nbsp;"))
                 .append("</div>" +
                     "</div>");
             

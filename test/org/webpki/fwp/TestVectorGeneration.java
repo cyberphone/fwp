@@ -32,6 +32,8 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
@@ -107,7 +109,7 @@ public class TestVectorGeneration {
               .append("\nMerchant 'hostname' according to the browser: " + MERCHANT_HOST);
         String paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
         
-        byte[] fwpAssertion = new FWPAssertionBuilder()
+        byte[] unsignedFwpAssertion = new FWPAssertionBuilder()
                 .addPaymentRequest(paymentRequestJson)
                 .addOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
                                                                 ISODateTime.LOCAL_NO_SUBSECONDS))
@@ -119,29 +121,33 @@ public class TestVectorGeneration {
                 .addPayeeHostName(MERCHANT_HOST)
                 .create(fwpSigner);
         
-        result.append("\n\nThe FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(new byte[0]/*fwpSigner.getChallenge()*/))
+        byte[] fwpAssertion = 
+        		FWPCrypto.directSign(unsignedFwpAssertion, p256.getPrivate(), ISSUER_URL);
+        
+        result.append("\n\nThe unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:\n")
+              .append(Base64UrlEncoder.encodeToString(HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
               .append("\nThis is subsequently used as FIDO 'challenge'.");
+        
+        CBORMap authContainer = CBORObject.decode(fwpAssertion).getMap().getObject(
+        		FWPCrypto.FWP_AUTHORIZATION_LABEL).getMap();
 
-        JSONObjectReader clientDataJSON = JSONParser.parse(new byte[0]/*fwpSigner.getClientDataJSON()*/);
+        JSONObjectReader clientDataJSON = JSONParser.parse(authContainer.getObject(
+        		FWPCrypto.AS_CLIENT_DATA_JSON).getByteString());
 
         result.append("\n\nFIDO 'ClientDataJSON', here shown in clear:\n")
               .append(clientDataJSON.serializeToString(JSONOutputFormats.NORMALIZED));
         
         result.append("Relying party URL: " + ISSUER_URL + "\n" +
                       "\nFIDO Authenticator Data in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(new byte[0]/*fwpSigner.getAuthenticatorData()*/))
+              .append(Base64UrlEncoder.encodeToString(
+            		  authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getByteString()))
               .append("\n(here using the UP flag and a zero counter value)\n");
 
-        fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR,
-                                                fwpAssertion);
+        fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
 
         result.append("\n\nSigned FWP assertion, here in CBOR 'diagnostic notation':\n")
               .append(CBORObject.decode(fwpAssertion).toString());
   
-        byte[] unsignedFwpAssertion = CBORObject.decode(fwpAssertion)
-                  .getMap().removeObject(FWPElements.AUTHORIZATION.cborLabel).encode();
-            
         result.append("\n\n\nUnsigned FWP assertion, here in CBOR 'diagnostic notation':\n")
               .append(CBORObject.decode(unsignedFwpAssertion).toString());
             

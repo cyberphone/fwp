@@ -141,14 +141,18 @@ public class FWPAssertionDecoder {
                                   " expected: " + FWPElements.CURRENT_VERSION);
         }
 
-        // Decode Payment Request.
+        // Payment Request (PRCD)
         paymentRequest = 
                 new PaymentRequest(fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
 
-        // Account data.
+        // Account.
         accountId = getString(FWPElements.ACCOUNT_ID);
-        serialNumber = getString(FWPElements.SERIAL_NUMBER);
+        
+        // For usage with the following payment method.
         paymentMethod = getString(FWPElements.PAYMENT_METHOD);
+
+        // Serial number of payment credential. Note: this is unrelated to FIDO credential Id.
+        serialNumber = getString(FWPElements.SERIAL_NUMBER);
 
         // Platform Data
         CBORMap platformData = 
@@ -162,7 +166,7 @@ public class FWPAssertionDecoder {
         // Date Time
         timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
 
-        // Host information from the browser.
+        // Host information from the browser
         hostName = getString(FWPElements.PAYEE_HOST_NAME);
 
         // Optional Network Data.
@@ -174,9 +178,8 @@ public class FWPAssertionDecoder {
             networkData.scan();
         }
 
-        // Finally, the authorization signature
-        publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion,
-                                                   FWPElements.AUTHORIZATION.cborLabel);
+        // Finally, the authorization signature.
+        publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion);
         // Check that we didn't forgot anything or that there is "other" data.
         fwpAssertion.checkObjectForUnread();
     }

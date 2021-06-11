@@ -49,83 +49,6 @@ import org.webpki.util.ArrayUtil;
  */
 public class FWPCrypto {
     
-    private static byte[] addRemainingElements(CBORMap cborFwpAssertion,
-                                               byte[] clientDataJSON,
-                                               byte[] authenticatorData,
-                                               byte[] signature) throws IOException {
-        cborFwpAssertion.getObject(FWPElements.AUTHORIZATION.cborLabel).getMap()
-            .setObject(AS_CLIENT_DATA_JSON, 
-                       new CBORByteString(clientDataJSON))
-            .setObject(AS_AUTHENTICATOR_DATA,
-                       new CBORByteString(authenticatorData))
-            .setObject(AS_SIGNATURE,
-                       new CBORByteString(signature));
-        return cborFwpAssertion.encode();
-    }
-
-    public static byte[] AddPostSignature(byte[] fwpAssertionPlus,
-                                          byte[] clientDataJSON,
-                                          byte[] authenticatorData,
-                                          byte[] signature) throws IOException,
-                                                                   GeneralSecurityException {
-        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertionPlus),
-                               JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
-            throw new GeneralSecurityException("Message hash mismatch");
-        }
-        CBORMap cborFwpAssertion = CBORObject.decode(fwpAssertionPlus).getMap();
-        return addRemainingElements(cborFwpAssertion, clientDataJSON, authenticatorData, signature);
-    }
-    
-    public static byte[] directSign(byte[] fwpAssertionPlus,
-                                    PrivateKey privateKey,
-                                    String origin) throws IOException,
-                                                                    GeneralSecurityException {
-        CBORMap cborFwpAssertion = CBORObject.decode(fwpAssertionPlus).getMap();
-        int coseAlgorithm = cborFwpAssertion.getObject(FWPElements.AUTHORIZATION.cborLabel)
-                .getMap().getObject(AS_ALGORITHM).getInt();
-        byte[] challenge = HashAlgorithms.SHA256.digest(fwpAssertionPlus);
-        // Now we have the data needed for creating the FIDI ClientDataJSON object.
-        byte[] clientDataJSON = new JSONObjectWriter()
-                .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
-                .setString(CDJ_ORIGIN, origin)
-                .setBinary(CHALLENGE, challenge)
-                .serializeToBytes(JSONOutputFormats.NORMALIZED);
-        
-        // Hard-coded FIDO Authenticator Data
-        byte[] authenticatorData = ArrayUtil.add(
-                HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
-                                             new byte[] {1, 0, 0 ,0, 0});
-        
-        // Create FIDO signature.
-        byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
-                .setEcdsaSignatureEncoding(true)
-                .update(authenticatorData)
-                .update(HashAlgorithms.SHA256.digest(clientDataJSON))
-                .sign();
-        return addRemainingElements(cborFwpAssertion, clientDataJSON, authenticatorData, signature);
-    }
-
-    public static class FWPPreSigner  {
-
-        PublicKey publicKey;
-        
-        public FWPPreSigner(PublicKey publicKey) {
-            this.publicKey = publicKey;
-        }
-
-        CBORMap appendSignatureObject(CBORMap fwpAssertion) 
-                throws IOException, GeneralSecurityException {
-            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(publicKey);
-            
-            // Add the authorization container map including the members that
-            // also are signed.
-            return new CBORMap()
-                .setObject(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
-                .setObject(AS_PUBLIC_KEY,
-                           CBORPublicKey.encode(publicKey));
-        }
-    }
-    
     private FWPCrypto() {}
     
     // FIDO call data
@@ -156,7 +79,79 @@ public class FWPCrypto {
     static final int AS_CLIENT_DATA_JSON   = 4;
     static final int AS_SIGNATURE          = 5;
     
+    // For attestation objects
     static final int COSE_ALGORITHM_LABEL  = 3;
+    
+    static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
+
+    private static byte[] addRemainingElements(CBORMap fwpAssertionInProgress,
+    		                                  byte[] clientDataJSON,
+    		                                  byte[] authenticatorData, 
+    		                                  byte[] signature) throws IOException {
+        fwpAssertionInProgress.getObject(FWP_AUTHORIZATION_LABEL).getMap()
+                .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
+                .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
+                .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        return fwpAssertionInProgress.encode();
+    }
+
+    public static byte[] AddPostSignature(byte[] unsignedFwpAssertion,
+                                          byte[] clientDataJSON,
+                                          byte[] authenticatorData,
+            byte[] signature) throws IOException, GeneralSecurityException {
+        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
+                JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
+            throw new GeneralSecurityException("Message hash mismatch");
+        }
+        CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
+        return addRemainingElements(
+                cborFwpAssertion, clientDataJSON, authenticatorData, signature);
+    }
+
+    public static byte[] directSign(byte[] unsignedFwpAssertion, 
+    		                        PrivateKey privateKey, 
+    		                        String origin)
+            throws IOException, GeneralSecurityException {
+        CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
+        int coseAlgorithm = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
+                .getObject(AS_ALGORITHM).getInt();
+        byte[] challenge = HashAlgorithms.SHA256.digest(unsignedFwpAssertion);
+
+        // Now we have the data needed for creating the FIDO ClientDataJSON object.
+        byte[] clientDataJSON = new JSONObjectWriter().setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
+                .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
+                .serializeToBytes(JSONOutputFormats.NORMALIZED);
+
+        // Hard-coded FIDO Authenticator Data
+        byte[] authenticatorData = ArrayUtil.add(
+                HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
+                new byte[] { 1, 0, 0, 0, 0 });
+
+        // Create a FIDO compatible signature.
+        byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
+                .setEcdsaSignatureEncoding(true).update(authenticatorData)
+                .update(HashAlgorithms.SHA256.digest(clientDataJSON)).sign();
+        return addRemainingElements(cborFwpAssertion, clientDataJSON, authenticatorData, signature);
+    }
+
+    public static class FWPPreSigner {
+
+        PublicKey publicKey;
+
+        public FWPPreSigner(PublicKey publicKey) {
+            this.publicKey = publicKey;
+        }
+
+        CBORMap appendSignatureObject() throws IOException, GeneralSecurityException {
+            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(publicKey);
+
+            // Add the authorization container map including the members that
+            // also are signed.
+            return new CBORMap().setObject(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
+                                .setObject(AS_PUBLIC_KEY, CBORPublicKey.encode(publicKey));
+        }
+    }
+
 
     /**
      * Public key to to COSE signature algorithm.
@@ -242,10 +237,9 @@ public class FWPCrypto {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpAssertion(CBORMap fwpAssertion,
-                                              int authorizationLabel)
+    public static byte[] validateFwpAssertion(CBORMap fwpAssertion)
             throws IOException, GeneralSecurityException {
-        CBORMap authorization = fwpAssertion.getObject(authorizationLabel).getMap();
+        CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
         byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
@@ -256,7 +250,7 @@ public class FWPCrypto {
         
         // We are nice and do not touch the original assertion.
         CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
-        CBORMap copyOfAuthorization = copyOfAssertion.getObject(authorizationLabel).getMap();
+        CBORMap copyOfAuthorization = copyOfAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
 
         // The following element do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having

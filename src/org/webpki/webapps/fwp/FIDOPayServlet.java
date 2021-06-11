@@ -31,9 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.cbor.CBORMap;
-import org.webpki.cbor.CBORObject;
-
 import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.fwp.FWPAssertionBuilder;
@@ -42,9 +39,6 @@ import org.webpki.fwp.FWPElements;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONParser;
-
-import org.webpki.util.ArrayUtil;
 
 /**
  * This Servlet is called by the PayServlet SPA
@@ -120,7 +114,7 @@ public class FIDOPayServlet extends HttpServlet {
 
             } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
  
-                // Login response! Now we must have an HTTP session.
+                // FIDO/WebAuthn response! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
                     FWPCommon.failed("Missing finalize session");
@@ -133,22 +127,17 @@ public class FIDOPayServlet extends HttpServlet {
                     FWPCommon.failed("Pay data missing");
                 }
 
-                // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
-                if (!ArrayUtil.compare(
-                        JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
-                    payData.getBinary(FWPCrypto.CHALLENGE))) {
-                    FWPCommon.failed("Challenge mismatch");
-                }
+                // Fetch the not yet complete assertion.
+                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
 
-                // Now we need to assemble the completed FWP assertion.
+                // Add the missing pieces from the associated FIDO/WebAuthn assertion.
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
-                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
                 resultJson.setBinary(FWPCommon.FWP_ASSERTION,
                                      FWPCrypto.AddPostSignature(unsignedAssertion,
-                                                                authenticatorData,
                                                                 clientDataJSON,
+                                                                authenticatorData,
                                                                 signature));
                 
             } else {

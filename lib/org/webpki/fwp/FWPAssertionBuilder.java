@@ -130,8 +130,7 @@ public class FWPAssertionBuilder {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
-        addElement(FWPElements.AUTHORIZATION,
-                   fwpPreSigner.appendSignatureObject(fwpAssertion));
+        addElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
         return fwpAssertion.encode();
     }
 }

@@ -22,7 +22,7 @@ Merchant 'W3C PaymentRequest' data:
 
 Merchant 'hostname' according to the browser: spaceshop.com
 
-The FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
+The unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
 Xhhzel_nHb32ptLVTQsx0w4B2vqERuWZc2vXJu56eoM
 This is subsequently used as FIDO 'challenge'.
 
@@ -98,7 +98,16 @@ Unsigned FWP assertion, here in CBOR 'diagnostic notation':
       2: "103"
     }
   },
-  10: 0("2021-06-10T08:34:21+02:00")
+  10: 0("2021-06-10T08:34:21+02:00"),
+  11: {
+    1: -7,
+    2: {
+      1: 2,
+      -1: 1,
+      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
+      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
+    }
+  }
 }
 
 Issuer encryption key in JWK format:
