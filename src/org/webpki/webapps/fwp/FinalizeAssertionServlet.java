@@ -1,0 +1,91 @@
+/*
+ *  Copyright 2018-2021 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+package org.webpki.webapps.fwp;
+
+import java.io.IOException;
+
+import java.util.Base64;
+
+import java.util.logging.Logger;
+
+import javax.servlet.ServletException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.webpki.cbor.CBORObject;
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
+
+/**
+ * This is a temporary payment application.
+ *
+ */
+public class FinalizeAssertionServlet extends HttpServlet {
+    
+    static Logger logger = Logger.getLogger(FinalizeAssertionServlet.class.getName());
+
+    private static final long serialVersionUID = 1L;
+    
+    
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        String encryptedSignedAuthorizationB64U = request.getParameter(FWPCommon.FWP_ESAD);
+        if (encryptedSignedAuthorizationB64U == null) {
+            FWPCommon.failed("Missing encrypted signed authorization data");
+            return;
+        }
+        JSONObjectReader accountData = JSONParser.parse(
+                request.getParameter(FWPCommon.FWP_ACCOUNT_DATA));
+        JSONObjectWriter fwpAssertion = new JSONObjectWriter()
+                .setString("paymentMethod", accountData.getString("pm"))
+                .setString("issuerId", accountData.getString("ii"))
+                .setString("encryptedAuthorization", encryptedSignedAuthorizationB64U);
+        StringBuilder html = new StringBuilder(
+            "<form name='shoot' method='POST' action='nowhere'>" +
+            "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION +
+            "' value='")
+        .append(fwpAssertion.serializeToString(JSONOutputFormats.NORMALIZED))
+        .append(
+            "'/>" +
+            "</form>" +
+
+            "<div class='header'>Finally, the FWP Assertion!</div>" +
+
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+              "<div class='comment'>" +
+                  "The following object represents the completed FWP assertion." +
+              "</div>" +
+            "</div>" +
+            
+            "<div style='display:flex;justify-content:center'>" +
+              "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+                "Return FWP Assertion to Merchant" +
+              "</div>" +
+            "</div>" +
+            "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
+                "<div class='ctbl'>")
+        .append(HTML.encode(fwpAssertion.toString(), true))
+        .append("</div>" +
+            "</div>");
+        HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
+    }
+
+}

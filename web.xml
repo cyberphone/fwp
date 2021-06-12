@@ -35,24 +35,35 @@
     </servlet>    
         
     <servlet>
-        <servlet-name>PayServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.PayServlet</servlet-class>
+        <servlet-name>BuyServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.BuyServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>ADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.ADServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>SADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.SADServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>ESADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.ESADServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>FinalizeAssertionServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FinalizeAssertionServlet</servlet-class>
     </servlet>
 
-    <servlet>
-        <servlet-name>EncryptionServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.EncryptionServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>FinalizeServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.FinalizeServlet</servlet-class>
-    </servlet>
     <servlet>
         <servlet-name>FIDOPayServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
     </servlet>
-
+    
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.LoginServlet</servlet-class>
@@ -82,21 +93,31 @@
         <servlet-name>FIDOEnrollServlet</servlet-name>
         <url-pattern>/fidoenroll</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuyServlet</servlet-name>
+        <url-pattern>/buy</url-pattern>
+    </servlet-mapping>
+       
+    <servlet-mapping>
+        <servlet-name>ADServlet</servlet-name>
+        <url-pattern>/ad</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SADServlet</servlet-name>
+        <url-pattern>/sad</url-pattern>
+    </servlet-mapping>
     
     <servlet-mapping>
-        <servlet-name>PayServlet</servlet-name>
-        <url-pattern>/pay</url-pattern>
+        <servlet-name>ESADServlet</servlet-name>
+        <url-pattern>/esad</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>EncryptionServlet</servlet-name>
-        <url-pattern>/encryption</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>FinalizeServlet</servlet-name>
-        <url-pattern>/finalize</url-pattern>
-    </servlet-mapping>
+        <servlet-name>FinalizeAssertionServlet</servlet-name>
+        <url-pattern>/finalizeassertion</url-pattern>
+    </servlet-mapping> 
 
     <servlet-mapping>
         <servlet-name>FIDOPayServlet</servlet-name>

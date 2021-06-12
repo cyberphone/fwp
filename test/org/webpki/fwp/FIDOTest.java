@@ -175,14 +175,14 @@ public class FIDOTest {
                                                                 GeneralSecurityException {
         return FWPCrypto.directSign(
                 new FWPAssertionBuilder()
-            .addPaymentRequest(getPaymentRequest(true, true))
-            .addPayeeHostName("spaceshop.com")
-            .addAccountData("FR7630002111110020050014382",
+            .setPaymentRequest(getPaymentRequest(true, true))
+            .setPayeeHostName("spaceshop.com")
+            .setAccountData("FR7630002111110020050014382",
                             "057862932",
                             "https://bankdirect.com")
-            .addPlatformData("Android", "10.0", "Chrome", "103")
-            .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
-            .addOptionalNetworkData(networkData)
+            .setPlatformData("Android", "10.0", "Chrome", "103")
+            .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
+            .setOptionalNetworkData(networkData)
             .create(fwpPreSigner),
             privateKey, "https://mybank.com");
     }
@@ -191,7 +191,7 @@ public class FIDOTest {
     public void CreateAssertions() throws Exception {
         try {
             new FWPAssertionBuilder()
-                .addPaymentRequest(getPaymentRequest(true, false))
+                .setPaymentRequest(getPaymentRequest(true, false))
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
@@ -200,7 +200,7 @@ public class FIDOTest {
 
         try {
             new FWPAssertionBuilder()
-                .addPaymentRequest(getPaymentRequest(true, true))
+                .setPaymentRequest(getPaymentRequest(true, true))
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
@@ -209,9 +209,9 @@ public class FIDOTest {
 
         try {
             new FWPAssertionBuilder()
-                .addPaymentRequest(getPaymentRequest(true, true))
-                .addPayeeHostName("example.com")
-                .addPayeeHostName("example.com")
+                .setPaymentRequest(getPaymentRequest(true, true))
+                .setPayeeHostName("example.com")
+                .setPayeeHostName("example.com")
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {

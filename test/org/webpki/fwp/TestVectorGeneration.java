@@ -114,15 +114,15 @@ public class TestVectorGeneration {
         String paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
         
         byte[] unsignedFwpAssertion = new FWPAssertionBuilder()
-                .addPaymentRequest(paymentRequestJson)
-                .addOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
+                .setPaymentRequest(paymentRequestJson)
+                .setOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
                                                                 ISODateTime.LOCAL_NO_SUBSECONDS))
-                .addAccountData("FR7630002111110020050014382",
+                .setAccountData("FR7630002111110020050014382",
                                 "0057162932",
                                 "https://bankdirect.com")
-                .addPlatformData("Android", "10.0", "Chrome", "103")
-                .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
-                .addPayeeHostName(MERCHANT_HOST)
+                .setPlatformData("Android", "10.0", "Chrome", "103")
+                .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
+                .setPayeeHostName(MERCHANT_HOST)
                 .create(fwpSigner);
         
         byte[] fwpAssertion = 

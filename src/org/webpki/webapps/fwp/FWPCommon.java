@@ -61,12 +61,21 @@ public class FWPCommon {
     // Attribute returned to the client in case of a server-side error
     static final String ERROR_JSON               = "error";
     
+    // Wallet sort of
+    static final String WALLET_REQUEST           = "walletRequest";
+    
     // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";
     static final String PAYMENT_REQUEST          = "paymentRequest";
 
-    // "Wallet" core
+    // FWP core
+    static final String FWP_AD                   = "ad";
+    static final String FWP_SAD                  = "sad";
+    static final String FWP_ESAD                 = "esad";
     static final String FWP_ASSERTION            = "fwpAssertion";
+    
+    // Follows all steps
+    static final String FWP_ACCOUNT_DATA         = "accountData";
     
     // Init/finalize phase session attributes
     static final String ATTR_REGISTER_DATA       = "registerdata";

@@ -35,9 +35,9 @@ import org.webpki.cbor.CBORMap;
  * This is a temporary payment application.
  *
  */
-public class EncryptionServlet extends HttpServlet {
+public class ESADServlet extends HttpServlet {
     
-    static Logger logger = Logger.getLogger(EncryptionServlet.class.getName());
+    static Logger logger = Logger.getLogger(ESADServlet.class.getName());
 
     private static final long serialVersionUID = 1L;
     
@@ -45,8 +45,8 @@ public class EncryptionServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            String fwpAssertionB64U = request.getParameter(FWPCommon.FWP_ASSERTION);
-            if (fwpAssertionB64U == null) {
+            String signedAuthorizationDataB64U = request.getParameter(FWPCommon.FWP_SAD);
+            if (signedAuthorizationDataB64U == null) {
                 FWPCommon.failed("FWP assertion missing");
             }
             
@@ -55,14 +55,19 @@ public class EncryptionServlet extends HttpServlet {
                                              FWPService.issuerKeyEncryptionAlgorithm,
                                              FWPService.issuerContentEncryptionAlgorithm)
                 .setKeyId(FWPService.issuerKeyId).encrypt(
-                        Base64.getUrlDecoder().decode(fwpAssertionB64U));
+                        Base64.getUrlDecoder().decode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(
-                "<form name='shoot' method='POST' action='assertion'>" +
-                "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION + 
+                "<form name='shoot' method='POST' action='finalizeassertion'>" +
+                "<input type='hidden' name='" + FWPCommon.FWP_ESAD + 
                 "' value='")
             .append(Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted.encode()))
             .append(
+                "'/>" +
+                "<input type='hidden' name='" + FWPCommon.FWP_ACCOUNT_DATA + 
+                "' value='")
+                .append(request.getParameter(FWPCommon.FWP_ACCOUNT_DATA))
+                .append(
                 "'/>" +
                 "</form>" +
 
@@ -84,7 +89,6 @@ public class EncryptionServlet extends HttpServlet {
             .append(HTML.encode(encrypted.toString(), true))
             .append("</div>" +
                 "</div>");
-        
             HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);

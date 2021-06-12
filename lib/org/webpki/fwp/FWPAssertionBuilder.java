@@ -44,10 +44,10 @@ public class FWPAssertionBuilder {
     HashSet<FWPElements> elementList = new HashSet<>();
     
     public FWPAssertionBuilder() throws IOException {
-        addStringElement(FWPElements.FWP_VERSION, FWPElements.CURRENT_VERSION);
+        setStringElement(FWPElements.FWP_VERSION, FWPElements.CURRENT_VERSION);
     }
     
-    private FWPAssertionBuilder addElement(FWPElements name,
+    private FWPAssertionBuilder setElement(FWPElements name,
                                            CBORObject value) throws IOException {
         if (elementList.contains(FWPElements.AUTHORIZATION)) {
             throw new IOException("Nothing can be added after: " + 
@@ -60,18 +60,18 @@ public class FWPAssertionBuilder {
         return this;
     }
     
-    private FWPAssertionBuilder addStringElement(FWPElements element,
+    private FWPAssertionBuilder setStringElement(FWPElements element,
                                                  String string) throws IOException {
-        return addElement(element, new CBORTextString(string));
+        return setElement(element, new CBORTextString(string));
     }
     
-    public FWPAssertionBuilder addPaymentRequest(String jsonString) throws IOException {
-        return addElement(FWPElements.PAYMENT_REQUEST,
+    public FWPAssertionBuilder setPaymentRequest(String jsonString) throws IOException {
+        return setElement(FWPElements.PAYMENT_REQUEST,
                           FWPElements.convertPaymentRequest(jsonString));
     }
     
-    public FWPAssertionBuilder addPayeeHostName(String payeeHostName) throws IOException {
-        return addStringElement(FWPElements.PAYEE_HOST_NAME, payeeHostName);
+    public FWPAssertionBuilder setPayeeHostName(String payeeHostName) throws IOException {
+        return setStringElement(FWPElements.PAYEE_HOST_NAME, payeeHostName);
     }
     
     private CBORMap nameVersion(String name, String version) throws IOException {
@@ -81,46 +81,46 @@ public class FWPAssertionBuilder {
                                        new CBORTextString(version));
     }
     
-    public FWPAssertionBuilder addPlatformData(String osName,
+    public FWPAssertionBuilder setPlatformData(String osName,
                                                String osVersion,
                                                String browserName,
                                                String browserVersion) throws IOException {
-        return addElement(FWPElements.PLATFORM_DATA,
+        return setElement(FWPElements.PLATFORM_DATA,
                           new CBORMap().setObject(FWPElements.CBOR_PD_OPERATING_SYSTEM,
                                                   nameVersion(osName, osVersion))
                                        .setObject(FWPElements.CBOR_PD_USER_AGENT,
                                                   nameVersion(browserName, browserVersion)));
     }
     
-    public FWPAssertionBuilder addAccountData(String accountId,
+    public FWPAssertionBuilder setAccountData(String accountId,
                                               String serialNumber,
                                               String paymentMethod) throws IOException {
-        addStringElement(FWPElements.ACCOUNT_ID, accountId);
-        addStringElement(FWPElements.SERIAL_NUMBER, serialNumber);
-        addStringElement(FWPElements.PAYMENT_METHOD, paymentMethod);
+        setStringElement(FWPElements.ACCOUNT_ID, accountId);
+        setStringElement(FWPElements.SERIAL_NUMBER, serialNumber);
+        setStringElement(FWPElements.PAYMENT_METHOD, paymentMethod);
         return this;
     }
     
-    public FWPAssertionBuilder addOptionalTimeStamp(GregorianCalendar timeStamp) throws IOException {
-        return addElement(FWPElements.TIME_STAMP,
+    public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) throws IOException {
+        return setElement(FWPElements.TIME_STAMP,
                           new CBORDateTime(timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS));
     }
     
-    public FWPAssertionBuilder addOptionalNetworkData(String jsonStringOrNull) throws IOException {
-        return jsonStringOrNull == null ? this : addElement(FWPElements.NETWORK_DATA,
+    public FWPAssertionBuilder setOptionalNetworkData(String jsonStringOrNull) throws IOException {
+        return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_DATA,
                                                             JSONReader.convert(jsonStringOrNull));
     }
 
-    public FWPAssertionBuilder addUserAuthorizationMethod(
+    public FWPAssertionBuilder setUserAuthorizationMethod(
                           FWPElements.UserAuthorizationMethods userAuthz) throws IOException {
-        return addElement(FWPElements.USER_AUTHORIZATION_METHOD,
+        return setElement(FWPElements.USER_AUTHORIZATION_METHOD,
                           new CBORInteger(userAuthz.cborValue));
     }
 
     public byte[] create(FWPPreSigner fwpPreSigner) throws IOException, GeneralSecurityException {
         // Default time is now.
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
-            addOptionalTimeStamp(new GregorianCalendar());
+            setOptionalTimeStamp(new GregorianCalendar());
         }
         for (FWPElements name : FWPElements.values()) {
             // Only NETWORK_DATA is optional.
@@ -130,7 +130,7 @@ public class FWPAssertionBuilder {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
-        addElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
+        setElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
         return fwpAssertion.encode();
     }
 }

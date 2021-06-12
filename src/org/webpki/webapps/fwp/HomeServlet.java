@@ -58,7 +58,7 @@ public class HomeServlet extends HttpServlet {
             "<div id='" + BUTTONS_ID + "' style='display:flex;justify-content:center'>" +
               "<table>" +
 
-                "<tr><td><div class='multibtn' onclick=\"document.location.href='pay'\" >" +
+                "<tr><td><div class='multibtn' onclick=\"document.location.href='buy'\" >" +
                     "Buy Something!" +
                 "</div></td></tr>" +
     

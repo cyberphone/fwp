@@ -33,9 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.crypto.HashAlgorithms;
 
-import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
-import org.webpki.fwp.FWPElements;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -92,18 +90,11 @@ public class FIDOPayServlet extends HttpServlet {
                     resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
 
-                byte[]unsignedAssertion = new FWPAssertionBuilder()
-                .addPaymentRequest(requestJson.getObject(FWPCommon.PAYMENT_REQUEST).toString())
-                .addPayeeHostName("spaceshop.com")
-                .addAccountData("FR7630002111110020050014382",
-                                "057862932",
-                                "https://bankdirect.com")
-                .addPlatformData("Android", "10.0", "Chrome", "103")
-                .addUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
-                .create(new FWPCrypto.FWPPreSigner(coreClientData.publicKey));
+                // Get the Authorization Data (AD).
+                byte[]unsignedAssertion = requestJson.getBinary(FWPCommon.FWP_AD);
 
                 // Need to save it for completion by FIDO.
-                resultJson.setBinary(FWPCommon.FWP_ASSERTION, unsignedAssertion);
+                resultJson.setBinary(FWPCommon.FWP_AD, unsignedAssertion);
 
                 // Make FIDO sign a hash of the unsigned assertion.
                 resultJson.setBinary(FWPCrypto.CHALLENGE, 
@@ -128,18 +119,17 @@ public class FIDOPayServlet extends HttpServlet {
                 }
 
                 // Fetch the not yet complete assertion.
-                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_ASSERTION);
+                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_AD);
 
                 // Add the missing pieces from the associated FIDO/WebAuthn assertion.
                 byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
-                resultJson.setBinary(FWPCommon.FWP_ASSERTION,
+                resultJson.setBinary(FWPCommon.FWP_SAD,
                                      FWPCrypto.AddPostSignature(unsignedAssertion,
                                                                 clientDataJSON,
                                                                 authenticatorData,
                                                                 signature));
-                
             } else {
                 FWPCommon.failed("Unknown phase: " + phase);
             }
