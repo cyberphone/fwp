@@ -40,6 +40,15 @@
     </servlet>
 
     <servlet>
+        <servlet-name>EncryptionServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.EncryptionServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FinalizeServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FinalizeServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>FIDOPayServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
     </servlet>
@@ -77,6 +86,16 @@
     <servlet-mapping>
         <servlet-name>PayServlet</servlet-name>
         <url-pattern>/pay</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EncryptionServlet</servlet-name>
+        <url-pattern>/encryption</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FinalizeServlet</servlet-name>
+        <url-pattern>/finalize</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

@@ -30,8 +30,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.cbor.CBORObject;
-
+import org.webpki.fwp.FWPAssertionDecoder;
 import org.webpki.fwp.FWPCrypto;
 
 import org.webpki.json.JSONOutputFormats;
@@ -40,9 +39,9 @@ import org.webpki.json.JSONOutputFormats;
  * This is a temporary payment application.
  *
  */
-public class PayServlet extends HttpServlet {
+public class ValidateServlet extends HttpServlet {
     
-    static Logger logger = Logger.getLogger(PayServlet.class.getName());
+    static Logger logger = Logger.getLogger(ValidateServlet.class.getName());
 
     private static final long serialVersionUID = 1L;
     
@@ -152,16 +151,28 @@ public class PayServlet extends HttpServlet {
             if (fwpAssertionB64U == null) {
                 FWPCommon.failed("FWP assertion missing");
             }
+
+            String userId = FWPCommon.getWalletCookie(request);
+            if (userId == null) {
+                FWPCommon.failed("User ID missing, have you enrolled?");
+            }
+
+            // Decode and validate the assertion.
+            FWPAssertionDecoder decodedFwp = 
+                    new FWPAssertionDecoder(Base64.getUrlDecoder().decode(fwpAssertionB64U));
+            
+            // Succeeded.  Is the key one of "ours"?
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                DataBaseOperations.authenticate(userId, decodedFwp.getPublicKey(), connection);
+            }
             
             StringBuilder html = new StringBuilder(
                     "<form name='shoot' method='POST' action='encryption'>" +
-                    "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION + 
-                    "' value='")
-            .append(fwpAssertionB64U)
-            .append("'/>" +
+                    "<input type='hidden' id='" + FWPCommon.FWP_ASSERTION + 
+                    "' name='" + FWPCommon.FWP_ASSERTION + "'/>" +
                     "</form>" +
 
-                    "<div class='header'>Signed Authorization Data (SAD)</div>" +
+                    "<div class='header'>Signed Authorization Created</div>" +
             
                     "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                       "<div class='comment'>" +
@@ -170,15 +181,14 @@ public class PayServlet extends HttpServlet {
                       "</div>" +
                     "</div>" +
                     "<div style='display:flex;justify-content:center'>" +
-                      "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+                      "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doEncryption()\">" +
                         "Next step - Encryption" +
                       "</div>" +
                     "</div>" +
                     "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
                         "<div class='ctbl'>")
-                .append(HTML.encode(CBORObject.decode(
-                            Base64.getUrlDecoder().decode(fwpAssertionB64U)).toString(), true))
-                 .append("</div>" +
+                .append(decodedFwp.getDecoded().toString().replace("\n", "<br>").replace(" ", "&nbsp;"))
+                .append("</div>" +
                     "</div>");
             
             HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);

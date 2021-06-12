@@ -96,8 +96,6 @@ public class EnrollServlet extends HttpServlet {
                 "</form>");
     
             String js = alreadyEnrolled ? null : new StringBuilder(
-                "'use strict';\n" +
-                
                 "const serviceUrl = 'fidoenroll';\n" +
 
                 FWPCommon.FWP_JAVASCRIPT +

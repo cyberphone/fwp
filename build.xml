@@ -97,7 +97,7 @@
         <include name="thelab.svg"/>
       </zipfileset>
       <zipfileset dir="${openkeystore.dir}/testdata/keys" prefix="${class_war_path}">
-        <include name="ed25519"/>
+        <include name="x25519privatekey.jwk"/>
       </zipfileset>
     </war>
   </target>

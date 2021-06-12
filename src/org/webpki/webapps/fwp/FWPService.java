@@ -18,7 +18,7 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.security.KeyPair;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,11 +31,12 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.webpki.crypto.CustomCryptoProvider;
-
+import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
+import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 import org.webpki.fwp.FWPElements;
-
+import org.webpki.jose.JOSEKeyWords;
 import org.webpki.json.JSONObjectWriter;
-
+import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
@@ -44,20 +45,20 @@ public class FWPService extends InitPropertyReader implements ServletContextList
 
     static Logger logger = Logger.getLogger(FWPService.class.getName());
 
-    static String sampleSignature;
-    
-    static String sampleJsonForHashing;
-    
-    static String samplePublicKey;
-    
-    static String sampleKeyConversionKey;
-
-    static String keyDeclarations;
-    
     static DataSource jdbcDataSource;
     
     static JSONObjectWriter samplePaymentRequest;
     
+    static KeyPair issuerEncryptionKey;
+    
+    static String issuerKeyId = "x25519:2021:01";
+    
+    static KeyEncryptionAlgorithms issuerKeyEncryptionAlgorithm = 
+            KeyEncryptionAlgorithms.ECDH_ES_A256KW;
+
+    static ContentEncryptionAlgorithms issuerContentEncryptionAlgorithm =
+            ContentEncryptionAlgorithms.A256GCM;
+
     static String samplePayeeHostname = "spaceshop.com";
 
     static boolean logging;
@@ -89,15 +90,24 @@ public class FWPService extends InitPropertyReader implements ServletContextList
             /////////////////////////////////////////////////////////////////////////////////////////////
             logging = getPropertyBoolean("logging");
             
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Merchant
+            /////////////////////////////////////////////////////////////////////////////////////////////
             samplePaymentRequest = new JSONObjectWriter()
                     .setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
                     .setString(FWPElements.JSON_PR_ID, "7040566321")
                     .setString(FWPElements.JSON_PR_AMOUNT, "435.00")
                     .setString(FWPElements.JSON_PR_CURRENCY, "EUR");
  
-            ////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Issuer data
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            issuerEncryptionKey = JSONParser.parse(getEmbeddedResource("x25519privatekey.jwk"))
+                   .removeProperty(JOSEKeyWords.KID_JSON).getKeyPair();
+
+            /////////////////////////////////////////////////////////////////////////////////////////////
             // Database
-            ////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////
             Context initContext = new InitialContext();
             Context envContext  = (Context)initContext.lookup("java:/comp/env");
             jdbcDataSource = (DataSource)envContext.lookup("jdbc/FWP");

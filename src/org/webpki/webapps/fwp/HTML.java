@@ -61,6 +61,9 @@ public class HTML {
                 case '\'':
                     buf.append("&#039;");
                     break;
+                case ' ':
+                    buf.append("&nbsp;");
+                    break;
                 default:
                     buf.append(c);
                     break;
@@ -75,7 +78,7 @@ public class HTML {
     static String getHTML(String javascript, String box) {
         StringBuilder html = new StringBuilder(HTML_INIT);
         if (javascript != null) {
-            html.append("<script>").append(javascript)
+            html.append("<script>\n'use strict';\n").append(javascript)
                     .append("</script>");
         }
         html.append("</head><body>" +

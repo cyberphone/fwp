@@ -81,8 +81,6 @@ public class LoginServlet extends HttpServlet {
             "</form>");
 
         String js = new StringBuilder(
-            "'use strict';\n" +
-            
             "const serviceUrl = 'fidologin';\n" +
 
             FWPCommon.FWP_JAVASCRIPT +
@@ -189,8 +187,8 @@ public class LoginServlet extends HttpServlet {
                 .append("/ ")
                 .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
                 .append(" Key /<br>")
-                .append(CBORPublicKey.encode(coreClientData.publicKey).toString()
-                            .replace("\n", "<br>").replace(" ", "&nbsp;"))
+                .append(HTML.encode(
+                            CBORPublicKey.encode(coreClientData.publicKey).toString(), true))
                 .append("</div>" +
 
                     "</div>");
