@@ -122,6 +122,7 @@ public class TestVectorGeneration {
                                 "https://bankdirect.com")
                 .setPlatformData("Android", "10.0", "Chrome", "103")
                 .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
+                .setOptionalNetworkData("\"additional stuff...\"")
                 .setPayeeHostName(MERCHANT_HOST)
                 .create(fwpSigner);
         
