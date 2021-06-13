@@ -32,7 +32,7 @@ import org.webpki.cbor.CBORAsymKeyEncrypter;
 import org.webpki.cbor.CBORMap;
 
 /**
- * This is a temporary payment application.
+ * Creates and shows the encrypted SAD object (ESAD).
  *
  */
 public class ESADServlet extends HttpServlet {
@@ -75,8 +75,10 @@ public class ESADServlet extends HttpServlet {
         
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>" +
-                     "The following is what the browser (FWP implementation) generated internally. " +
-                     "However, we are not done yet!" +
+                  "<b>Step 4.4</b>.  The authorization data has now been signed and encrypted, " +
+                  "the latter using an <i>issuer-specific key</i>." +
+                  "<div style='margin-top:0.4em'>However, payment backend processing needs some data " +
+                  "in clear in order to perform its work.</div>" +
                   "</div>" +
                 "</div>" +
                 "<div style='display:flex;justify-content:center'>" +
@@ -84,10 +86,10 @@ public class ESADServlet extends HttpServlet {
                     "Next step - Finalize Assertion" +
                   "</div>" +
                 "</div>" +
-                "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
-                    "<div class='ctbl'>")
+
+                "<div class='staticbox'>")
             .append(HTML.encode(encrypted.toString(), true))
-            .append("</div>" +
+            .append(
                 "</div>");
             HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {

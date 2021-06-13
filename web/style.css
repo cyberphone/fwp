@@ -26,6 +26,8 @@ li {
 }
 
 .staticbox, .textbox {
+  font-family:"Noto Mono",monospace;
+  margin-top: 1.5em;
   box-sizing:border-box;
   width:100%;word-break:break-all;
   border-width:1px;
@@ -83,6 +85,7 @@ li {
 }
 
 .comment {
+  max-width: 40em;
   padding:0.5em 1em;
   background-color:#fffdf2;
   box-shadow: 0.2em 0.2em 0.2em #d0d0d0;

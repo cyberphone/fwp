@@ -60,6 +60,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>MerchantServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.MerchantServlet</servlet-class>
+    </servlet>
+ 
+    <servlet>
         <servlet-name>FIDOPayServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
     </servlet>
@@ -117,6 +122,11 @@
     <servlet-mapping>
         <servlet-name>FinalizeAssertionServlet</servlet-name>
         <url-pattern>/finalizeassertion</url-pattern>
+    </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>MerchantServlet</servlet-name>
+        <url-pattern>/merchant</url-pattern>
     </servlet-mapping> 
 
     <servlet-mapping>

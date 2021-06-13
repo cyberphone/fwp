@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.util.Base64;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,65 +28,63 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
+import org.webpki.cbor.CBORMap;
+import org.webpki.cbor.CBORObject;
+import org.webpki.fwp.FWPCrypto;
 import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONParser;
 
 /**
- * Creates and shows the finalized FWP assertion.
+ * TBD
  *
  */
-public class FinalizeAssertionServlet extends HttpServlet {
+public class MerchantServlet extends HttpServlet {
     
-    static Logger logger = Logger.getLogger(FinalizeAssertionServlet.class.getName());
+    static Logger logger = Logger.getLogger(MerchantServlet.class.getName());
 
     private static final long serialVersionUID = 1L;
     
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        String encryptedSignedAuthorizationB64U = request.getParameter(FWPCommon.FWP_ESAD);
-        if (encryptedSignedAuthorizationB64U == null) {
-            FWPCommon.failed("Missing encrypted signed authorization data");
+        String fwpAssertion = request.getParameter(FWPCommon.FWP_ASSERTION);
+        if (fwpAssertion == null) {
+            FWPCommon.failed("Missing FWP assertion");
             return;
         }
-        JSONObjectReader accountData = JSONParser.parse(
-                request.getParameter(FWPCommon.FWP_ACCOUNT_DATA));
-        JSONObjectWriter fwpAssertion = new JSONObjectWriter()
-                .setString("paymentMethod", accountData.getString("pm"))
-                .setString("issuerId", accountData.getString("ii"))
-                .setString("encryptedAuthorization", encryptedSignedAuthorizationB64U);
         StringBuilder html = new StringBuilder(
-            "<form name='shoot' method='POST' action='merchant'>" +
+            "<form name='shoot' method='POST' action='esad'>" +
             "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION +
             "' value='")
-        .append(fwpAssertion.serializeToString(JSONOutputFormats.NORMALIZED))
+        .append(fwpAssertion)
         .append(
             "'/>" +
             "</form>" +
 
-            "<div class='header'>Finally, the FWP Assertion!</div>" +
+            "<div class='header'>Back to Merchant</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "<b>Step 4.5</b>. The following data represents the completed FWP assertion." +
-                  "<div style='margin-top:0.4em'>To simplify usage in browsers and " +
-                  "payment processors, FWP assertions are provided as JSON objects. "+
-                  "Only verifiers need to deal with low-level CBOR processing.</div>" +
+              "This part is still to be written..." +
+              "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
               "</div>" +
-            "</div>" +
+            "</div>");
+/*
             
             "<div style='display:flex;justify-content:center'>" +
               "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-                "Return FWP Assertion to Merchant" +
+              "Next Step - Encrypt Authorization" +
               "</div>" +
             "</div>" +
 
             "<div class='staticbox'>")
-        .append(HTML.encode(fwpAssertion.toString(), true))
+        .append(HTML.encode(CBORObject.decode(
+                    Base64.getUrlDecoder().decode(fwpAssertion)).toString(), true)
+                .replace("9:", 
+                        "<span style='color:grey'>// The platform data is " +
+                          "currently not authentic</span><br>&nbsp;&nbsp;9:"))
         .append(
             "</div>");
+*/
         HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
     }
 

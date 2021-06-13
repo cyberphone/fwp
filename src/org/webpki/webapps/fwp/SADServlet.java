@@ -28,13 +28,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
-import org.webpki.fwp.FWPCrypto;
-import org.webpki.json.JSONOutputFormats;
 
 /**
- * This is a temporary payment application.
+ * Receives and shows the Signed Authorization Data (SAD).
  *
  */
 public class SADServlet extends HttpServlet {
@@ -69,20 +66,25 @@ public class SADServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "Encrypt now" +
+              "<b>Step 4.3</b>. THe FIDO signature has now been added. " +
+              "<div style='margin-top:0.4em'>Since FWP is a <i>privacy-centric scheme</i>, " +
+              "the data is not yet ready for release.</div>" +
               "</div>" +
             "</div>" +
             
             "<div style='display:flex;justify-content:center'>" +
               "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
-                "Pay using FWP" +
+              "Next Step - Encrypt Authorization" +
               "</div>" +
             "</div>" +
-            "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
-                "<div class='ctbl'>")
+
+            "<div class='staticbox'>")
         .append(HTML.encode(CBORObject.decode(
-                    Base64.getUrlDecoder().decode(signedAuthorizationB64U)).toString(), true))
-        .append("</div>" +
+                    Base64.getUrlDecoder().decode(signedAuthorizationB64U)).toString(), true)
+                .replace("9:&nbsp;", 
+                        "<span style='color:grey'>// The platform data is " +
+                          "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
+        .append(
             "</div>");
         HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
     }

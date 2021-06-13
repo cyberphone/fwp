@@ -113,8 +113,12 @@ public class ADServlet extends HttpServlet {
 
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>" +
-                      "This is just a temporary arrangement where you pay 140 EUR." +
-                  "</div>" +
+                  "<b>Step 4.2</b>.  The payment data to authorize. " +
+                  "This data is (after SHA256-digesting), used as FIDO 'challenge'. " +
+                  "That is, there is no FIDO authentication server since FWP is a " +
+                  "&quot;pure&quot; <i>authorization</i> scheme. " + 
+                  "<div style='margin-top:0.4em'>The data is shown in CBOR Diagnostic Notation.</div>" +
+                 "</div>" +
                 "</div>" +
                 
                 "<div style='display:flex;justify-content:center'>" +
@@ -126,16 +130,21 @@ public class ADServlet extends HttpServlet {
 
                 "<div style='display:flex;justify-content:center'>" +
                   "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doPay()\">" +
-                    "Authorize (Sign)" +
+                    "Authorize (Sign) using FIDO" +
                   "</div>" +
                 "</div>" +
-                "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
-                    "<div class='ctbl'>")
-            .append(HTML.encode(CBORObject.decode(fwpAssertion).toString(), true))
-            .append("</div>" +
+
+                "<div class='staticbox'>")
+            .append(HTML.encode(CBORObject.decode(fwpAssertion).toString(), true)
+                    .replace("9:&nbsp;", 
+                             "<span style='color:grey'>// The platform data is " +
+                               "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
+            .append(
                 "</div>");
 
             String js = new StringBuilder(
+
+                FWPCommon.GO_HOME_JAVASCRIPT +
                 
                 "const serviceUrl = 'fidopay';\n" +
 

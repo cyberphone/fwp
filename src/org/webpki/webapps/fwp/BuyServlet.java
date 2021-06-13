@@ -18,10 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -29,10 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.webpki.cbor.CBORObject;
-
-import org.webpki.fwp.FWPCrypto;
 
 import org.webpki.json.JSONOutputFormats;
 
@@ -49,6 +41,12 @@ public class BuyServlet extends HttpServlet {
    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        if (FWPCommon.getWalletCookie(request) == null) {
+            HTML.standardPage(response, null, new StringBuilder(
+                "<div class='important'>User ID is missing, have you enrolled?</div>"));
+            return;
+        }
+
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='ad'>" +
         
@@ -59,7 +57,9 @@ public class BuyServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "This is just a temporary arrangement where you pay 140 EUR." +
+                  "This is just a temporary arrangement where you pay 435 EUR." +
+                  "<div style='margin-top:0.4em'>It will later be replaced by a " +
+                  "merchant application as well as the FWP wallet UI.</div>" +
               "</div>" +
             "</div>" +
             
