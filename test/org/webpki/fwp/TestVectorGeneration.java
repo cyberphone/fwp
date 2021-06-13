@@ -68,9 +68,9 @@ public class TestVectorGeneration {
     
     static final String FILE_TESTVECTOR_TEXT = "vectors.txt";
     
-    static final String FILE_UNSIGNED_CBOR   = "unsigned.cbor";
-    static final String FILE_SIGNED_CBOR     = "signed.cbor";
-    static final String FILE_ENCRYPTED_CBOR  = "encrypted.cbor";
+    static final String FILE_UNSIGNED_CBOR   = "AD.cbor";
+    static final String FILE_SIGNED_CBOR     = "SAD.cbor";
+    static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
 
     String testDataDir;
     String keyDir;
@@ -180,7 +180,9 @@ public class TestVectorGeneration {
               .append(DebugFormatter.getHexString(fwpAssertion));
 
   
-        conditionalRewrite(testDataDir + FILE_UNSIGNED_CBOR, unsignedFwpAssertion);
+        if (conditionalRewrite(testDataDir + FILE_UNSIGNED_CBOR, unsignedFwpAssertion)) {
+        	writeTextVersion(FILE_UNSIGNED_CBOR, unsignedFwpAssertion);
+        }
         
         KeyPair x25519 = readKey("x25519");
         result.append("\n\n\n" +
@@ -196,14 +198,16 @@ public class TestVectorGeneration {
                                          ISSUER_KEY_ENCRYPTION_ALGORITHM,
                                          ISSUER_CONTENT_ENCRYPTION_ALGORITHM)
                 .setKeyId(ISSUER_KEY_ID).encrypt(fwpAssertion).encode();
-        if (signRewrite) {
-            ArrayUtil.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
-        } else {
+        if (!signRewrite) {
             try {
                 encryptedAssertion = ArrayUtil.readFile(testDataDir + FILE_ENCRYPTED_CBOR);
             } catch (Exception e) {
-                
+                signRewrite = true;
             }
+        }
+        if (signRewrite) {
+        	ArrayUtil.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
+        	writeTextVersion(FILE_ENCRYPTED_CBOR, encryptedAssertion);
         }
         
         result.append("\n\nEncrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:\n")
@@ -233,16 +237,17 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, result.toString().getBytes("utf-8"));
     }
 
-    void conditionalRewrite(String fileName, byte[] newFile) throws IOException {
+    boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {
         try {
             byte[] oldFile = ArrayUtil.readFile(fileName);
             if (ArrayUtil.compare(oldFile, newFile)) {
-                return;
+                return false;
             }
         } catch (Exception e) {
             
         }
         ArrayUtil.writeFile(fileName, newFile);
+        return true;
     }
 
 
@@ -264,11 +269,19 @@ public class TestVectorGeneration {
         }
         signRewrite = true;
         ArrayUtil.writeFile(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
+        writeTextVersion(FILE_SIGNED_CBOR, fwpAssertion);
         return fwpAssertion;
     }
 
 
-    public static void main(String[] args) {
+    private void writeTextVersion(String fileSignedCbor, byte[] fwpAssertion) throws IOException {
+        ArrayUtil.writeFile(testDataDir + fileSignedCbor
+        		.substring(0, fileSignedCbor.length() - 4) + "txt",
+        		            CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
+    }
+
+
+	public static void main(String[] args) {
         try {
             CustomCryptoProvider.forcedLoad(false);
            new TestVectorGeneration(args[0] + File.separatorChar, args[1] + File.separatorChar);
