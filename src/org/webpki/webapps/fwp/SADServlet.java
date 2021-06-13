@@ -66,7 +66,7 @@ public class SADServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-              "<b>Step 4.3</b>. THe FIDO signature has now been added. " +
+              "<b>Step 4.3</b>. The FIDO signature has now been added. " +
               "<div style='margin-top:0.4em'>Since FWP is a <i>privacy-centric scheme</i>, " +
               "the data is not yet ready for release.</div>" +
               "</div>" +
