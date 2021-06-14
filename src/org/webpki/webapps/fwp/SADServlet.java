@@ -57,16 +57,18 @@ public class SADServlet extends HttpServlet {
             "'/>" +
             "<input type='hidden' name='" + FWPCommon.FWP_ACCOUNT_DATA + 
             "' value='")
-            .append(request.getParameter(FWPCommon.FWP_ACCOUNT_DATA))
-            .append(
+        .append(request.getParameter(FWPCommon.FWP_ACCOUNT_DATA))
+        .append(
             "'/>" +
             "</form>" +
 
             "<div class='header'>Signed Authorization Data (SAD)</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-              "<div class='comment'>" +
-              "<b>Step 4.3</b>. The FIDO signature has now been added. " +
+              "<div class='comment'>")
+        .append(ADServlet.sectionReference("seq-4.3"))
+        .append(
+              "The FIDO signature has now been added. " +
               "<div style='margin-top:0.4em'>Since FWP is a <i>privacy-centric scheme</i>, " +
               "the data is not yet ready for release.</div>" +
               "</div>" +

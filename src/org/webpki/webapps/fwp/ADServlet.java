@@ -54,8 +54,13 @@ public class ADServlet extends HttpServlet {
     private static final String WAITING_ID     = "wait";
     private static final String FAILED_ID      = "fail";
     private static final String ACTIVATE_ID    = "activate";
-    
-    
+
+
+    static String sectionReference(String section) {
+        return "<a href='" + "https://fido-web-pay.github.io/specification#" + section +
+                  "' target='_blank'><b>" + section + "</b></a>:  ";
+    }
+
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -112,8 +117,10 @@ public class ADServlet extends HttpServlet {
                 "<div class='header'>Authorization Data (AD)</div>" +
 
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                  "<div class='comment'>" +
-                  "<b>Step 4.2</b>.  The payment data to authorize. " +
+                  "<div class='comment'>")
+            .append(sectionReference("seq-4.2"))
+            .append(
+                  "The payment data to authorize. " +
                   "This data is (after SHA256-digesting), used as FIDO 'challenge'. " +
                   "That is, there is no FIDO authentication server since FWP is a " +
                   "&quot;pure&quot; <i>authorization</i> scheme. " + 
@@ -206,5 +213,4 @@ public class ADServlet extends HttpServlet {
             HTML.errorPage(response, e);
         }
     }
-
 }

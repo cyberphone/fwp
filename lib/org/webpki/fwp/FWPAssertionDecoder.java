@@ -132,7 +132,7 @@ public class FWPAssertionDecoder {
     
     public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
                                                                  GeneralSecurityException {
-    	// Convert binary into CBOR objects.
+        // Convert binary into CBOR objects.
         fwpAssertion = CBORObject.decode(signedFwpAssertion).getMap();
         
         // Are we compatible?

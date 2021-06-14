@@ -67,8 +67,10 @@ public class FinalizeAssertionServlet extends HttpServlet {
             "<div class='header'>Finally, the FWP Assertion!</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-              "<div class='comment'>" +
-                  "<b>Step 4.5</b>. The following data represents the completed FWP assertion." +
+              "<div class='comment'>")
+        .append(ADServlet.sectionReference("seq-4.5"))
+        .append(
+                  "The following data represents the completed FWP assertion." +
                   "<div style='margin-top:0.4em'>To simplify usage in browsers and " +
                   "payment processors, FWP assertions are provided as JSON objects. "+
                   "Only verifiers need to deal with low-level CBOR processing.</div>" +

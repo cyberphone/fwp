@@ -239,7 +239,7 @@ public class FWPCrypto {
      */
     public static byte[] validateFwpSignature(CBORMap fwpAssertion)
             throws IOException, GeneralSecurityException {
-    	// Retrieve the authorization object.
+        // Retrieve the authorization object.
         CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
         
         // Fetch the core FIDO assertion elements.
