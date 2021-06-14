@@ -56,8 +56,10 @@ public class TestVectorGeneration {
 
     static final Base64.Encoder Base64UrlEncoder = Base64.getUrlEncoder().withoutPadding();
     
-    static final String ISSUER_URL = "https://fwp.mybank.com";
-    static final String ISSUER_KEY_ID = "x25519:2021:3";
+    static final String ISSUER_URL     = "https://mybank.fr";
+    static final String ISSUER_ID      = "https://mybank.fr/payment";
+    static final String PAYMENT_METHOD = "https://bankdirect.com";
+    static final String ISSUER_KEY_ID  = "x25519:2021:3";
     static final KeyEncryptionAlgorithms ISSUER_KEY_ENCRYPTION_ALGORITHM =
             KeyEncryptionAlgorithms.ECDH_ES_A256KW;
     static final ContentEncryptionAlgorithms ISSUER_CONTENT_ENCRYPTION_ALGORITHM =
@@ -71,6 +73,7 @@ public class TestVectorGeneration {
     static final String FILE_UNSIGNED_CBOR   = "AD.cbor";
     static final String FILE_SIGNED_CBOR     = "SAD.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
+    static final String FILE_FWP_ASSERTION_JSON  = "FWP-assertion.json";
 
     String testDataDir;
     String keyDir;
@@ -108,7 +111,8 @@ public class TestVectorGeneration {
                 .setString(FWPElements.JSON_PR_ID, "7040566321")
                 .setString(FWPElements.JSON_PR_AMOUNT, "435.00")
                 .setString(FWPElements.JSON_PR_CURRENCY, "EUR");
-        result.append("\n\nMerchant 'W3C PaymentRequest' (PRCD) data in pretty-printed JSON notation:\n")
+        result.append("\n\nMerchant 'W3C PaymentRequest' (PRCD) data in " +
+                      "pretty-printed JSON notation:\n")
               .append(paymentRequest.toString())
               .append("\nMerchant 'hostname' according to the browser: " + MERCHANT_HOST);
         String paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
@@ -119,7 +123,7 @@ public class TestVectorGeneration {
                                                                 ISODateTime.LOCAL_NO_SUBSECONDS))
                 .setAccountData("FR7630002111110020050014382",
                                 "0057162932",
-                                "https://bankdirect.com")
+                                PAYMENT_METHOD)
                 .setPlatformData("Android", "10.0", "Chrome", "103")
                 .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                 .setOptionalNetworkData("\"additional stuff...\"")
@@ -142,8 +146,10 @@ public class TestVectorGeneration {
                       "the FIDO public key (EC/P256) which is " +
                       "also is part of the data to be signed.\n");
 
-        result.append("\n\nThe unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
+        result.append("\n\nThe unsigned FWP assertion (binary) " +
+                      "converted into a SHA256 hash, here in Base64Url notation:\n")
+              .append(Base64UrlEncoder.encodeToString(
+            		  HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
               .append("\nThis is subsequently used as FIDO 'challenge'.\n\n\n" +
                       "****************************************\n" +
                       "* FIDO/WebAuthn assertion happens here *\n" +
@@ -217,7 +223,17 @@ public class TestVectorGeneration {
               .append(DebugFormatter.getHexString(encryptedAssertion))
               .append("\n");
         
-        byte[] decryptedFwpAssertion = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
+        FWPJsonAssertion fwpJsonAssertion = new FWPJsonAssertion(PAYMENT_METHOD,
+                ISSUER_ID,
+                encryptedAssertion);
+        result.append("\n\nFWP assertion delivered by the browser:\n")
+              .append(fwpJsonAssertion.toString());
+
+        conditionalRewrite(testDataDir + FILE_FWP_ASSERTION_JSON, 
+        	               fwpJsonAssertion.toString().getBytes("utf-8"));
+
+        byte[] decryptedFwpAssertion = 
+        		new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
             
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
@@ -231,11 +247,12 @@ public class TestVectorGeneration {
             }
         }).decrypt(encryptedAssertion);
  
-        FWPAssertionDecoder decodedFwpAssertion = new FWPAssertionDecoder(decryptedFwpAssertion);
+        FWPAssertionDecoder decodedFwpAssertion =
+        		new FWPAssertionDecoder(decryptedFwpAssertion);
         decodedFwpAssertion.verifyClaimedPaymentRequest(paymentRequestJson);
-     //   decodedFwpAssertion.getPaymentRequest();
-        
-        conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, result.toString().getBytes("utf-8"));
+
+        conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, 
+        		           result.toString().getBytes("utf-8"));
     }
 
     boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {
@@ -259,7 +276,8 @@ public class TestVectorGeneration {
         return fwpAssertion;
     }
     
-    private byte[] optionalSignatureRewrite(String fileName, byte[] fwpAssertion) throws IOException {
+    private byte[] optionalSignatureRewrite(String fileName, 
+    		                                byte[] fwpAssertion) throws IOException {
         try {
             byte[] oldFwpAssertion = ArrayUtil.readFile(fileName);
             if (cleanSignature(oldFwpAssertion).equals(cleanSignature(fwpAssertion))) {
@@ -275,7 +293,8 @@ public class TestVectorGeneration {
     }
 
 
-    private void writeTextVersion(String fileSignedCbor, byte[] fwpAssertion) throws IOException {
+    private void writeTextVersion(String fileSignedCbor, 
+    		                      byte[] fwpAssertion) throws IOException {
         ArrayUtil.writeFile(testDataDir + fileSignedCbor
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
                             CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
@@ -285,7 +304,8 @@ public class TestVectorGeneration {
     public static void main(String[] args) {
         try {
             CustomCryptoProvider.forcedLoad(false);
-           new TestVectorGeneration(args[0] + File.separatorChar, args[1] + File.separatorChar);
+           new TestVectorGeneration(args[0] + File.separatorChar,
+        		                    args[1] + File.separatorChar);
         } catch (Exception e) {
             e.printStackTrace();
         }
