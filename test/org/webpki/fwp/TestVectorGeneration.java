@@ -182,7 +182,7 @@ public class TestVectorGeneration {
 
   
         if (conditionalRewrite(testDataDir + FILE_UNSIGNED_CBOR, unsignedFwpAssertion)) {
-        	writeTextVersion(FILE_UNSIGNED_CBOR, unsignedFwpAssertion);
+            writeTextVersion(FILE_UNSIGNED_CBOR, unsignedFwpAssertion);
         }
         
         KeyPair x25519 = readKey("x25519");
@@ -207,8 +207,8 @@ public class TestVectorGeneration {
             }
         }
         if (signRewrite) {
-        	ArrayUtil.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
-        	writeTextVersion(FILE_ENCRYPTED_CBOR, encryptedAssertion);
+            ArrayUtil.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
+            writeTextVersion(FILE_ENCRYPTED_CBOR, encryptedAssertion);
         }
         
         result.append("\n\nEncrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:\n")
@@ -277,12 +277,12 @@ public class TestVectorGeneration {
 
     private void writeTextVersion(String fileSignedCbor, byte[] fwpAssertion) throws IOException {
         ArrayUtil.writeFile(testDataDir + fileSignedCbor
-        		.substring(0, fileSignedCbor.length() - 4) + "txt",
-        		            CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
+                .substring(0, fileSignedCbor.length() - 4) + "txt",
+                            CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
     }
 
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         try {
             CustomCryptoProvider.forcedLoad(false);
            new TestVectorGeneration(args[0] + File.separatorChar, args[1] + File.separatorChar);

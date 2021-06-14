@@ -237,27 +237,38 @@ public class FWPCrypto {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpAssertion(CBORMap fwpAssertion)
+    public static byte[] validateFwpSignature(CBORMap fwpAssertion)
             throws IOException, GeneralSecurityException {
+    	// Retrieve the authorization object.
         CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
+        
+        // Fetch the core FIDO assertion elements.
         byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
+        
+        // The public key must be available and be in COSE format.
+        // Here it is converted to the Java format since this
+        // is necessary for validation using Java standard tools.
         CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
         PublicKey publicKey = CBORPublicKey.decode(cborPublicKey);
+        
+        // The mandatory COSE signature algorithm.
         int coseAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
+        
+        // Does the algorithm match the public key?
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
-        // We are nice and do not touch the original assertion.
+        // Be nice - Do not destroy the original assertion.
         CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
         CBORMap copyOfAuthorization = copyOfAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
 
-        // The following element do not participate in the signature generation
+        // The following elements do not participate in the signature generation
         // and must therefore be removed from the assertion (after first having
         // been fetched).
-        copyOfAuthorization.removeObject(AS_AUTHENTICATOR_DATA);
-        copyOfAuthorization.removeObject(AS_CLIENT_DATA_JSON);
-        copyOfAuthorization.removeObject(AS_SIGNATURE);
+        copyOfAuthorization.removeObject(AS_AUTHENTICATOR_DATA)
+                           .removeObject(AS_CLIENT_DATA_JSON)
+                           .removeObject(AS_SIGNATURE);
         
         // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(copyOfAssertion.encode()),
@@ -265,14 +276,14 @@ public class FWPCrypto {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         
-        // Everything is good so far, now take on the signature.
+        // Everything is good so far, now take on the core FIDO signature.
         validateFidoSignature(getWebPkiAlgorithm(coseAlgorithm),
                               publicKey,
                               authenticatorData,
                               clientDataJSON,
                               signature);
 
-        // Return the public key for looking up in an RP database.
+        // Return the "raw" public key for looking up in an RP database.
         return cborPublicKey.encode();
     }
 

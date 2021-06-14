@@ -132,6 +132,7 @@ public class FWPAssertionDecoder {
     
     public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
                                                                  GeneralSecurityException {
+    	// Convert binary into CBOR objects.
         fwpAssertion = CBORObject.decode(signedFwpAssertion).getMap();
         
         // Are we compatible?
@@ -179,7 +180,8 @@ public class FWPAssertionDecoder {
         }
 
         // Finally, the authorization signature.
-        publicKey = FWPCrypto.validateFwpAssertion(fwpAssertion);
+        publicKey = FWPCrypto.validateFwpSignature(fwpAssertion);
+
         // Check that we didn't forgot anything or that there is "other" data.
         fwpAssertion.checkObjectForUnread();
     }

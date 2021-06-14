@@ -49,7 +49,7 @@ public enum FWPElements {
         this.cborLabel = cborLabel;
     }
     
-    public static final String CURRENT_VERSION = "1.00";
+    public static final String CURRENT_VERSION = "1.0";
     
     // Payment Request
     public static final int CBOR_PR_PAYEE       = 1;
@@ -66,8 +66,8 @@ public enum FWPElements {
     public static final int CBOR_PD_OPERATING_SYSTEM = 1;
     public static final int CBOR_PD_USER_AGENT       = 2;
     // Platform Data sub elements
-    public static final int CBOR_PDSUB_NAME          = 1;
-    public static final int CBOR_PDSUB_VERSION       = 2;
+    public static final int CBOR_PDSUB_NAME          = 3;
+    public static final int CBOR_PDSUB_VERSION       = 4;
     
     public static enum UserAuthorizationMethods {
     
