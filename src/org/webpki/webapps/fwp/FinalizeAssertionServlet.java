@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.util.Base64;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,9 +28,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.fwp.FWPJsonAssertion;
+
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 /**
@@ -51,15 +53,16 @@ public class FinalizeAssertionServlet extends HttpServlet {
         }
         JSONObjectReader accountData = JSONParser.parse(
                 request.getParameter(FWPCommon.FWP_ACCOUNT_DATA));
-        JSONObjectWriter fwpAssertion = new JSONObjectWriter()
-                .setString("paymentMethod", accountData.getString("pm"))
-                .setString("issuerId", accountData.getString("ii"))
-                .setString("encryptedAuthorization", encryptedSignedAuthorizationB64U);
+        FWPJsonAssertion fwpAssertion =
+                new FWPJsonAssertion(accountData.getString("pm"),
+                                     accountData.getString("ii"),
+                                     Base64.getUrlDecoder().decode(
+                                             encryptedSignedAuthorizationB64U));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='merchant'>" +
             "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION +
             "' value='")
-        .append(fwpAssertion.serializeToString(JSONOutputFormats.NORMALIZED))
+        .append(fwpAssertion.serialize())
         .append(
             "'/>" +
             "</form>" +

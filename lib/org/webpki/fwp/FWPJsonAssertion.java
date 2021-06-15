@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 
 /**
  * The FWP Assertion as provided by the browser.
@@ -32,46 +33,50 @@ public class FWPJsonAssertion {
     
     String paymentMethod;
     public String getPaymentMethod() {
-    	return paymentMethod;
+        return paymentMethod;
     }
     
     String issuerId;
     public String getIssuerId() {
-    	return issuerId;
+        return issuerId;
     }
     
     byte[] encryptedAuthorization;
     public byte[] getEncryptedAuthorization() {
-    	return encryptedAuthorization;
+        return encryptedAuthorization;
     }
     
     public FWPJsonAssertion(JSONObjectReader reader) throws IOException {
-    	paymentMethod = reader.getString(PAYMENT_METHOD);
-    	issuerId = reader.getString(ISSUER_ID);
-    	encryptedAuthorization = reader.getBinary(ENCRYPTED_AUTHORIZATION);
+        paymentMethod = reader.getString(PAYMENT_METHOD);
+        issuerId = reader.getString(ISSUER_ID);
+        encryptedAuthorization = reader.getBinary(ENCRYPTED_AUTHORIZATION);
     }
     
     public FWPJsonAssertion(String paymentMethod,
-    		                String issuerId,
-    		                byte[] encryptedAuthorization) {
-    	this.paymentMethod = paymentMethod;
-    	this.issuerId = issuerId;
-    	this.encryptedAuthorization = encryptedAuthorization;
+                            String issuerId,
+                            byte[] encryptedAuthorization) {
+        this.paymentMethod = paymentMethod;
+        this.issuerId = issuerId;
+        this.encryptedAuthorization = encryptedAuthorization;
     }
     
-    public JSONObjectWriter serialize() throws IOException {
-    	return new JSONObjectWriter()
-    			.setString(PAYMENT_METHOD, paymentMethod)
-    			.setString(ISSUER_ID, issuerId)
-    			.setBinary(ENCRYPTED_AUTHORIZATION, encryptedAuthorization);
+    public String serialize() throws IOException {
+        return internalSerialize().serializeToString(JSONOutputFormats.NORMALIZED);
+    }
+    
+    JSONObjectWriter internalSerialize() throws IOException {
+        return new JSONObjectWriter()
+                .setString(PAYMENT_METHOD, paymentMethod)
+                .setString(ISSUER_ID, issuerId)
+                .setBinary(ENCRYPTED_AUTHORIZATION, encryptedAuthorization);
     }
     
     @Override
     public String toString() {
-    	try {
-    		return serialize().toString();
-    	} catch (IOException e) {
-    		throw new RuntimeException(e);
-    	}
+        try {
+            return internalSerialize().toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

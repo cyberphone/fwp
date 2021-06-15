@@ -149,7 +149,7 @@ public class TestVectorGeneration {
         result.append("\n\nThe unsigned FWP assertion (binary) " +
                       "converted into a SHA256 hash, here in Base64Url notation:\n")
               .append(Base64UrlEncoder.encodeToString(
-            		  HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
+                      HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
               .append("\nThis is subsequently used as FIDO 'challenge'.\n\n\n" +
                       "****************************************\n" +
                       "* FIDO/WebAuthn assertion happens here *\n" +
@@ -230,10 +230,10 @@ public class TestVectorGeneration {
               .append(fwpJsonAssertion.toString());
 
         conditionalRewrite(testDataDir + FILE_FWP_ASSERTION_JSON, 
-        	               fwpJsonAssertion.toString().getBytes("utf-8"));
+                           fwpJsonAssertion.toString().getBytes("utf-8"));
 
         byte[] decryptedFwpAssertion = 
-        		new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
+                new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
             
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
@@ -248,11 +248,11 @@ public class TestVectorGeneration {
         }).decrypt(encryptedAssertion);
  
         FWPAssertionDecoder decodedFwpAssertion =
-        		new FWPAssertionDecoder(decryptedFwpAssertion);
+                new FWPAssertionDecoder(decryptedFwpAssertion);
         decodedFwpAssertion.verifyClaimedPaymentRequest(paymentRequestJson);
 
         conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, 
-        		           result.toString().getBytes("utf-8"));
+                           result.toString().getBytes("utf-8"));
     }
 
     boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {
@@ -277,7 +277,7 @@ public class TestVectorGeneration {
     }
     
     private byte[] optionalSignatureRewrite(String fileName, 
-    		                                byte[] fwpAssertion) throws IOException {
+                                            byte[] fwpAssertion) throws IOException {
         try {
             byte[] oldFwpAssertion = ArrayUtil.readFile(fileName);
             if (cleanSignature(oldFwpAssertion).equals(cleanSignature(fwpAssertion))) {
@@ -294,7 +294,7 @@ public class TestVectorGeneration {
 
 
     private void writeTextVersion(String fileSignedCbor, 
-    		                      byte[] fwpAssertion) throws IOException {
+                                  byte[] fwpAssertion) throws IOException {
         ArrayUtil.writeFile(testDataDir + fileSignedCbor
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
                             CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
@@ -305,7 +305,7 @@ public class TestVectorGeneration {
         try {
             CustomCryptoProvider.forcedLoad(false);
            new TestVectorGeneration(args[0] + File.separatorChar,
-        		                    args[1] + File.separatorChar);
+                                    args[1] + File.separatorChar);
         } catch (Exception e) {
             e.printStackTrace();
         }
