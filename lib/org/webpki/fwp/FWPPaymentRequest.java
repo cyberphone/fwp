@@ -78,7 +78,7 @@ public class FWPPaymentRequest {
         id = cborPaymentRequest.getObject(CBOR_PR_ID).getTextString();
         amount = cborPaymentRequest.getObject(CBOR_PR_AMOUNT).getTextString();
         currency = cborPaymentRequest.getObject(CBOR_PR_CURRENCY).getTextString();
-        cborObject.checkObjectForUnread();
+        cborObject.checkForUnread();
     }
     
     public FWPPaymentRequest(String payee,

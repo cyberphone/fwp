@@ -147,7 +147,7 @@ public class FWPAssertionDecoder {
         publicKey = FWPCrypto.validateFwpSignature(fwpAssertion);
 
         // Check that we didn't forgot anything or that there is "other" data.
-        fwpAssertion.checkObjectForUnread();
+        fwpAssertion.checkForUnread();
     }
 }
 
