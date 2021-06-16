@@ -64,17 +64,17 @@ public class ADServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String walletRequest = request.getParameter(FWPCommon.WALLET_REQUEST);
+        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
         if (walletRequest == null) {
-            FWPCommon.failed("Missing wallet requiest");
+            FWPWalletCore.failed("Missing wallet requiest");
         }
         logger.info(walletRequest);
         JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
         try {
             // Get the enrolled user.
-            String userId = FWPCommon.getWalletCookie(request);
+            String userId = FWPWalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPCommon.failed("User ID missing, have you enrolled?");
+                FWPWalletCore.failed("User ID missing, have you enrolled?");
                 return;
             }
 
@@ -85,7 +85,7 @@ public class ADServlet extends HttpServlet {
                 coreClientData = 
                         DataBaseOperations.getCoreClientData(userId, connection);
                 if (coreClientData == null) {
-                    FWPCommon.failed("User is missing, you need to reenroll");
+                    FWPWalletCore.failed("User is missing, you need to reenroll");
                     return;
                 }
             }
@@ -105,9 +105,9 @@ public class ADServlet extends HttpServlet {
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='sad'>" +
-                "<input type='hidden' id='" + FWPCommon.FWP_SAD + 
-                    "' name='" + FWPCommon.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPCommon.FWP_ACCOUNT_DATA + 
+                "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
+                    "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
+                "<input type='hidden' name='" + FWPWalletCore.FWP_ACCOUNT_DATA + 
                 "' value='")
             .append(accountData.serializeToString(JSONOutputFormats.NORMALIZED))
             .append(
@@ -151,20 +151,20 @@ public class ADServlet extends HttpServlet {
 
             String js = new StringBuilder(
 
-                FWPCommon.GO_HOME_JAVASCRIPT +
+                FWPWalletCore.GO_HOME_JAVASCRIPT +
                 
                 "const serviceUrl = 'fidopay';\n" +
 
-                FWPCommon.FWP_JAVASCRIPT +
+                FWPWalletCore.FWP_JAVASCRIPT +
 
                 "async function doPay() {\n" +
                 "  try {\n" +
                 "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "    const initPhase = await exchangeJSON({" + FWPCommon.FWP_AD + 
+                "    const initPhase = await exchangeJSON({" + FWPWalletCore.FWP_AD + 
                   ": '" + 
                   Base64.getUrlEncoder().withoutPadding().encodeToString(fwpAssertion) +
-                  "'},'" + FWPCommon.INIT_PHASE + "');\n" +
+                  "'},'" + FWPWalletCore.INIT_PHASE + "');\n" +
 
                 "    const options = {\n" +
                 "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
@@ -191,10 +191,10 @@ public class ADServlet extends HttpServlet {
                              FWPCrypto.CLIENT_DATA_JSON_JSON + 
                              ":arrBufToB64url(result.response.clientDataJSON)},'" +
 
-                             FWPCommon.FINALIZE_PHASE + "');\n" +
+                             FWPWalletCore.FINALIZE_PHASE + "');\n" +
 
-                "    document.getElementById('" + FWPCommon.FWP_SAD + 
-                    "').value = finalizePhase." + FWPCommon.FWP_SAD + ";\n" +
+                "    document.getElementById('" + FWPWalletCore.FWP_SAD + 
+                    "').value = finalizePhase." + FWPWalletCore.FWP_SAD + ";\n" +
                 "    document.forms.shoot.submit();\n" +
 
                 // Errors are effectively aborting so a single try-catch does the trick.

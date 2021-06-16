@@ -39,14 +39,14 @@ public class MerchantServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        String fwpAssertion = request.getParameter(FWPCommon.FWP_ASSERTION);
+        String fwpAssertion = request.getParameter(FWPWalletCore.FWP_ASSERTION);
         if (fwpAssertion == null) {
-            FWPCommon.failed("Missing FWP assertion");
+            FWPWalletCore.failed("Missing FWP assertion");
             return;
         }
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='esad'>" +
-            "<input type='hidden' name='" + FWPCommon.FWP_ASSERTION +
+            "<input type='hidden' name='" + FWPWalletCore.FWP_ASSERTION +
             "' value='")
         .append(fwpAssertion)
         .append(
@@ -78,7 +78,7 @@ public class MerchantServlet extends HttpServlet {
         .append(
             "</div>");
 */
-        HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
+        HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
     }
 
 }

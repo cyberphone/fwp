@@ -41,7 +41,7 @@ public class BuyServlet extends HttpServlet {
    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        if (FWPCommon.getWalletCookie(request) == null) {
+        if (FWPWalletCore.getWalletCookie(request) == null) {
             HTML.standardPage(response, null, new StringBuilder(
                 "<div class='important'>User ID is missing, have you enrolled?</div>"));
             return;
@@ -50,8 +50,8 @@ public class BuyServlet extends HttpServlet {
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='ad'>" +
         
-            "<input type='hidden' id='" + FWPCommon.WALLET_REQUEST + 
-                "' name='" + FWPCommon.WALLET_REQUEST + "'/>" +
+            "<input type='hidden' id='" + FWPWalletCore.WALLET_REQUEST + 
+                "' name='" + FWPWalletCore.WALLET_REQUEST + "'/>" +
 
             "<div class='header'>Checkout Time!</div>" +
 
@@ -85,7 +85,7 @@ public class BuyServlet extends HttpServlet {
 
             "function doPay() {\n" +
 
-            "  document.getElementById('" + FWPCommon.WALLET_REQUEST + 
+            "  document.getElementById('" + FWPWalletCore.WALLET_REQUEST + 
                 "').value = JSON.stringify({pr: paymentRequest, ad: accountData});\n" +
             "  document.forms.shoot.submit();\n" +
 

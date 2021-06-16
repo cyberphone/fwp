@@ -43,21 +43,21 @@ public class SADServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        String signedAuthorizationB64U = request.getParameter(FWPCommon.FWP_SAD);
+        String signedAuthorizationB64U = request.getParameter(FWPWalletCore.FWP_SAD);
         if (signedAuthorizationB64U == null) {
-            FWPCommon.failed("Missing signed authorization data");
+            FWPWalletCore.failed("Missing signed authorization data");
             return;
         }
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='esad'>" +
-            "<input type='hidden' name='" + FWPCommon.FWP_SAD +
+            "<input type='hidden' name='" + FWPWalletCore.FWP_SAD +
             "' value='")
         .append(signedAuthorizationB64U)
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPCommon.FWP_ACCOUNT_DATA + 
+            "<input type='hidden' name='" + FWPWalletCore.FWP_ACCOUNT_DATA + 
             "' value='")
-        .append(request.getParameter(FWPCommon.FWP_ACCOUNT_DATA))
+        .append(request.getParameter(FWPWalletCore.FWP_ACCOUNT_DATA))
         .append(
             "'/>" +
             "</form>" +
@@ -88,7 +88,7 @@ public class SADServlet extends HttpServlet {
                           "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
         .append(
             "</div>");
-        HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
+        HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
     }
 
 }

@@ -52,27 +52,27 @@ public class FIDOPayServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // Get the input (request) data.
-            JSONObjectReader requestJson = FWPCommon.getJSON(request);
+            JSONObjectReader requestJson = FWPWalletCore.getJSON(request);
             
             // Prepare for writing a response.
             JSONObjectWriter resultJson = new JSONObjectWriter();
             
             // The FIDO server is stateful and its state MUST be checked
             // with that of the client.
-            String phase = requestJson.getString(FWPCommon.PHASE_JSON);
+            String phase = requestJson.getString(FWPWalletCore.PHASE_JSON);
 
             // Tentative: return the same phase info as in the request.
-            resultJson.setString(FWPCommon.PHASE_JSON, phase);
+            resultJson.setString(FWPWalletCore.PHASE_JSON, phase);
             
             // Get the enrolled user.
-            String userId = FWPCommon.getWalletCookie(request);
+            String userId = FWPWalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPCommon.softError(response, resultJson, "User ID missing, have you enrolled?");
+                FWPWalletCore.softError(response, resultJson, "User ID missing, have you enrolled?");
                 return;
             }
             
             // Determine where are in the process.
-            if (phase.equals(FWPCommon.INIT_PHASE)) {
+            if (phase.equals(FWPWalletCore.INIT_PHASE)) {
 
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
@@ -84,60 +84,60 @@ public class FIDOPayServlet extends HttpServlet {
                     coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
                     if (coreClientData == null) {
-                        FWPCommon.softError(response, resultJson, "User is missing, you need to reenroll");
+                        FWPWalletCore.softError(response, resultJson, "User is missing, you need to reenroll");
                         return;
                     }
                     resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
 
                 // Get the Authorization Data (AD).
-                byte[]unsignedAssertion = requestJson.getBinary(FWPCommon.FWP_AD);
+                byte[]unsignedAssertion = requestJson.getBinary(FWPWalletCore.FWP_AD);
 
                 // Need to save it for completion by FIDO.
-                resultJson.setBinary(FWPCommon.FWP_AD, unsignedAssertion);
+                resultJson.setBinary(FWPWalletCore.FWP_AD, unsignedAssertion);
 
                 // Make FIDO sign a hash of the unsigned assertion.
                 resultJson.setBinary(FWPCrypto.CHALLENGE, 
                                      HashAlgorithms.SHA256.digest(unsignedAssertion));
 
                 // This what we send but we must also read and verify it.
-                session.setAttribute(FWPCommon.ATTR_PAY_DATA, new JSONObjectReader(resultJson));
+                session.setAttribute(FWPWalletCore.ATTR_PAY_DATA, new JSONObjectReader(resultJson));
 
-            } else if (phase.equals(FWPCommon.FINALIZE_PHASE)) {
+            } else if (phase.equals(FWPWalletCore.FINALIZE_PHASE)) {
  
                 // FIDO/WebAuthn response! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
-                    FWPCommon.failed("Missing finalize session");
+                    FWPWalletCore.failed("Missing finalize session");
                 }
                 
                 // Get the object holding the payment authorization session in progress.
                 JSONObjectReader payData = 
-                        (JSONObjectReader) session.getAttribute(FWPCommon.ATTR_PAY_DATA);
+                        (JSONObjectReader) session.getAttribute(FWPWalletCore.ATTR_PAY_DATA);
                 if (payData == null) {
-                    FWPCommon.failed("Pay data missing");
+                    FWPWalletCore.failed("Pay data missing");
                 }
 
                 // Fetch the not yet complete assertion.
-                byte[] unsignedAssertion = payData.getBinary(FWPCommon.FWP_AD);
+                byte[] unsignedAssertion = payData.getBinary(FWPWalletCore.FWP_AD);
 
                 // Add the missing pieces from the associated FIDO/WebAuthn assertion.
                 byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
-                resultJson.setBinary(FWPCommon.FWP_SAD,
+                resultJson.setBinary(FWPWalletCore.FWP_SAD,
                                      FWPCrypto.AddPostSignature(unsignedAssertion,
                                                                 clientDataJSON,
                                                                 authenticatorData,
                                                                 signature));
             } else {
-                FWPCommon.failed("Unknown phase: " + phase);
+                FWPWalletCore.failed("Unknown phase: " + phase);
             }
-            FWPCommon.returnJSON(response, resultJson);
+            FWPWalletCore.returnJSON(response, resultJson);
 
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.log(Level.SEVERE, FWPCommon.getStackTrace(e, message));
+            logger.log(Level.SEVERE, FWPWalletCore.getStackTrace(e, message));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             PrintWriter writer = response.getWriter();
             writer.print(message);

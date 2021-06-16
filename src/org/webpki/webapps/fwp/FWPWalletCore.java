@@ -40,7 +40,7 @@ import org.webpki.webutil.ServletUtil;
 /**
  * Common FWP wallet emulator functions and constants.
  */
-public class FWPCommon {
+public class FWPWalletCore {
 
     // The center of it all...
     static final String WALLET_COOKIE            = "WALLET";
@@ -132,7 +132,7 @@ public class FWPCommon {
             "  history.pushState(null, null, 'home');\n" +
             "});\n";
 
-    static Logger logger = Logger.getLogger(FWPCommon.class.getName());
+    static Logger logger = Logger.getLogger(FWPWalletCore.class.getName());
 
     static String getWalletCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -185,7 +185,7 @@ public class FWPCommon {
     static void softError(HttpServletResponse response, 
                           JSONObjectWriter json,
                           String errorMesseage) throws IOException {
-        FWPCommon.returnJSON(response, json.setString(FWPCommon.ERROR_JSON, errorMesseage));
+        FWPWalletCore.returnJSON(response, json.setString(FWPWalletCore.ERROR_JSON, errorMesseage));
     }
 
     static void failed(String what) throws IOException {

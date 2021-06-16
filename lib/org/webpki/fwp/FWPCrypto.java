@@ -85,9 +85,9 @@ public class FWPCrypto {
     static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
 
     private static byte[] addRemainingElements(CBORMap fwpAssertionInProgress,
-                                              byte[] clientDataJSON,
-                                              byte[] authenticatorData, 
-                                              byte[] signature) throws IOException {
+                                               byte[] clientDataJSON,
+                                               byte[] authenticatorData, 
+                                               byte[] signature) throws IOException {
         fwpAssertionInProgress.getObject(FWP_AUTHORIZATION_LABEL).getMap()
                 .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
                 .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))

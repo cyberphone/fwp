@@ -48,8 +48,8 @@ public enum FWPElements {
     // Platform Data
     public static final int CBOR_PD_OPERATING_SYSTEM = 1;
     public static final int CBOR_PD_USER_AGENT       = 2;
-    // Platform Data sub elements
 
+    // Platform Data sub elements
     public static final int CBOR_PDSUB_NAME          = 3;
     public static final int CBOR_PDSUB_VERSION       = 4;
     

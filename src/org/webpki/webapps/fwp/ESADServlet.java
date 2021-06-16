@@ -45,9 +45,9 @@ public class ESADServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            String signedAuthorizationDataB64U = request.getParameter(FWPCommon.FWP_SAD);
+            String signedAuthorizationDataB64U = request.getParameter(FWPWalletCore.FWP_SAD);
             if (signedAuthorizationDataB64U == null) {
-                FWPCommon.failed("FWP assertion missing");
+                FWPWalletCore.failed("FWP assertion missing");
             }
             
             CBORMap encrypted = 
@@ -59,14 +59,14 @@ public class ESADServlet extends HttpServlet {
 
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='finalizeassertion'>" +
-                "<input type='hidden' name='" + FWPCommon.FWP_ESAD + 
+                "<input type='hidden' name='" + FWPWalletCore.FWP_ESAD + 
                 "' value='")
             .append(Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted.encode()))
             .append(
                 "'/>" +
-                "<input type='hidden' name='" + FWPCommon.FWP_ACCOUNT_DATA + 
+                "<input type='hidden' name='" + FWPWalletCore.FWP_ACCOUNT_DATA + 
                 "' value='")
-            .append(request.getParameter(FWPCommon.FWP_ACCOUNT_DATA))
+            .append(request.getParameter(FWPWalletCore.FWP_ACCOUNT_DATA))
             .append(
                 "'/>" +
                 "</form>" +
@@ -93,7 +93,7 @@ public class ESADServlet extends HttpServlet {
             .append(HTML.encode(encrypted.toString(), true))
             .append(
                 "</div>");
-            HTML.standardPage(response, FWPCommon.GO_HOME_JAVASCRIPT, html);
+            HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }
