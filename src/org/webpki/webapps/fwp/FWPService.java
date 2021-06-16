@@ -18,7 +18,9 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.security.KeyPair;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,12 +33,16 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.webpki.crypto.CustomCryptoProvider;
+
 import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
-import org.webpki.fwp.FWPElements;
+
+import org.webpki.fwp.FWPPaymentRequest;
+
 import org.webpki.jose.JOSEKeyWords;
-import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.json.JSONParser;
+
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
@@ -47,7 +53,7 @@ public class FWPService extends InitPropertyReader implements ServletContextList
 
     static DataSource jdbcDataSource;
     
-    static JSONObjectWriter samplePaymentRequest;
+    static FWPPaymentRequest samplePaymentRequest;
     
     static KeyPair issuerEncryptionKey;
     
@@ -93,11 +99,10 @@ public class FWPService extends InitPropertyReader implements ServletContextList
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Merchant
             /////////////////////////////////////////////////////////////////////////////////////////////
-            samplePaymentRequest = new JSONObjectWriter()
-                    .setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
-                    .setString(FWPElements.JSON_PR_ID, "7040566321")
-                    .setString(FWPElements.JSON_PR_AMOUNT, "435.00")
-                    .setString(FWPElements.JSON_PR_CURRENCY, "EUR");
+            samplePaymentRequest = new FWPPaymentRequest("Space Shop",
+                                                         "7040566321",
+                                                         "435.00",
+                                                         "EUR");
  
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Issuer data

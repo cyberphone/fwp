@@ -19,6 +19,7 @@ package org.webpki.fwp;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+
 import java.util.GregorianCalendar;
 
 import org.webpki.cbor.CBORMap;
@@ -29,43 +30,6 @@ import org.webpki.cbor.CBORObject;
  */
 public class FWPAssertionDecoder {
 
-    CBORMap cborPaymentRequest;
-
-    public class PaymentRequest {
-        
-        String getString(int cborId) throws IOException {
-            return cborPaymentRequest.getObject(cborId).getTextString();
-        }
-
-        PaymentRequest(CBORObject cborObject) throws IOException {
-            cborPaymentRequest = cborObject.getMap();
-            payee = getString(FWPElements.CBOR_PR_PAYEE);
-            id = getString(FWPElements.CBOR_PR_ID);
-            amount = getString(FWPElements.CBOR_PR_AMOUNT);
-            currency = getString(FWPElements.CBOR_PR_CURRENCY);
-        }
-        
-        String payee;
-        public String getPayee() {
-            return payee;
-        }
-        
-        String id;
-        public String getId() {
-            return id;
-        }
-        
-        String amount;
-        public String getAmount() {
-            return amount;
-        }
-
-        String currency;
-        public String getCurrency() {
-            return currency;
-        }
-
-    }
     
     GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
@@ -82,8 +46,8 @@ public class FWPAssertionDecoder {
         return networkData;
     }
     
-    PaymentRequest paymentRequest;
-    public PaymentRequest getPaymentRequest() {
+    FWPPaymentRequest paymentRequest;
+    public FWPPaymentRequest getPaymentRequest() {
         return paymentRequest;
     }
     
@@ -109,11 +73,11 @@ public class FWPAssertionDecoder {
 
     CBORMap fwpAssertion;
   
-    public void verifyClaimedPaymentRequest(String jsonString) throws IOException {
-        CBORMap claimedPaymentRequest = FWPElements.convertPaymentRequest(jsonString);
-        if (!cborPaymentRequest.equals(claimedPaymentRequest)) {
+    public void verifyClaimedPaymentRequest(FWPPaymentRequest claimedPaymentRequest) 
+            throws IOException {
+        if (!paymentRequest.equals(claimedPaymentRequest)) {
             throw new IOException("Claimed:\n" + claimedPaymentRequest.toString() +
-                                  "Actual:\n" + cborPaymentRequest.toString());
+                                  "Actual:\n" + paymentRequest.toString());
         }
     }
     
@@ -143,8 +107,8 @@ public class FWPAssertionDecoder {
         }
 
         // Payment Request (PRCD)
-        paymentRequest = 
-                new PaymentRequest(fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
+        paymentRequest = new FWPPaymentRequest(
+                fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
 
         // Account.
         accountId = getString(FWPElements.ACCOUNT_ID);
@@ -156,8 +120,8 @@ public class FWPAssertionDecoder {
         serialNumber = getString(FWPElements.SERIAL_NUMBER);
 
         // Platform Data
-        CBORMap platformData = 
-                fwpAssertion.getObject(FWPElements.PLATFORM_DATA.cborLabel).getMap();
+        CBORMap platformData = fwpAssertion.getObject(
+                FWPElements.PLATFORM_DATA.cborLabel).getMap();
         platformData.scan();
 
         // User Authorization Method

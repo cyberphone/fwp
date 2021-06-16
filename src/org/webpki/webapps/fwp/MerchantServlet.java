@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -27,11 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.webpki.cbor.CBORMap;
-import org.webpki.cbor.CBORObject;
-import org.webpki.fwp.FWPCrypto;
-import org.webpki.json.JSONOutputFormats;
 
 /**
  * TBD

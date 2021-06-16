@@ -40,7 +40,6 @@ import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 import org.webpki.jose.JOSEKeyWords;
 
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
@@ -106,19 +105,18 @@ public class TestVectorGeneration {
         
         FWPCrypto.FWPPreSigner fwpSigner = new FWPCrypto.FWPPreSigner(p256.getPublic());
        
-        JSONObjectWriter paymentRequest = new JSONObjectWriter()
-                .setString(FWPElements.JSON_PR_PAYEE, "Space Shop")
-                .setString(FWPElements.JSON_PR_ID, "7040566321")
-                .setString(FWPElements.JSON_PR_AMOUNT, "435.00")
-                .setString(FWPElements.JSON_PR_CURRENCY, "EUR");
+        FWPPaymentRequest paymentRequest = 
+                new FWPPaymentRequest("Space Shop",
+                                          "7040566321",
+                                          "435.00",
+                                          "EUR");
         result.append("\n\nMerchant 'W3C PaymentRequest' (PRCD) data in " +
                       "pretty-printed JSON notation:\n")
               .append(paymentRequest.toString())
               .append("\nMerchant 'hostname' according to the browser: " + MERCHANT_HOST);
-        String paymentRequestJson = paymentRequest.serializeToString(JSONOutputFormats.NORMALIZED);
         
         byte[] unsignedFwpAssertion = new FWPAssertionBuilder()
-                .setPaymentRequest(paymentRequestJson)
+                .setPaymentRequest(paymentRequest)
                 .setOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
                                                                 ISODateTime.LOCAL_NO_SUBSECONDS))
                 .setAccountData("FR7630002111110020050014382",
@@ -249,7 +247,7 @@ public class TestVectorGeneration {
  
         FWPAssertionDecoder decodedFwpAssertion =
                 new FWPAssertionDecoder(decryptedFwpAssertion);
-        decodedFwpAssertion.verifyClaimedPaymentRequest(paymentRequestJson);
+        decodedFwpAssertion.verifyClaimedPaymentRequest(paymentRequest);
 
         conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, 
                            result.toString().getBytes("utf-8"));

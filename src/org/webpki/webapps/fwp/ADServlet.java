@@ -35,7 +35,7 @@ import org.webpki.cbor.CBORObject;
 import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
 import org.webpki.fwp.FWPElements;
-
+import org.webpki.fwp.FWPPaymentRequest;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
@@ -93,8 +93,8 @@ public class ADServlet extends HttpServlet {
             // Build Authorization Data (AD)
             JSONObjectReader accountData = walletRequestJson.getObject("ad");
             byte[] fwpAssertion = new FWPAssertionBuilder()
-                    .setPaymentRequest(walletRequestJson.getObject("pr")
-                            .serializeToString(JSONOutputFormats.NORMALIZED))
+                    .setPaymentRequest(new FWPPaymentRequest(
+                            walletRequestJson.getObject("pr")))
                     .setAccountData(accountData.getString("id"),
                                     accountData.getString("sn"),
                                     accountData.getString("pm"))

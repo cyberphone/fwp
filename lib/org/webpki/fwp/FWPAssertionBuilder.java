@@ -65,9 +65,9 @@ public class FWPAssertionBuilder {
         return setElement(element, new CBORTextString(string));
     }
     
-    public FWPAssertionBuilder setPaymentRequest(String jsonString) throws IOException {
-        return setElement(FWPElements.PAYMENT_REQUEST,
-                          FWPElements.convertPaymentRequest(jsonString));
+    public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
+            throws IOException {
+        return setElement(FWPElements.PAYMENT_REQUEST, jsonPaymentRequest.serializeAsCBOR());
     }
     
     public FWPAssertionBuilder setPayeeHostName(String payeeHostName) throws IOException {

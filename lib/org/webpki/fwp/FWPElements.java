@@ -18,14 +18,8 @@ package org.webpki.fwp;
 
 import java.io.IOException;
 
-import org.webpki.cbor.CBORMap;
-import org.webpki.cbor.CBORTextString;
-
-import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONParser;
-
 /**
- * All elements of an FWP assertion.
+ * Core elements of an FWP assertion.
  * 
  */
 public enum FWPElements {
@@ -51,21 +45,11 @@ public enum FWPElements {
     
     public static final String CURRENT_VERSION = "1.0";
     
-    // Payment Request
-    public static final int CBOR_PR_PAYEE       = 1;
-    public static final int CBOR_PR_ID          = 2;
-    public static final int CBOR_PR_AMOUNT      = 3;
-    public static final int CBOR_PR_CURRENCY    = 4;
-
-    public static final String JSON_PR_PAYEE    = "payee";
-    public static final String JSON_PR_ID       = "id";
-    public static final String JSON_PR_AMOUNT   = "amount";
-    public static final String JSON_PR_CURRENCY = "currency";
-    
     // Platform Data
     public static final int CBOR_PD_OPERATING_SYSTEM = 1;
     public static final int CBOR_PD_USER_AGENT       = 2;
     // Platform Data sub elements
+
     public static final int CBOR_PDSUB_NAME          = 3;
     public static final int CBOR_PDSUB_VERSION       = 4;
     
@@ -93,29 +77,5 @@ public enum FWPElements {
         throw new IOException("Unrecognized user authorization method: " + cborValue);
     }
 
-
-    /**
-     * Convert a payment request in JSON to CBOR.
-     * 
-     * @param paymentRequestJson
-     * @return CBOR representation
-     * @throws IOException
-     */
-    public static CBORMap convertPaymentRequest(String jsonString) throws IOException {
-        JSONObjectReader jsonPaymentRequest = JSONParser.parse(jsonString);
-        CBORMap cborPaymentRequest = new CBORMap()
-            .setObject(CBOR_PR_PAYEE, 
-                       new CBORTextString(jsonPaymentRequest.getString(JSON_PR_PAYEE)))
-            .setObject(CBOR_PR_ID, 
-                       new CBORTextString(jsonPaymentRequest.getString(JSON_PR_ID)))
-            .setObject(CBOR_PR_AMOUNT, 
-                       new CBORTextString(jsonPaymentRequest.getString(JSON_PR_AMOUNT)))
-            .setObject(CBOR_PR_CURRENCY, 
-                       new CBORTextString(jsonPaymentRequest.getString(JSON_PR_CURRENCY)));
-        
-        // Additional data is not permitted.
-        jsonPaymentRequest.checkForUnread();
-        return cborPaymentRequest;
-    }
 }
     

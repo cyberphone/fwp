@@ -44,8 +44,6 @@ import org.webpki.jose.JOSEKeyWords;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
@@ -161,13 +159,11 @@ public class FIDOTest {
         testVectors.checkForUnread();
     }
     
-    String getPaymentRequest(boolean goodName, boolean allIsThere) throws IOException {
-        return new JSONObjectWriter()
-            .setString(FWPElements.JSON_PR_PAYEE, goodName ? "Space Shop" : "Evil Merchant")
-            .setDynamic((wr)-> allIsThere ? wr.setString(FWPElements.JSON_PR_ID, "65656") : wr)
-            .setString(FWPElements.JSON_PR_AMOUNT, "140.00")
-            .setString(FWPElements.JSON_PR_CURRENCY, "EUR")
-            .serializeToString(JSONOutputFormats.NORMALIZED);
+    FWPPaymentRequest getPaymentRequest(boolean goodName) throws IOException {
+        return new FWPPaymentRequest(goodName ? "Space Shop" : "Evil Merchant",
+                                     "65656",
+                                     "140.00",
+                                     "EUR");
     }
     
     byte[] buildGoodPaymenRequest(String networkData,
@@ -175,7 +171,7 @@ public class FIDOTest {
                                                                 GeneralSecurityException {
         return FWPCrypto.directSign(
                 new FWPAssertionBuilder()
-            .setPaymentRequest(getPaymentRequest(true, true))
+            .setPaymentRequest(getPaymentRequest(true))
             .setPayeeHostName("spaceshop.com")
             .setAccountData("FR7630002111110020050014382",
                             "057862932",
@@ -191,16 +187,7 @@ public class FIDOTest {
     public void CreateAssertions() throws Exception {
         try {
             new FWPAssertionBuilder()
-                .setPaymentRequest(getPaymentRequest(true, false))
-                .create(fwpPreSigner);
-            fail("Must not execute");
-        } catch (Exception e) {
-            checkException(e, "Property \"id\" is missing");
-        }
-
-        try {
-            new FWPAssertionBuilder()
-                .setPaymentRequest(getPaymentRequest(true, true))
+                .setPaymentRequest(getPaymentRequest(true))
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
@@ -209,7 +196,7 @@ public class FIDOTest {
 
         try {
             new FWPAssertionBuilder()
-                .setPaymentRequest(getPaymentRequest(true, true))
+                .setPaymentRequest(getPaymentRequest(true))
                 .setPayeeHostName("example.com")
                 .setPayeeHostName("example.com")
                 .create(fwpPreSigner);
@@ -226,7 +213,7 @@ public class FIDOTest {
         fwpPreSigner = new FWPCrypto.FWPPreSigner(keyPair.getPublic());
         FWPAssertionDecoder decoder = 
                 new FWPAssertionDecoder(buildGoodPaymenRequest(null, keyPair.getPrivate()));
-        FWPAssertionDecoder.PaymentRequest paymentRequest = decoder.getPaymentRequest();
+        FWPPaymentRequest paymentRequest = decoder.getPaymentRequest();
         assertTrue("payee", paymentRequest.getPayee().equals("Space Shop"));
         assertTrue("id", paymentRequest.getId().equals("65656"));
         assertTrue("amount", paymentRequest.getAmount().equals("140.00"));
@@ -245,9 +232,9 @@ public class FIDOTest {
                 "{\"service\":\"https://mybank.com/fwp\"}", keyPair.getPrivate()));
         assertTrue("nd", decoder.getNetworkData().toString()
                 .equals("{\n  \"service\": \"https://mybank.com/fwp\"\n}"));
-        decoder.verifyClaimedPaymentRequest(getPaymentRequest(true, true));
+        decoder.verifyClaimedPaymentRequest(getPaymentRequest(true));
         try {
-            decoder.verifyClaimedPaymentRequest(getPaymentRequest(false, true));
+            decoder.verifyClaimedPaymentRequest(getPaymentRequest(false));
             fail("should not execute");
         } catch (Exception e) {
             assertTrue("claimed", e.getMessage().contains("Claimed"));

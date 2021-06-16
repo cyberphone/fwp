@@ -72,7 +72,7 @@ public class BuyServlet extends HttpServlet {
 
         String js = new StringBuilder(
             "const paymentRequest = ")
-        .append(FWPService.samplePaymentRequest.serializeToString(JSONOutputFormats.PRETTY_JS_NATIVE))
+        .append(FWPService.samplePaymentRequest.serializeAsJSON(JSONOutputFormats.PRETTY_JS_NATIVE))
         .append(
             ";\n" +
 
