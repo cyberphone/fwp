@@ -61,10 +61,10 @@ public class FWPJsonAssertion {
     }
     
     public String serialize() throws IOException {
-        return internalSerialize().serializeToString(JSONOutputFormats.NORMALIZED);
+        return getWriter().serializeToString(JSONOutputFormats.NORMALIZED);
     }
     
-    JSONObjectWriter internalSerialize() throws IOException {
+    public JSONObjectWriter getWriter() throws IOException {
         return new JSONObjectWriter()
                 .setString(PAYMENT_METHOD, paymentMethod)
                 .setString(ISSUER_ID, issuerId)
@@ -74,7 +74,7 @@ public class FWPJsonAssertion {
     @Override
     public String toString() {
         try {
-            return internalSerialize().toString();
+            return getWriter().toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

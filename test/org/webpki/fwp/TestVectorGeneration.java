@@ -25,6 +25,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import java.util.Base64;
+import java.util.GregorianCalendar;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORAsymKeyEncrypter;
@@ -73,6 +74,8 @@ public class TestVectorGeneration {
     static final String FILE_SIGNED_CBOR     = "SAD.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
     static final String FILE_FWP_ASSERTION_JSON  = "FWP-assertion.json";
+    static final String FILE_PSP_REQUEST_JSON  = "PSP-request.json";
+    static final String FILE_ISSUER_REQUEST_JSON  = "ISSUER-request.json";
 
     String testDataDir;
     String keyDir;
@@ -103,13 +106,14 @@ public class TestVectorGeneration {
         result.append("\n\nUser FIDO key in JWK format:\n")
               .append(currPrivateKey);
         
+        GregorianCalendar time = ISODateTime.parseDateTime("2021-06-17T12:34:07+02:00",
+                                                           ISODateTime.LOCAL_NO_SUBSECONDS);
+        
         FWPCrypto.FWPPreSigner fwpSigner = new FWPCrypto.FWPPreSigner(p256.getPublic());
        
         FWPPaymentRequest paymentRequest = 
-                new FWPPaymentRequest("Space Shop",
-                                          "7040566321",
-                                          "435.00",
-                                          "EUR");
+                new FWPPaymentRequest("Space Shop", "7040566321", "435.00", "EUR");
+        
         result.append("\n\nMerchant 'W3C PaymentRequest' (PRCD) data in " +
                       "pretty-printed JSON notation:\n")
               .append(paymentRequest.toString())
@@ -117,8 +121,7 @@ public class TestVectorGeneration {
         
         byte[] unsignedFwpAssertion = new FWPAssertionBuilder()
                 .setPaymentRequest(paymentRequest)
-                .setOptionalTimeStamp(ISODateTime.parseDateTime("2021-06-10T08:34:21+02:00",
-                                                                ISODateTime.LOCAL_NO_SUBSECONDS))
+                .setOptionalTimeStamp(time)
                 .setAccountData("FR7630002111110020050014382",
                                 "0057162932",
                                 PAYMENT_METHOD)
@@ -251,6 +254,27 @@ public class TestVectorGeneration {
 
         conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, 
                            result.toString().getBytes("utf-8"));
+
+        
+        // The following were only added for the specification samples...
+        
+        time.add(GregorianCalendar.SECOND, 15);
+        PSPRequest pspRequest = new PSPRequest(paymentRequest,
+        		                               fwpJsonAssertion, 
+        		                               "DE89370400440532013000", 
+        		                               "220.13.198.144", 
+        		                               time);
+        conditionalRewrite(testDataDir + FILE_PSP_REQUEST_JSON, 
+        		pspRequest.toString().getBytes("utf-8"));
+
+        
+        time.add(GregorianCalendar.SECOND, 1);
+        IssuerRequest issuerRequest = new IssuerRequest(pspRequest,
+                                                        "spaceshop.com", 
+                                                        time);
+        conditionalRewrite(testDataDir + FILE_ISSUER_REQUEST_JSON, 
+        		issuerRequest.toString().getBytes("utf-8"));
+
     }
 
     boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {

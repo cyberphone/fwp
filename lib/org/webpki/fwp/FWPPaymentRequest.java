@@ -96,7 +96,7 @@ public class FWPPaymentRequest {
     }
     
     public String serializeAsJSON(JSONOutputFormats format) throws IOException {
-        return internalSerialize().serializeToString(format);
+        return getWriter().serializeToString(format);
     }
     
     public CBORMap serializeAsCBOR() throws IOException {
@@ -107,7 +107,7 @@ public class FWPPaymentRequest {
                 .setObject(CBOR_PR_CURRENCY, new CBORTextString(currency));
     }
 
-    JSONObjectWriter internalSerialize() throws IOException {
+    public JSONObjectWriter getWriter() throws IOException {
         return new JSONObjectWriter()
                 .setString(JSON_PR_PAYEE, payee)
                 .setString(JSON_PR_ID, id)
@@ -118,7 +118,7 @@ public class FWPPaymentRequest {
     @Override
     public String toString() {
         try {
-            return internalSerialize().toString();
+            return getWriter().toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
