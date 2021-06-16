@@ -260,12 +260,12 @@ public class TestVectorGeneration {
         
         time.add(GregorianCalendar.SECOND, 15);
         PSPRequest pspRequest = new PSPRequest(paymentRequest,
-        		                               fwpJsonAssertion, 
-        		                               "DE89370400440532013000", 
-        		                               "220.13.198.144", 
-        		                               time);
+                                               fwpJsonAssertion, 
+                                               "DE89370400440532013000", 
+                                               "220.13.198.144", 
+                                               time);
         conditionalRewrite(testDataDir + FILE_PSP_REQUEST_JSON, 
-        		pspRequest.toString().getBytes("utf-8"));
+                pspRequest.toString().getBytes("utf-8"));
 
         
         time.add(GregorianCalendar.SECOND, 1);
@@ -273,7 +273,7 @@ public class TestVectorGeneration {
                                                         "spaceshop.com", 
                                                         time);
         conditionalRewrite(testDataDir + FILE_ISSUER_REQUEST_JSON, 
-        		issuerRequest.toString().getBytes("utf-8"));
+                issuerRequest.toString().getBytes("utf-8"));
 
     }
 

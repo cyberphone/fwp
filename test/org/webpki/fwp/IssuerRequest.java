@@ -47,21 +47,21 @@ public class IssuerRequest {
  
     GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
-    	return timeStamp;
+        return timeStamp;
     }   
     
     public IssuerRequest(JSONObjectReader reader) throws IOException {
         pspRequest = new PSPRequest(reader.getObject(PSP_REQUEST));
         payeeHost = reader.getString(PAYEE_HOST);
-       	timeStamp = reader.getDateTime(TIME_STAMP, ISODateTime.COMPLETE);
+        timeStamp = reader.getDateTime(TIME_STAMP, ISODateTime.COMPLETE);
     }
     
     public IssuerRequest(PSPRequest pspRequest,
                          String payeeHost,
                          GregorianCalendar timeStamp) {
         this.pspRequest = pspRequest;
-    	this.payeeHost = payeeHost;
-    	this.timeStamp = timeStamp;
+        this.payeeHost = payeeHost;
+        this.timeStamp = timeStamp;
     }
     
     public String serialize() throws IOException {
@@ -70,9 +70,9 @@ public class IssuerRequest {
     
     public JSONObjectWriter getWriter() throws IOException {
         return new JSONObjectWriter()
-        		.setObject(PSP_REQUEST, pspRequest.getWriter())
-    	        .setString(PAYEE_HOST, payeeHost)
-    	        .setDateTime(TIME_STAMP, timeStamp, ISODateTime.UTC_NO_SUBSECONDS);
+                .setObject(PSP_REQUEST, pspRequest.getWriter())
+                .setString(PAYEE_HOST, payeeHost)
+                .setDateTime(TIME_STAMP, timeStamp, ISODateTime.UTC_NO_SUBSECONDS);
     }
     
     @Override

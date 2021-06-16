@@ -40,50 +40,50 @@ public class PSPRequest {
     
     FWPPaymentRequest paymentRequest;
     public FWPPaymentRequest getPaymentRequest() {
-    	return paymentRequest;
+        return paymentRequest;
     }
     
     FWPJsonAssertion fwpAssertion;
     public FWPJsonAssertion getFwpAssertion() {
-    	return fwpAssertion;
+        return fwpAssertion;
     }
 
     String receiveAccount;
     public String getReceiveAccount() {
-    	return receiveAccount;
+        return receiveAccount;
     }
 
     String clientIp;
     public String getClientIp() {
-    	return clientIp;
+        return clientIp;
     }    
 
     GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
-    	return timeStamp;
+        return timeStamp;
     }    
 
     JSONObjectReader reader;
     
     public PSPRequest(JSONObjectReader reader) throws IOException {
-    	this.reader = reader;
-    	paymentRequest = new FWPPaymentRequest(reader.getObject(PAYMENT_REQUEST));
-    	fwpAssertion = new FWPJsonAssertion(reader.getObject(FWP_ASSERTION));
-    	receiveAccount = reader.getString(RECEIVE_ACCOUNT);
-    	clientIp = reader.getString(CLIENT_IP);
-    	timeStamp = reader.getDateTime(TIME_STAMP, ISODateTime.COMPLETE);
+        this.reader = reader;
+        paymentRequest = new FWPPaymentRequest(reader.getObject(PAYMENT_REQUEST));
+        fwpAssertion = new FWPJsonAssertion(reader.getObject(FWP_ASSERTION));
+        receiveAccount = reader.getString(RECEIVE_ACCOUNT);
+        clientIp = reader.getString(CLIENT_IP);
+        timeStamp = reader.getDateTime(TIME_STAMP, ISODateTime.COMPLETE);
     }
     
     public PSPRequest(FWPPaymentRequest paymentRequest,
-    		          FWPJsonAssertion fwpAssertion,
-    		          String receiveAccount,
-    		          String clientIp,
-    		          GregorianCalendar timeStamp) {
-    	this.paymentRequest = paymentRequest;
-    	this.fwpAssertion = fwpAssertion;
-    	this.receiveAccount = receiveAccount;
-    	this.clientIp = clientIp;
-    	this.timeStamp = timeStamp;
+                      FWPJsonAssertion fwpAssertion,
+                      String receiveAccount,
+                      String clientIp,
+                      GregorianCalendar timeStamp) {
+        this.paymentRequest = paymentRequest;
+        this.fwpAssertion = fwpAssertion;
+        this.receiveAccount = receiveAccount;
+        this.clientIp = clientIp;
+        this.timeStamp = timeStamp;
     }
     
     public String serialize() throws IOException {
@@ -92,11 +92,11 @@ public class PSPRequest {
     
     public JSONObjectWriter getWriter() throws IOException {
         return new JSONObjectWriter()
-        		.setObject(PAYMENT_REQUEST, paymentRequest.getWriter())
-        		.setObject(FWP_ASSERTION, fwpAssertion.getWriter())
-    	        .setString(RECEIVE_ACCOUNT, receiveAccount)
-    	        .setString(CLIENT_IP, clientIp)
-    	        .setDateTime(TIME_STAMP, timeStamp, ISODateTime.UTC_NO_SUBSECONDS);
+                .setObject(PAYMENT_REQUEST, paymentRequest.getWriter())
+                .setObject(FWP_ASSERTION, fwpAssertion.getWriter())
+                .setString(RECEIVE_ACCOUNT, receiveAccount)
+                .setString(CLIENT_IP, clientIp)
+                .setDateTime(TIME_STAMP, timeStamp, ISODateTime.UTC_NO_SUBSECONDS);
     }
     
     @Override

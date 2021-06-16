@@ -144,7 +144,7 @@ public class ADServlet extends HttpServlet {
                 "<div class='staticbox'>")
             .append(HTML.encode(CBORObject.decode(fwpAssertion).toString(), true)
                     .replace("9:&nbsp;", 
-                             "<span style='color:grey'>// The platform data is " +
+                             "<span style='color:grey;word-break:normal'>// The platform data is " +
                                "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
             .append(
                 "</div>");
