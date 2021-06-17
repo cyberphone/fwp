@@ -133,7 +133,9 @@ public class EnrollServlet extends HttpServlet {
                 "        residentKey: 'preferred',\n" +
                 "        userVerification: 'preferred'\n" +
                 "      },\n" +
-                "      attestation: 'direct',\n" +
+// Attestation on Android is very slow so we drop this for the PoC :(
+//                "      attestation: 'direct',\n" +
+                "      attestation: 'none',\n" +
                 "      extensions: {}\n" +
                 "    };\n" +
                 
