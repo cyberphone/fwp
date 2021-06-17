@@ -43,6 +43,9 @@ public class FinalizeAssertionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
+    // DIV elements to turn on and turn off.
+    private static final String WAITING_ID     = "wait";
+    private static final String ACTIVATE_ID    = "activate";
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -79,9 +82,14 @@ public class FinalizeAssertionServlet extends HttpServlet {
                   "Only verifiers need to deal with low-level CBOR processing.</div>" +
               "</div>" +
             "</div>" +
+
+            "<div style='display:flex;justify-content:center'>" +
+              "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+                "style='padding-top:2em;display:none' alt='waiting'/>" +
+            "</div>" +  
             
             "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+              "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doReturn()\">" +
                 "Return FWP Assertion to Merchant" +
               "</div>" +
             "</div>" +
@@ -90,7 +98,18 @@ public class FinalizeAssertionServlet extends HttpServlet {
         .append(HTML.encode(fwpAssertion.toString(), true))
         .append(
             "</div>");
-        HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
-    }
+        String js = new StringBuilder(
 
+            FWPWalletCore.GO_HOME_JAVASCRIPT +
+            
+            "function doReturn() {\n" +
+            "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
+            "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+            "  setTimeout(function() {\n" +
+            "    document.forms.shoot.submit();\n" +
+            "  }, 1000);\n" +
+            "}\n").toString();
+
+        HTML.standardPage(response, js, html);
+    }
 }
