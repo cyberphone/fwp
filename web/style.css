@@ -66,6 +66,11 @@ li {
   background-color:##fffdf2;
 }
 
+.payimage {
+  cursor:pointer;
+  height:3em;
+}
+
 .stdbtn, .multibtn {
   cursor:pointer;
   background:linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);

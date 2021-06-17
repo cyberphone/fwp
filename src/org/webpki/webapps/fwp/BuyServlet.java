@@ -62,12 +62,19 @@ public class BuyServlet extends HttpServlet {
                   "merchant application as well as the FWP wallet UI.</div>" +
               "</div>" +
             "</div>" +
+
+            "<div class='header' style='margin:1em 0'>Select Payment Method</div>" +
             
             "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"doPay()\">" +
-                "Pay using FWP" +
-              "</div>" +
+              "<table>" +
+                "<tr><td><img src='images/fwp-pay.svg' class='payimage' " +
+                    "onclick=\"doPay()\"/></td></tr>" +
+                "<tr><td><img src='images/paypal-pay.svg' class='payimage' " +
+                   "style='margin:0.8em 0'/></td></tr>" +
+                "<tr><td><img src='images/visamc-pay.svg' class='payimage'/></td></tr>" +
+             "</table>" +
             "</div>" +
+            
             "</form>");
 
         String js = new StringBuilder(
