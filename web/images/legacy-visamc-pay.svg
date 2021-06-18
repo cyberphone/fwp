@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>
-  <title>Browser Symbol</title>
+  <title>VISA/MC Legacy Payment</title>
   <!-- Anders Ruyndgren 2021-->
   <rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>
   <line x1='150' y1='1' x2='150' y2='100' stroke='grey' stroke-width='2' fill='none'/>
 <svg
    x="175"
-   y="2"
+   y="3"
    width="90"
    height="42"
    viewBox="0 0 1000.046 323.653"
