@@ -72,12 +72,20 @@ public class BuyServlet extends HttpServlet {
             "<div style='display:flex;justify-content:center'>" +
               "<table>" +
                 "<tr><td><img src='images/fwpminiplus-pay.svg' class='payimage' " +
-                  "onclick='doPay()'/></td></tr>" +
+                  "onclick='doPay()' alt='image'/></td></tr>" +
                 "<tr><td><img src='images/paypal-pay.svg' class='payimage' " +
-                  "onclick='unsupported(this)' style='margin:0.8em 0'/></td></tr>" +
+                  "onclick='unsupported(this)' style='margin:0.8em 0' alt='image'/></td></tr>" +
                 "<tr><td><img src='images/legacy-visamc-pay.svg' class='payimage' " + 
-                  "onclick='unsupported(this)'/></td></tr>" +
+                  "onclick='unsupported(this)' alt='image'/></td></tr>" +
              "</table>" +
+            "</div>" +
+             
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+              "<div style='max-width:40em'>" +
+                "Note that FIDO Web Pay follows FIDO by being <i>payment system neutral</i>. " +
+                "For the user the experience is <i>identical</i> when performing a SEPA instant " +
+                "payment or using an international card network like VISA." +
+              "</div>" +
             "</div>" +
             
             "</form>");
