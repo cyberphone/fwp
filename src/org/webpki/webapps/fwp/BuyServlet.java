@@ -38,6 +38,8 @@ public class BuyServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
+    private static final String NOTIFIER = "notifier";
+    
    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -65,13 +67,16 @@ public class BuyServlet extends HttpServlet {
 
             "<div class='header' style='margin:1em 0'>Select Payment Method</div>" +
             
+            "<div id='" + NOTIFIER + "' class='toasting'>This demo only supports FWP...</div>" +
+            
             "<div style='display:flex;justify-content:center'>" +
               "<table>" +
-                "<tr><td><img src='images/fwp-pay.svg' class='payimage' " +
-                    "onclick=\"doPay()\"/></td></tr>" +
+                "<tr><td><img src='images/fwpminiplus-pay.svg' class='payimage' " +
+                  "onclick='doPay()'/></td></tr>" +
                 "<tr><td><img src='images/paypal-pay.svg' class='payimage' " +
-                   "style='margin:0.8em 0'/></td></tr>" +
-                "<tr><td><img src='images/visamc-pay.svg' class='payimage'/></td></tr>" +
+                  "onclick='unsupported(this)' style='margin:0.8em 0'/></td></tr>" +
+                "<tr><td><img src='images/legacy-visamc-pay.svg' class='payimage' " + 
+                  "onclick='unsupported(this)'/></td></tr>" +
              "</table>" +
             "</div>" +
             
@@ -89,13 +94,22 @@ public class BuyServlet extends HttpServlet {
             " sn: '0057162932',\n" +
             " ii: 'https://mybank.fr/payment'\n" +
             "};\n" +
+            
+            "function unsupported(target) {\n" +
+            "  let notifier = document.getElementById('" + NOTIFIER + "');\n" +
+            "  notifier.style.top = (target.getBoundingClientRect().top + window.scrollY - " +
+                "notifier.offsetHeight) + 'px';\n" +
+            "  notifier.style.left = ((window.innerWidth - notifier.offsetWidth) / 2) + 'px';\n" +
+            "  notifier.style.visibility = 'visible';\n" +
+            "  setTimeout(function() {\n" +
+            "    notifier.style.visibility = 'hidden';\n" +
+            "  }, 1000);\n" +
+            "}\n\n" +
 
             "function doPay() {\n" +
-
             "  document.getElementById('" + FWPWalletCore.WALLET_REQUEST + 
                 "').value = JSON.stringify({pr: paymentRequest, ad: accountData});\n" +
             "  document.forms.shoot.submit();\n" +
-
             "}\n").toString();
         HTML.standardPage(response, js, html);
     }

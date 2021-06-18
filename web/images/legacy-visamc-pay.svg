@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg width='405' height='100' xmlns='http://www.w3.org/2000/svg'>
-  <title>VISA/MasterCard Payment Symbol</title>
+<svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>
+  <title>Browser Symbol</title>
   <!-- Anders Ruyndgren 2021-->
-  <rect x='1' y='1' width='400' height='98' stroke='grey' stroke-width='2' fill='none'/>
-  <line x1='200' y1='1' x2='200' y2='100' stroke='grey' stroke-width='2' fill='none'/>
+  <rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>
+  <line x1='150' y1='1' x2='150' y2='100' stroke='grey' stroke-width='2' fill='none'/>
 <svg
-   x="16"
-   y="24"
-   width="170"
-   height="52"
+   x="175"
+   y="2"
+   width="90"
+   height="42"
    viewBox="0 0 1000.046 323.653"
    enable-background="new 0 0 258.381 161.154">
 <g
@@ -33,10 +33,10 @@
 <svg
    xmlns="http://www.w3.org/2000/svg"
    viewBox="0 0 1000.008 775.97201"
-   x='250'
-   height="75"
-   y='15'
-   width="100">
+   x='195'
+   y='20'
+   width="60">
+   height="40"
   <g
      transform="matrix(3.3557321,0,0,3.3557321,-1551.7864,-1849.1059)"
      id="layer1">
@@ -66,5 +66,10 @@
     </g>
   </g>
 </svg>
+
+<text font-size='30' font-family='Roboto,sans-serif' text-anchor='middle'>
+<tspan x='78' y='43'>Payment</tspan>
+<tspan x='78' y='79'>Card</tspan>
+</text>
 
 </svg>

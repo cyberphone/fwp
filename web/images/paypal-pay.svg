@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>
-  <title>Browser Symbol</title>
-  <!-- Anders Ruyndgren 2021-->
+  <title>PayPal payment symbol</title>
+  <!-- PayPal 2021-->
   <rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>
 
 <svg x="17" y="17"
