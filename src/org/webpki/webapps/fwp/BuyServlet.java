@@ -69,22 +69,21 @@ public class BuyServlet extends HttpServlet {
             
             "<div id='" + NOTIFIER + "' class='toasting'>This demo only supports FWP...</div>" +
             
-            "<div style='display:flex;justify-content:center'>" +
-              "<table>" +
-                "<tr><td><img src='images/fwpminiplus-pay.svg' class='payimage' " +
-                  "onclick='doPay()' alt='image'/></td></tr>" +
-                "<tr><td><img src='images/paypal-pay.svg' class='payimage' " +
-                  "onclick='unsupported(this)' style='margin:0.8em 0' alt='image'/></td></tr>" +
-                "<tr><td><img src='images/legacy-visamc-pay.svg' class='payimage' " + 
-                  "onclick='unsupported(this)' alt='image'/></td></tr>" +
-             "</table>" +
+            "<div style='display:flex;align-items:center;flex-direction:column'>" +
+              "<img src='images/fwpminiplus-pay.svg' class='payimage' " +
+                 "onclick='doPay()' alt='image'/>" +
+              "<img src='images/paypal-pay.svg' class='payimage' " +
+                  "onclick='unsupported(this)' style='margin:1em 0' alt='image'/>" +
+              "<img src='images/legacy-visamc-pay.svg' class='payimage' " + 
+                 "onclick='unsupported(this)' alt='image'/>" +
             "</div>" +
              
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div style='max-width:40em'>" +
-                "Note that FIDO Web Pay follows FIDO by being <i>payment system neutral</i>. " +
-                "For the user the experience is <i>identical</i> when performing a SEPA instant " +
-                "payment or using an international card network like VISA." +
+                "Note that FIDO Web Pay follows the FIDO paradigm by being " +
+                "<i>payment system neutral</i>. " +
+                "This also makes the user experience <i>identical</i> when performing a " +
+                "SEPA instant payment or using an international card network like VISA." +
               "</div>" +
             "</div>" +
             
