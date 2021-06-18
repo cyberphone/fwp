@@ -122,6 +122,10 @@ public class LoginServlet extends HttpServlet {
 
             // Errors are effectively aborting so a single try-catch does the trick.
             "  } catch (error) {\n" +
+            "    if (error == '" + FIDOLoginServlet.MISSING_ENROLL + "') {\n" +
+            "      document.location.href = 'walletadmin';\n" +
+            "      return;\n" +
+            "    }\n" +
             "    let message = 'Fail: ' + error;\n" +
             "    console.log(message);\n" +
             "    document.getElementById('" + WAITING_ID + "').style.display = 'none';\n" +

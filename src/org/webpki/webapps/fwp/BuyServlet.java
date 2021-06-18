@@ -43,12 +43,6 @@ public class BuyServlet extends HttpServlet {
    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        if (FWPWalletCore.getWalletCookie(request) == null) {
-            HTML.standardPage(response, null, new StringBuilder(
-                "<div class='important'>User ID is missing, have you enrolled?</div>"));
-            return;
-        }
-
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='ad'>" +
         

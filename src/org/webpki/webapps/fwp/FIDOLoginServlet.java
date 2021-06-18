@@ -50,6 +50,8 @@ public class FIDOLoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
    
     static Logger logger = Logger.getLogger(FIDOLoginServlet.class.getName());
+    
+    static final String MISSING_ENROLL = "User ID missing, have you enrolled?";
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -70,7 +72,7 @@ public class FIDOLoginServlet extends HttpServlet {
             // Get the enrolled user.
             String userId = FWPWalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPWalletCore.softError(response, resultJson, "User ID missing, have you enrolled?");
+                FWPWalletCore.softError(response, resultJson, MISSING_ENROLL);
                 return;
             }
             

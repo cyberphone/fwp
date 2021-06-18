@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,7 +64,13 @@ public class WalletAdminServlet extends HttpServlet {
                 "</div>"
                                               :
                 "<div class='important'>" +
-                  "You currently have no payment cards" +
+                  "You have not yet enrolled the FIDO wallet." +
+                "</div>" +
+                  
+                "<div style='display:flex;justify-content:center'>" +
+                   "<div class='stdbtn' onclick=\"document.location.href='enroll'\">" +
+                    "Go to Enrollment!" +
+                   "</div>" +
                 "</div>");
     
             HTML.standardPage(response, null, html);
@@ -88,10 +95,17 @@ public class WalletAdminServlet extends HttpServlet {
                     "<form name='shoot' method='POST' action='hash'>" +
                     "<div class='header'>Payment Cards Deleted</div>" +
                     "<div style='display:flex;justify-content:center;margin-top:15pt'>")
-                .append("Thank you testing.  We hope that you liked it!")
+                .append("Thank you for testing.  We hope that you liked it!")
                 .append(
                     "</div>" +
                     "</form>");
+
+            // We remove the cookie as well.
+            Cookie walletCookie = new Cookie(FWPWalletCore.WALLET_COOKIE, "");
+            walletCookie.setMaxAge(0);  // 100 days.
+            walletCookie.setSecure(true);
+            response.addCookie(walletCookie);
+            
             HTML.standardPage(response, null, html);
 
             logger.info("Deleted payment cards for user: " + userId);

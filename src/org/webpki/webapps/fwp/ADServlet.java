@@ -66,7 +66,7 @@ public class ADServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
         if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet requiest");
+            FWPWalletCore.failed("Missing wallet request");
         }
         logger.info(walletRequest);
         JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
@@ -74,7 +74,7 @@ public class ADServlet extends HttpServlet {
             // Get the enrolled user.
             String userId = FWPWalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPWalletCore.failed("User ID missing, have you enrolled?");
+                response.sendRedirect("walletadmin");
                 return;
             }
 
