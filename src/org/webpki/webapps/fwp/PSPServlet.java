@@ -28,8 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.fwp.FWPJsonAssertion;
-import org.webpki.fwp.FWPPaymentRequest;
+import org.webpki.fwp.IssuerRequest;
 import org.webpki.fwp.PSPRequest;
 
 import org.webpki.json.JSONParser;
@@ -38,11 +37,13 @@ import org.webpki.json.JSONParser;
  * TBD
  *
  */
-public class MerchantServlet extends HttpServlet {
+public class PSPServlet extends HttpServlet {
     
-    static Logger logger = Logger.getLogger(MerchantServlet.class.getName());
+    static Logger logger = Logger.getLogger(PSPServlet.class.getName());
 
     private static final long serialVersionUID = 1L;
+    
+    public static final String PSP_REQUEST = "pspRequest";
     
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID     = "wait";
@@ -51,34 +52,25 @@ public class MerchantServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String fwpAssertion = request.getParameter(FWPWalletCore.FWP_ASSERTION);
-        if (fwpAssertion == null) {
-            FWPWalletCore.failed("Missing FWP assertion");
+        String pspRequest = request.getParameter(PSP_REQUEST);
+        if (pspRequest == null) {
+            FWPWalletCore.failed("Missing PSP request");
             return;
         }
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
-            return;
-        }    
-        FWPJsonAssertion fwpJsonAssertion = new FWPJsonAssertion(JSONParser.parse(fwpAssertion));
-        FWPPaymentRequest fwpPaymentRequest = new FWPPaymentRequest(
-                JSONParser.parse(walletRequest).getObject("pr"));
-        PSPRequest pspRequest = new PSPRequest(fwpPaymentRequest,
-                                               fwpJsonAssertion,
-                                               "DE89370400440532013000", 
-                                               "220.13.198.144", 
-                                               new GregorianCalendar());
+        IssuerRequest issuerRequest = 
+                new IssuerRequest(new PSPRequest(JSONParser.parse(pspRequest)), 
+                                  "spaceshop.com",
+                                  new GregorianCalendar());
         StringBuilder html = new StringBuilder(
-            "<form name='shoot' method='POST' action='pspreq'>" +
-            "<input type='hidden' name='" + PSPServlet.PSP_REQUEST +
+            "<form name='shoot' method='POST' action='issuerreq'>" +
+            "<input type='hidden' name='" + IssuerServlet.ISSUER_REQUEST +
             "' value='")
-        .append(HTML.encode(pspRequest.serialize(), false))
+        .append(HTML.encode(issuerRequest.serialize(), false))
         .append(
             "'/>" +
             "</form>" +
 
-            "<div class='header'>Back to Merchant</div>" +
+            "<div class='header'>PSP Action</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
@@ -99,7 +91,7 @@ public class MerchantServlet extends HttpServlet {
             "</div>" +
         
             "<div class='staticbox'>")
-        .append(HTML.encode(pspRequest.toString(), true))
+        .append(HTML.encode(issuerRequest.toString(), true))
         .append(
             "</div>");
         String js = new StringBuilder(

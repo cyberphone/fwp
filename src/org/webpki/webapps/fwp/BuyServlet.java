@@ -91,7 +91,7 @@ public class BuyServlet extends HttpServlet {
 
             "const accountData = {" +
             " id: 'FR7630002111110020050014382',\n" +
-            " pm: 'https://bankdirect.com',\n" +
+            " pm: 'https://bank<table>\\'\\u20acdirect.com',\n" +
             " sn: '0057162932',\n" +
             " ii: 'https://mybank.fr/payment'\n" +
             "};\n" +

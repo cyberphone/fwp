@@ -46,13 +46,14 @@ public class SADServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        request.setCharacterEncoding("utf-8");
         String signedAuthorizationB64U = request.getParameter(FWPWalletCore.FWP_SAD);
         if (signedAuthorizationB64U == null) {
             FWPWalletCore.failed("Missing signed authorization data");
             return;
         }
-        String walletRequestB64U = request.getParameter(FWPWalletCore.WALLET_REQUEST_B64U);
-        if (walletRequestB64U == null) {
+        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
+        if (walletRequest == null) {
             FWPWalletCore.failed("Missing wallet request");
             return;
         }
@@ -63,8 +64,8 @@ public class SADServlet extends HttpServlet {
         .append(signedAuthorizationB64U)
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST_B64U + "' value='")
-        .append(walletRequestB64U)
+            "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST+ "' value='")
+        .append(HTML.encode(walletRequest, false))
         .append(
             "'/>" +
             "</form>" +

@@ -49,18 +49,18 @@ public class FinalizeAssertionServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        request.setCharacterEncoding("utf-8");
         String encryptedSignedAuthorizationB64U = request.getParameter(FWPWalletCore.FWP_ESAD);
         if (encryptedSignedAuthorizationB64U == null) {
             FWPWalletCore.failed("Missing encrypted signed authorization data");
             return;
         }
-        String walletRequestB64U = request.getParameter(FWPWalletCore.WALLET_REQUEST_B64U);
-        if (walletRequestB64U == null) {
+        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
+        if (walletRequest == null) {
             FWPWalletCore.failed("Missing wallet request");
             return;
         }     
-        JSONObjectReader accountData = JSONParser.parse(
-                Base64.getUrlDecoder().decode(walletRequestB64U)).getObject("ad");
+        JSONObjectReader accountData = JSONParser.parse(walletRequest).getObject("ad");
         FWPJsonAssertion fwpAssertion =
                 new FWPJsonAssertion(accountData.getString("pm"),
                                      accountData.getString("ii"),
@@ -70,7 +70,11 @@ public class FinalizeAssertionServlet extends HttpServlet {
             "<form name='shoot' method='POST' action='merchant'>" +
             "<input type='hidden' name='" + FWPWalletCore.FWP_ASSERTION +
             "' value='")
-        .append(fwpAssertion.serialize())
+        .append(HTML.encode(fwpAssertion.serialize(), false))
+        .append(
+            "'/>" +
+            "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
+        .append(HTML.encode(walletRequest, false))
         .append(
             "'/>" +
             "</form>" +

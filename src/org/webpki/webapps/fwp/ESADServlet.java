@@ -47,13 +47,14 @@ public class ESADServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        request.setCharacterEncoding("utf-8");
         try {
             String signedAuthorizationDataB64U = request.getParameter(FWPWalletCore.FWP_SAD);
             if (signedAuthorizationDataB64U == null) {
                 FWPWalletCore.failed("FWP assertion missing");
             }
-            String walletRequestB64U = request.getParameter(FWPWalletCore.WALLET_REQUEST_B64U);
-            if (walletRequestB64U == null) {
+            String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
+            if (walletRequest == null) {
                 FWPWalletCore.failed("Missing wallet request");
                 return;
             }            
@@ -71,8 +72,8 @@ public class ESADServlet extends HttpServlet {
             .append(Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted.encode()))
             .append(
                 "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST_B64U + "' value='")
-            .append(walletRequestB64U)
+                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
+            .append(HTML.encode(walletRequest, false))
             .append(
                 "'/>" +
                 "</form>" +

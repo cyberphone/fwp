@@ -36,8 +36,8 @@ import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
 import org.webpki.fwp.FWPElements;
 import org.webpki.fwp.FWPPaymentRequest;
+
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 /**
@@ -93,9 +93,7 @@ public class ADServlet extends HttpServlet {
             // Build Authorization Data (AD)
             JSONObjectReader accountData = walletRequestJson.getObject("ad");
             JSONObjectReader paymentRequest = walletRequestJson.getObject("pr");
-            String walletRequestB64U = Base64.getUrlEncoder().withoutPadding().encodeToString(
-                    walletRequestJson.serializeToBytes(JSONOutputFormats.NORMALIZED));
-            byte[] fwpAssertion = new FWPAssertionBuilder()
+             byte[] fwpAssertion = new FWPAssertionBuilder()
                     .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
                     .setAccountData(accountData.getString("id"),
                                     accountData.getString("sn"),
@@ -109,8 +107,8 @@ public class ADServlet extends HttpServlet {
                 "<form name='shoot' method='POST' action='sad'>" +
                 "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
                     "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST_B64U + "' value='")
-            .append(walletRequestB64U)
+                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
+            .append(HTML.encode(walletRequest, false))
             .append(
                 "'/>" +
                 "</form>" +

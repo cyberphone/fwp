@@ -63,7 +63,17 @@
         <servlet-name>MerchantServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.MerchantServlet</servlet-class>
     </servlet>
- 
+
+    <servlet>
+        <servlet-name>PSPServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.PSPServlet</servlet-class>
+    </servlet> 
+
+    <servlet>
+        <servlet-name>IssuerServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.IssuerServlet</servlet-class>
+    </servlet>
+    
     <servlet>
         <servlet-name>FIDOPayServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
@@ -128,6 +138,16 @@
         <servlet-name>MerchantServlet</servlet-name>
         <url-pattern>/merchant</url-pattern>
     </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>PSPServlet</servlet-name>
+        <url-pattern>/pspreq</url-pattern>
+    </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>IssuerServlet</servlet-name>
+        <url-pattern>/issuerreq</url-pattern>
+    </servlet-mapping>     
 
     <servlet-mapping>
         <servlet-name>FIDOPayServlet</servlet-name>

@@ -73,9 +73,6 @@ public class FWPWalletCore {
     static final String FWP_ESAD                 = "esad";
     static final String FWP_ASSERTION            = "fwpAssertion";
     
-    // Follows all steps
-    static final String WALLET_REQUEST_B64U      = "walletRequestB64U";
-    
     // Init/finalize phase session attributes
     static final String ATTR_REGISTER_DATA       = "registerdata";
     static final String ATTR_LOGIN_DATA          = "logindata";

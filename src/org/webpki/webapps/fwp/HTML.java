@@ -35,7 +35,7 @@ public class HTML {
         "<title>FWP Lab</title>" + 
         "<link rel='stylesheet' type='text/css' href='style.css'>";
 
-    static String encode(String val, boolean newLineExpansion) {
+    static String encode(String val, boolean codeListings) {
         if (val != null) {
             StringBuilder buf = new StringBuilder(val.length() + 8);
             char c;
@@ -44,7 +44,7 @@ public class HTML {
                 c = val.charAt(i);
                 switch (c) {
                 case '\n':
-                    buf.append(newLineExpansion ? "<br>" : "\n");
+                    buf.append(codeListings ? "<br>" : "\n");
                     break;
                 case '<':
                     buf.append("&lt;");
@@ -62,7 +62,7 @@ public class HTML {
                     buf.append("&#039;");
                     break;
                 case ' ':
-                    buf.append("&nbsp;");
+                    buf.append(codeListings ? "&nbsp;" : " ");
                     break;
                 default:
                     buf.append(c);

@@ -66,7 +66,7 @@
        includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
     <copy file="web.xml" todir="${temp.dir}"/>
     <javac debug="${debug}"
-           srcdir="${src.dir};${lib.dir}"
+           srcdir="${src.dir};${lib.dir}:${test.dir}"
            destdir="${temp.dir}"
            includeAntRuntime="false">
         <classpath>
