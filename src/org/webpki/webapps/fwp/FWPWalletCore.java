@@ -66,7 +66,6 @@ public class FWPWalletCore {
     
     // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";
-    static final String PAYMENT_REQUEST          = "paymentRequest";
 
     // FWP core
     static final String FWP_AD                   = "ad";
@@ -75,7 +74,7 @@ public class FWPWalletCore {
     static final String FWP_ASSERTION            = "fwpAssertion";
     
     // Follows all steps
-    static final String FWP_ACCOUNT_DATA         = "accountData";
+    static final String WALLET_REQUEST_B64U      = "walletRequestB64U";
     
     // Init/finalize phase session attributes
     static final String ATTR_REGISTER_DATA       = "registerdata";

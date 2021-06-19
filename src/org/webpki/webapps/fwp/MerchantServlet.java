@@ -26,6 +26,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.fwp.FWPJsonAssertion;
+import org.webpki.json.JSONParser;
+
 /**
  * TBD
  *
@@ -44,6 +47,7 @@ public class MerchantServlet extends HttpServlet {
             FWPWalletCore.failed("Missing FWP assertion");
             return;
         }
+        FWPJsonAssertion fwpJsonAssertion = new FWPJsonAssertion(JSONParser.parse(fwpAssertion));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='esad'>" +
             "<input type='hidden' name='" + FWPWalletCore.FWP_ASSERTION +

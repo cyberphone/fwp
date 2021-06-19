@@ -54,8 +54,13 @@ public class FinalizeAssertionServlet extends HttpServlet {
             FWPWalletCore.failed("Missing encrypted signed authorization data");
             return;
         }
+        String walletRequestB64U = request.getParameter(FWPWalletCore.WALLET_REQUEST_B64U);
+        if (walletRequestB64U == null) {
+            FWPWalletCore.failed("Missing wallet request");
+            return;
+        }     
         JSONObjectReader accountData = JSONParser.parse(
-                request.getParameter(FWPWalletCore.FWP_ACCOUNT_DATA));
+                Base64.getUrlDecoder().decode(walletRequestB64U)).getObject("ad");
         FWPJsonAssertion fwpAssertion =
                 new FWPJsonAssertion(accountData.getString("pm"),
                                      accountData.getString("ii"),

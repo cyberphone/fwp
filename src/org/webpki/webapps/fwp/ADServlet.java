@@ -58,7 +58,7 @@ public class ADServlet extends HttpServlet {
 
     static String sectionReference(String section) {
         return "<a href='" + "https://fido-web-pay.github.io/specification#" + section +
-                  "' target='_blank'><b>" + section + "</b></a>:  ";
+                  "' target='_blank'>" + section + "</a>:  ";
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -92,9 +92,11 @@ public class ADServlet extends HttpServlet {
             
             // Build Authorization Data (AD)
             JSONObjectReader accountData = walletRequestJson.getObject("ad");
+            JSONObjectReader paymentRequest = walletRequestJson.getObject("pr");
+            String walletRequestB64U = Base64.getUrlEncoder().withoutPadding().encodeToString(
+                    walletRequestJson.serializeToBytes(JSONOutputFormats.NORMALIZED));
             byte[] fwpAssertion = new FWPAssertionBuilder()
-                    .setPaymentRequest(new FWPPaymentRequest(
-                            walletRequestJson.getObject("pr")))
+                    .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
                     .setAccountData(accountData.getString("id"),
                                     accountData.getString("sn"),
                                     accountData.getString("pm"))
@@ -107,9 +109,8 @@ public class ADServlet extends HttpServlet {
                 "<form name='shoot' method='POST' action='sad'>" +
                 "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
                     "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.FWP_ACCOUNT_DATA + 
-                "' value='")
-            .append(accountData.serializeToString(JSONOutputFormats.NORMALIZED))
+                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST_B64U + "' value='")
+            .append(walletRequestB64U)
             .append(
                 "'/>" +
                 "</form>" +
@@ -122,9 +123,14 @@ public class ADServlet extends HttpServlet {
             .append(
                   "The payment data to authorize. " +
                   "This data is (after SHA256-digesting), used as FIDO 'challenge'. " +
-                  "That is, there is no FIDO authentication server since FWP is a " +
-                  "&quot;pure&quot; <i>authorization</i> scheme. " + 
-                  "<div style='margin-top:0.4em'>The data is shown in CBOR Diagnostic Notation.</div>" +
+                  "That is, <i>there is no FIDO authentication server</i> because FWP builds on a " +
+                  "&quot;Card&nbsp;Present&quot; <i>authorization</i> concept like " +
+                  "<a href='https://www.emvco.com/about/deployment-statistics/' " +
+                  "target='_blank'>EMV&reg;</a> and " + 
+                  "<a href='https://www.apple.com/apple-pay/' target='_blank'>Apple Pay&reg;</a>." +
+                  "<div style='margin-top:0.4em'>The data is shown in " +
+                  "<a href='https://fido-web-pay.github.io/specification/#cbor' " +
+                  "target='_blank'>CBOR</a> diagnostic notation.</div>" +
                  "</div>" +
                 "</div>" +
                 
