@@ -128,7 +128,7 @@ public class TestVectorGeneration {
                 .setPlatformData("Android", "10.0", "Chrome", "103")
                 .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                 .setOptionalNetworkData("\"additional stuff...\"")
-                .setPayeeHostName(MERCHANT_HOST)
+                .setPayeeHost(MERCHANT_HOST)
                 .create(fwpSigner);
         
         byte[] fwpAssertion = 

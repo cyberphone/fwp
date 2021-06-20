@@ -26,7 +26,7 @@ public enum FWPElements {
     
     FWP_VERSION               (1),
     PAYMENT_REQUEST           (2),
-    PAYEE_HOST_NAME           (3),
+    PAYEE_HOST                (3),
     ACCOUNT_ID                (4),
     SERIAL_NUMBER             (5),
     PAYMENT_METHOD            (6),

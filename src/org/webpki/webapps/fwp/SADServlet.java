@@ -52,9 +52,9 @@ public class SADServlet extends HttpServlet {
             FWPWalletCore.failed("Missing signed authorization data");
             return;
         }
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
+        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        if (walletInternal == null) {
+            FWPWalletCore.failed("Missing wallet data");
             return;
         }
         StringBuilder html = new StringBuilder(
@@ -64,8 +64,8 @@ public class SADServlet extends HttpServlet {
         .append(signedAuthorizationB64U)
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST+ "' value='")
-        .append(HTML.encode(walletRequest, false))
+            "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL+ "' value='")
+        .append(HTML.encode(walletInternal, false))
         .append(
             "'/>" +
             "</form>" +

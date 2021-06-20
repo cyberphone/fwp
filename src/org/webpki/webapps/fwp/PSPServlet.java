@@ -34,7 +34,7 @@ import org.webpki.fwp.PSPRequest;
 import org.webpki.json.JSONParser;
 
 /**
- * TBD
+ * PSP step.
  *
  */
 public class PSPServlet extends HttpServlet {
@@ -58,8 +58,9 @@ public class PSPServlet extends HttpServlet {
             return;
         }
         IssuerRequest issuerRequest = 
-                new IssuerRequest(new PSPRequest(JSONParser.parse(pspRequest)), 
-                                  "spaceshop.com",
+                new IssuerRequest(new PSPRequest(JSONParser.parse(pspRequest)),
+                                  // This is wrong, merchant hosts are stored in a PSP database
+                                  request.getServerName(),
                                   new GregorianCalendar());
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='issuerreq'>" +
@@ -86,7 +87,7 @@ public class PSPServlet extends HttpServlet {
               
             "<div style='display:flex;justify-content:center'>" +
               "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doReturn()\">" +
-                  "Send Request to PSP" +
+                  "Send Request to Issuer" +
               "</div>" +
             "</div>" +
         

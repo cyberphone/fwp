@@ -44,7 +44,7 @@ public class BuyServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
-            "<form name='shoot' method='POST' action='ad'>" +
+            "<form name='shoot' method='POST' action='pr'>" +
         
             "<input type='hidden' id='" + FWPWalletCore.WALLET_REQUEST + 
                 "' name='" + FWPWalletCore.WALLET_REQUEST + "'/>" +
@@ -53,9 +53,9 @@ public class BuyServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "This is just a temporary arrangement where you pay 435 EUR." +
+                  "This is a temporary arrangement where you just pay &#x20ac;&#x2009;435." +
                   "<div style='margin-top:0.4em'>It will later be replaced by a " +
-                  "merchant application as well as the FWP wallet UI.</div>" +
+                  "simple merchant application.</div>" +
               "</div>" +
             "</div>" +
 
@@ -88,14 +88,19 @@ public class BuyServlet extends HttpServlet {
         .append(FWPService.samplePaymentRequest.serializeAsJSON(JSONOutputFormats.PRETTY_JS_NATIVE))
         .append(
             ";\n" +
-
+        
+            "const paymentMethods = [\n" +
+            "  'https://bankdirect.com',\n" +
+            "  'https://supercard.com'\n" +
+            "]\n" +
+/*
             "const accountData = {" +
             " id: 'FR7630002111110020050014382',\n" +
             " pm: 'https://bank<table>\\'\\u20acdirect.com',\n" +
             " sn: '0057162932',\n" +
             " ii: 'https://mybank.fr/payment'\n" +
             "};\n" +
-            
+*/            
             "function unsupported(target) {\n" +
             "  let notifier = document.getElementById('" + NOTIFIER + "');\n" +
             "  notifier.style.top = (target.getBoundingClientRect().top + window.scrollY - " +
@@ -109,7 +114,9 @@ public class BuyServlet extends HttpServlet {
 
             "function doPay() {\n" +
             "  document.getElementById('" + FWPWalletCore.WALLET_REQUEST + 
-                "').value = JSON.stringify({pr: paymentRequest, ad: accountData});\n" +
+                "').value = JSON.stringify({" + 
+                FWPWalletCore.PAYMENT_REQUEST + ": paymentRequest, " +
+                FWPWalletCore.PAYMENT_METHODS + ": paymentMethods});\n" +
             "  document.forms.shoot.submit();\n" +
             "}\n").toString();
         HTML.standardPage(response, js, html);

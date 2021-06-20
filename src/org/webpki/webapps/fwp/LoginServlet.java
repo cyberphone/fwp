@@ -186,12 +186,12 @@ public class LoginServlet extends HttpServlet {
                 .append(coreClientData.credentialId)
                 .append("</div>" +
 
-                        "<div class='ctblh'>FIDO Public Key (COSE)</div>" +
-                        "<div class='ctbl'>")
-                .append("/ ")
+                        "<div class='ctblh'>FIDO ")
                 .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
-                .append(" Key /<br>")
-                .append(HTML.encode(
+                .append(
+                        " Public Key (COSE)</div>" +
+                        "<div class='ctbl'>")
+                    .append(HTML.encode(
                             CBORPublicKey.encode(coreClientData.publicKey).toString(), true))
                 .append("</div>" +
 

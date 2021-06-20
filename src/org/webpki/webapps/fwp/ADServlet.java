@@ -41,7 +41,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 
 /**
- * This is a temporary payment application.
+ * This FWP step creates Authorization Data (AD).
  *
  */
 public class ADServlet extends HttpServlet {
@@ -64,12 +64,12 @@ public class ADServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
+        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        if (walletInternal == null) {
+            FWPWalletCore.failed("Missing wallet data");
         }
-        logger.info(walletRequest);
-        JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
+        logger.info(walletInternal);
+        JSONObjectReader walletInternalJson = JSONParser.parse(walletInternal);
         try {
             // Get the enrolled user.
             String userId = FWPWalletCore.getWalletCookie(request);
@@ -91,15 +91,15 @@ public class ADServlet extends HttpServlet {
             }
             
             // Build Authorization Data (AD)
-            JSONObjectReader accountData = walletRequestJson.getObject("ad");
-            JSONObjectReader paymentRequest = walletRequestJson.getObject("pr");
+            JSONObjectReader accountData = walletInternalJson.getObject(FWPWalletCore.ACCOUNT_DATA);
+            JSONObjectReader paymentRequest = walletInternalJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
              byte[] fwpAssertion = new FWPAssertionBuilder()
                     .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
-                    .setAccountData(accountData.getString("id"),
-                                    accountData.getString("sn"),
-                                    accountData.getString("pm"))
+                    .setAccountData(accountData.getString(FWPWalletCore.ACCOUNT_ID),
+                                    accountData.getString(FWPWalletCore.SERIAL_NUMBER),
+                                    accountData.getString(FWPWalletCore.PAYMENT_METHOD))
                     .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
-                    .setPayeeHostName(request.getServerName())
+                    .setPayeeHost(request.getServerName())
                     .setPlatformData("Android", "10.0", "Chrome", "103")
                     .create(new FWPCrypto.FWPPreSigner(coreClientData.publicKey));
              
@@ -107,8 +107,8 @@ public class ADServlet extends HttpServlet {
                 "<form name='shoot' method='POST' action='sad'>" +
                 "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
                     "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
-            .append(HTML.encode(walletRequest, false))
+                "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL + "' value='")
+            .append(HTML.encode(walletInternal, false))
             .append(
                 "'/>" +
                 "</form>" +
@@ -120,7 +120,7 @@ public class ADServlet extends HttpServlet {
             .append(sectionReference("seq-4.2"))
             .append(
                   "The payment data to authorize. " +
-                  "This data is (after SHA256-digesting), used as FIDO 'challenge'. " +
+                  "This data is (after SHA256-digesting), used as the FIDO &quot;challenge&quot;. " +
                   "That is, <i>there is no FIDO authentication server</i> because FWP builds on a " +
                   "&quot;Card&nbsp;Present&quot; <i>authorization</i> concept like " +
                   "<a href='https://www.emvco.com/about/deployment-statistics/' " +

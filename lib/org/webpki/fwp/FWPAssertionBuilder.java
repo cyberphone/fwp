@@ -70,8 +70,8 @@ public class FWPAssertionBuilder {
         return setElement(FWPElements.PAYMENT_REQUEST, jsonPaymentRequest.serializeAsCBOR());
     }
     
-    public FWPAssertionBuilder setPayeeHostName(String payeeHostName) throws IOException {
-        return setStringElement(FWPElements.PAYEE_HOST_NAME, payeeHostName);
+    public FWPAssertionBuilder setPayeeHost(String payeeHost) throws IOException {
+        return setStringElement(FWPElements.PAYEE_HOST, payeeHost);
     }
     
     private CBORMap nameVersion(String name, String version) throws IOException {

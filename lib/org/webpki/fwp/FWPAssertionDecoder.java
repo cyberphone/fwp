@@ -51,9 +51,9 @@ public class FWPAssertionDecoder {
         return paymentRequest;
     }
     
-    String hostName;
-    public String getHostName() {
-        return hostName;
+    String payeeHost;
+    public String getPayeeHost() {
+        return payeeHost;
     }
     
     String accountId;
@@ -132,7 +132,7 @@ public class FWPAssertionDecoder {
         timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
 
         // Host information from the browser
-        hostName = getString(FWPElements.PAYEE_HOST_NAME);
+        payeeHost = getString(FWPElements.PAYEE_HOST);
 
         // Optional Network Data.
         if (fwpAssertion.hasKey(FWPElements.NETWORK_DATA.cborLabel)) {

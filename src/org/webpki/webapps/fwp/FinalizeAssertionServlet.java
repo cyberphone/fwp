@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.fwp.FWPJsonAssertion;
 
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 /**
@@ -55,15 +56,16 @@ public class FinalizeAssertionServlet extends HttpServlet {
             FWPWalletCore.failed("Missing encrypted signed authorization data");
             return;
         }
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
+        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        if (walletInternal == null) {
+            FWPWalletCore.failed("Missing wallet data");
             return;
         }     
-        JSONObjectReader accountData = JSONParser.parse(walletRequest).getObject("ad");
+        JSONObjectReader accountData = 
+                JSONParser.parse(walletInternal).getObject(FWPWalletCore.ACCOUNT_DATA);
         FWPJsonAssertion fwpAssertion =
-                new FWPJsonAssertion(accountData.getString("pm"),
-                                     accountData.getString("ii"),
+                new FWPJsonAssertion(accountData.getString(FWPWalletCore.PAYMENT_METHOD),
+                                     accountData.getString(FWPWalletCore.ISSUER_ID),
                                      Base64.getUrlDecoder().decode(
                                              encryptedSignedAuthorizationB64U));
         StringBuilder html = new StringBuilder(
@@ -73,8 +75,10 @@ public class FinalizeAssertionServlet extends HttpServlet {
         .append(HTML.encode(fwpAssertion.serialize(), false))
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
-        .append(HTML.encode(walletRequest, false))
+            "<input type='hidden' name='" + FWPWalletCore.PAYMENT_REQUEST + "' value='")
+        .append(HTML.encode(JSONParser.parse(walletInternal).getObject(
+                FWPWalletCore.PAYMENT_REQUEST).serializeToString(JSONOutputFormats.NORMALIZED),
+                            false))
         .append(
             "'/>" +
             "</form>" +

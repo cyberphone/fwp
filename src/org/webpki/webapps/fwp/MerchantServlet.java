@@ -35,7 +35,7 @@ import org.webpki.fwp.PSPRequest;
 import org.webpki.json.JSONParser;
 
 /**
- * TBD
+ * Return to merchant after successful FWP invocation.
  *
  */
 public class MerchantServlet extends HttpServlet {
@@ -56,18 +56,19 @@ public class MerchantServlet extends HttpServlet {
             FWPWalletCore.failed("Missing FWP assertion");
             return;
         }
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
+        String paymentRequest = request.getParameter(FWPWalletCore.PAYMENT_REQUEST);
+        if (paymentRequest == null) {
+            FWPWalletCore.failed("Missing payment request");
             return;
         }    
-        FWPJsonAssertion fwpJsonAssertion = new FWPJsonAssertion(JSONParser.parse(fwpAssertion));
-        FWPPaymentRequest fwpPaymentRequest = new FWPPaymentRequest(
-                JSONParser.parse(walletRequest).getObject("pr"));
+        FWPJsonAssertion fwpJsonAssertion = 
+                new FWPJsonAssertion(JSONParser.parse(fwpAssertion));
+        FWPPaymentRequest fwpPaymentRequest = 
+                new FWPPaymentRequest(JSONParser.parse(paymentRequest));
         PSPRequest pspRequest = new PSPRequest(fwpPaymentRequest,
                                                fwpJsonAssertion,
                                                "DE89370400440532013000", 
-                                               "220.13.198.144", 
+                                               request.getRemoteAddr(), 
                                                new GregorianCalendar());
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='pspreq'>" +

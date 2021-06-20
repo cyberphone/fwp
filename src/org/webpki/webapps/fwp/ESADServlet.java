@@ -53,9 +53,9 @@ public class ESADServlet extends HttpServlet {
             if (signedAuthorizationDataB64U == null) {
                 FWPWalletCore.failed("FWP assertion missing");
             }
-            String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
-            if (walletRequest == null) {
-                FWPWalletCore.failed("Missing wallet request");
+            String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+            if (walletInternal == null) {
+                FWPWalletCore.failed("Missing wallet data");
                 return;
             }            
             CBORMap encrypted = 
@@ -72,8 +72,8 @@ public class ESADServlet extends HttpServlet {
             .append(Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted.encode()))
             .append(
                 "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_REQUEST + "' value='")
-            .append(HTML.encode(walletRequest, false))
+                "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL + "' value='")
+            .append(HTML.encode(walletInternal, false))
             .append(
                 "'/>" +
                 "</form>" +

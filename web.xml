@@ -40,10 +40,15 @@
     </servlet>
     
     <servlet>
-        <servlet-name>ADServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.ADServlet</servlet-class>
+        <servlet-name>PaymentRequestServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.PaymentRequestServlet</servlet-class>
     </servlet>
     
+    <servlet>
+        <servlet-name>ADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.ADServlet</servlet-class>
+    </servlet>    
+
     <servlet>
         <servlet-name>SADServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.SADServlet</servlet-class>
@@ -114,6 +119,11 @@
         <url-pattern>/buy</url-pattern>
     </servlet-mapping>
        
+    <servlet-mapping>
+        <servlet-name>PaymentRequestServlet</servlet-name>
+        <url-pattern>/pr</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ADServlet</servlet-name>
         <url-pattern>/ad</url-pattern>

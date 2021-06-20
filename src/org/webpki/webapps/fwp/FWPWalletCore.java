@@ -61,9 +61,22 @@ public class FWPWalletCore {
     // Attribute returned to the client in case of a server-side error
     static final String ERROR_JSON               = "error";
     
-    // Wallet sort of
+    // Wallet external call
     static final String WALLET_REQUEST           = "walletRequest";
     
+    // Wallet internal call
+    static final String WALLET_INTERNAL          = "walletInternal";
+
+    static final String PAYMENT_METHODS          = "paymentMethods";
+    static final String PAYMENT_REQUEST          = "paymentRequest";
+    static final String ACCOUNT_DATA             = "accountData";
+
+    // Sub parameters to the above
+    static final String PAYMENT_METHOD           = "paymentMethod";
+    static final String SERIAL_NUMBER            = "serialNumber";
+    static final String ACCOUNT_ID               = "accountId";
+    static final String ISSUER_ID                = "issuerId";
+
     // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";
 

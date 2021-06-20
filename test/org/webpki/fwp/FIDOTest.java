@@ -172,7 +172,7 @@ public class FIDOTest {
         return FWPCrypto.directSign(
                 new FWPAssertionBuilder()
             .setPaymentRequest(getPaymentRequest(true))
-            .setPayeeHostName("spaceshop.com")
+            .setPayeeHost("spaceshop.com")
             .setAccountData("FR7630002111110020050014382",
                             "057862932",
                             "https://bankdirect.com")
@@ -197,8 +197,8 @@ public class FIDOTest {
         try {
             new FWPAssertionBuilder()
                 .setPaymentRequest(getPaymentRequest(true))
-                .setPayeeHostName("example.com")
-                .setPayeeHostName("example.com")
+                .setPayeeHost("example.com")
+                .setPayeeHost("example.com")
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
@@ -218,7 +218,7 @@ public class FIDOTest {
         assertTrue("id", paymentRequest.getId().equals("65656"));
         assertTrue("amount", paymentRequest.getAmount().equals("140.00"));
         assertTrue("currency", paymentRequest.getCurrency().equals("EUR"));
-        assertTrue("host", decoder.getHostName().equals("spaceshop.com"));
+        assertTrue("host", decoder.getPayeeHost().equals("spaceshop.com"));
         assertTrue("fp", decoder.getUserAuthorizationMethod().equals(
                 FWPElements.UserAuthorizationMethods.FINGERPRINT));
         assertTrue("nd", decoder.getNetworkData() == null);

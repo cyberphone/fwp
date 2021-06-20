@@ -17,9 +17,11 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -29,16 +31,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
+
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
+
 import org.webpki.fwp.FWPAssertionDecoder;
 import org.webpki.fwp.FWPJsonAssertion;
 import org.webpki.fwp.FWPPaymentRequest;
 import org.webpki.fwp.IssuerRequest;
 import org.webpki.fwp.PSPRequest;
+
 import org.webpki.json.JSONParser;
 
 /**
- * TBD
+ * The "finale", the receival by the Issuer.
  *
  */
 public class IssuerServlet extends HttpServlet {
@@ -63,16 +68,18 @@ public class IssuerServlet extends HttpServlet {
             PSPRequest pspRequest = decodedIssuerRequest.getPspRequest();
             FWPJsonAssertion fwpJsonAssertion = pspRequest.getFwpAssertion();
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
-            String payeeHost = decodedIssuerRequest.getPayeeHost();
-            
+             
             // Decrypt assertion.
-            byte[] fwpAssertionBinary = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
+            byte[] fwpAssertionBinary = 
+                    new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
                 @Override
                 public PrivateKey locate(PublicKey publicKey,
                                          String keyId,
                                          KeyEncryptionAlgorithms algorithm)
                         throws IOException, GeneralSecurityException {
+
+                    // Somewhat simplistic setup: a single encryption key
                     if (!FWPService.issuerKeyId.equals(keyId)) {
                         throw new GeneralSecurityException("Unknown keyId: " + keyId);
                     }
@@ -88,8 +95,11 @@ public class IssuerServlet extends HttpServlet {
             
             // Check merchant claim.
             fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
-            // Succeeded.
+
+            // Check that the user haven't been phished.
+            compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
             
+
             StringBuilder html = new StringBuilder(
     
                 "<div class='header'>Received by the Issuer</div>" +
@@ -109,6 +119,12 @@ public class IssuerServlet extends HttpServlet {
             HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
+        }
+    }
+    
+    private void compare(String one, String two) throws GeneralSecurityException {
+        if (!one.equals(two)) {
+            throw new GeneralSecurityException("Compare failed for " + one + "=" + two);
         }
     }
 }

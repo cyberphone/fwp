@@ -137,7 +137,7 @@ public class DataBaseOperations {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Verify that the key hash of the public key matches the user Id                             //
+    // FIDO login: Verify that the key hash of the public key matches the user Id                 //
     ////////////////////////////////////////////////////////////////////////////////////////////////
     static void authenticate(String userId, byte[] rawPublicKey, Connection connection)
             throws IOException, SQLException, GeneralSecurityException {
