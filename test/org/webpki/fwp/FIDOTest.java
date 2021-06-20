@@ -191,7 +191,7 @@ public class FIDOTest {
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
-            checkException(e, "Missing element: PAYEE_HOST_NAME");
+            checkException(e, "Missing element: PAYEE_HOST");
         }
 
         try {
@@ -202,7 +202,7 @@ public class FIDOTest {
                 .create(fwpPreSigner);
             fail("Must not execute");
         } catch (Exception e) {
-            checkException(e, "Duplicate: PAYEE_HOST_NAME");
+            checkException(e, "Duplicate: PAYEE_HOST");
         }
         
     }
