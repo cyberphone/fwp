@@ -135,6 +135,31 @@ li {
   text-align:center;
 }
 
+.tftable {
+  border-collapse:collapse;
+  margin:2.5em 0 1em 0;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.tftable td {
+  background-color: #fffdf2;
+  padding: 0.4em 0.5em;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black;
+ }
+
+.tftable th {
+  font-weight: normal;
+  padding: 0.4em 0.5em;
+  text-align: right;
+  background-color: #f8f8f8;
+  border-width: 1px;
+  border-style: solid; 
+  border-color: black
+}
+
 @media (max-width:768px) {
 
   .stdbtn, .multibtn, .staticbox, .textbox {

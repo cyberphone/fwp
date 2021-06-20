@@ -1,7 +1,7 @@
 {
   "paymentRequest": {
-    "payee": "Space Shop",
-    "id": "7040566321",
+    "payeeName": "Space Shop",
+    "requestId": "7040566321",
     "amount": "435.00",
     "currency": "EUR"
   },

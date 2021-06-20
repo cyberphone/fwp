@@ -60,9 +60,9 @@ public class PSPServlet extends HttpServlet {
         PSPRequest decodedPspRequest = new PSPRequest(JSONParser.parse(pspRequest));
         
         // This is wrong, PSPs have databases with merchant data.
-        String payee = decodedPspRequest.getPaymentRequest().getPayee();
-        if (!payee.equals("Space Shop")) {
-            throw new IOException("Unexpected merchant name: " + payee);
+        String payeeName = decodedPspRequest.getPaymentRequest().getPayeeName();
+        if (!payeeName.equals("Space Shop")) {
+            throw new IOException("Unexpected merchant name: " + payeeName);
         }
         
         // Russian doll like messaging is cool.

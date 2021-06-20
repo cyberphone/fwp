@@ -22,6 +22,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.util.GregorianCalendar;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -41,6 +43,8 @@ import org.webpki.fwp.IssuerRequest;
 import org.webpki.fwp.PSPRequest;
 
 import org.webpki.json.JSONParser;
+
+import org.webpki.util.ISODateTime;
 
 /**
  * The "finale", the receival by the Issuer.
@@ -113,9 +117,37 @@ public class IssuerServlet extends HttpServlet {
                   "</div>" +
                 "</div>" +
                   
-                "<div class='staticbox'>")
-            .append(HTML.encode(decodedIssuerRequest.toString(), true))
-            .append(
+                "<div style='overflow-x:auto'>" +
+                  "<table class='tftable'>" +
+                    "<tr><th>Amount</th><td>")
+            .append(fwpPaymentRequest.getAmount())
+            .append("</td></tr>" +
+                    "<tr><th>Currency</th><td>")
+            .append(fwpPaymentRequest.getCurrency())
+            .append("</td></tr>" +
+                    "<tr><th>Time Stamp</th><td>")
+            .append(ISODateTime.formatDateTime(new GregorianCalendar(),
+                                               ISODateTime.UTC_NO_SUBSECONDS))
+            .append("</td></tr>" +
+
+                    "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
+
+                    "<tr><th>Payee Name</th><td>")
+            .append(fwpPaymentRequest.getPayeeName())
+            .append("</td></tr>" +
+                    "<tr><th>Payee Host</th><td>")
+            .append(fwpAssertion.getPayeeHost())
+            .append("</td></tr>" +
+                    "<tr><th>Payee Account</th><td>")
+            .append(pspRequest.getReceiveAccount())
+            .append("</td></tr>" +
+                    "<tr><th>Payee Request Id</th><td>")
+            .append(fwpPaymentRequest.getRequestId())
+            .append("</td></tr>" +
+
+                    "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
+                    "<tr><th>kurt</th><td>murthdshufsydufysdyfudsyfuysduyfusdyufydsuyfhghghgghghghghghghghghghghghgusdyufy</td></tr>" +
+                  "</table>" +
                 "</div>");
             
             HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);

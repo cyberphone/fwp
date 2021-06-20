@@ -33,25 +33,25 @@ import org.webpki.json.JSONOutputFormats;
 public class FWPPaymentRequest {
 
     // Payment Request constants in CBOR
-    public static final int CBOR_PR_PAYEE       = 1;
-    public static final int CBOR_PR_ID          = 2;
+    public static final int CBOR_PR_PAYEE_NAME  = 1;
+    public static final int CBOR_PR_REQUEST_ID  = 2;
     public static final int CBOR_PR_AMOUNT      = 3;
     public static final int CBOR_PR_CURRENCY    = 4;
 
     // Payment Request constants in JSON
-    public static final String JSON_PR_PAYEE    = "payee";
-    public static final String JSON_PR_ID       = "id";
-    public static final String JSON_PR_AMOUNT   = "amount";
-    public static final String JSON_PR_CURRENCY = "currency";
+    public static final String JSON_PR_PAYEE_NAME = "payeeName";
+    public static final String JSON_PR_REQUEST_ID = "requestId";
+    public static final String JSON_PR_AMOUNT     = "amount";
+    public static final String JSON_PR_CURRENCY   = "currency";
     
-    String payee;
-    public String getPayee() {
-        return payee;
+    String payeeName;
+    public String getPayeeName() {
+        return payeeName;
     }
 
-    String id;
-    public String getId() {
-        return id;
+    String requestId;
+    public String getRequestId() {
+        return requestId;
     }
 
     String currency;
@@ -65,8 +65,8 @@ public class FWPPaymentRequest {
     }
 
     public FWPPaymentRequest(JSONObjectReader reader) throws IOException {
-        payee = reader.getString(JSON_PR_PAYEE);
-        id = reader.getString(JSON_PR_ID);
+        payeeName = reader.getString(JSON_PR_PAYEE_NAME);
+        requestId = reader.getString(JSON_PR_REQUEST_ID);
         amount = reader.getString(JSON_PR_AMOUNT);
         currency = reader.getString(JSON_PR_CURRENCY);
         reader.checkForUnread();
@@ -74,19 +74,19 @@ public class FWPPaymentRequest {
     
     public FWPPaymentRequest(CBORObject cborObject) throws IOException {
         CBORMap cborPaymentRequest = cborObject.getMap();
-        payee = cborPaymentRequest.getObject(CBOR_PR_PAYEE).getTextString();
-        id = cborPaymentRequest.getObject(CBOR_PR_ID).getTextString();
+        payeeName = cborPaymentRequest.getObject(CBOR_PR_PAYEE_NAME).getTextString();
+        requestId = cborPaymentRequest.getObject(CBOR_PR_REQUEST_ID).getTextString();
         amount = cborPaymentRequest.getObject(CBOR_PR_AMOUNT).getTextString();
         currency = cborPaymentRequest.getObject(CBOR_PR_CURRENCY).getTextString();
         cborObject.checkForUnread();
     }
     
-    public FWPPaymentRequest(String payee,
-                             String id,
+    public FWPPaymentRequest(String payeeName,
+                             String requestId,
                              String amount,
                              String currency) {
-        this.payee = payee;
-        this.id = id;
+        this.payeeName = payeeName;
+        this.requestId = requestId;
         this.amount = amount;
         this.currency = currency;
     }
@@ -101,16 +101,16 @@ public class FWPPaymentRequest {
     
     public CBORMap serializeAsCBOR() throws IOException {
         return new CBORMap()
-                .setObject(CBOR_PR_PAYEE,  new CBORTextString(payee))
-                .setObject(CBOR_PR_ID,     new CBORTextString(id))
+                .setObject(CBOR_PR_PAYEE_NAME, new CBORTextString(payeeName))
+                .setObject(CBOR_PR_REQUEST_ID, new CBORTextString(requestId))
                 .setObject(CBOR_PR_AMOUNT, new CBORTextString(amount))
                 .setObject(CBOR_PR_CURRENCY, new CBORTextString(currency));
     }
 
     public JSONObjectWriter getWriter() throws IOException {
         return new JSONObjectWriter()
-                .setString(JSON_PR_PAYEE, payee)
-                .setString(JSON_PR_ID, id)
+                .setString(JSON_PR_PAYEE_NAME, payeeName)
+                .setString(JSON_PR_REQUEST_ID, requestId)
                 .setString(JSON_PR_AMOUNT, amount)
                 .setString(JSON_PR_CURRENCY, currency);
     }

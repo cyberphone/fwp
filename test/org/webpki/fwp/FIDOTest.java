@@ -214,8 +214,8 @@ public class FIDOTest {
         FWPAssertionDecoder decoder = 
                 new FWPAssertionDecoder(buildGoodPaymenRequest(null, keyPair.getPrivate()));
         FWPPaymentRequest paymentRequest = decoder.getPaymentRequest();
-        assertTrue("payee", paymentRequest.getPayee().equals("Space Shop"));
-        assertTrue("id", paymentRequest.getId().equals("65656"));
+        assertTrue("payee", paymentRequest.getPayeeName().equals("Space Shop"));
+        assertTrue("id", paymentRequest.getRequestId().equals("65656"));
         assertTrue("amount", paymentRequest.getAmount().equals("140.00"));
         assertTrue("currency", paymentRequest.getCurrency().equals("EUR"));
         assertTrue("host", decoder.getPayeeHost().equals("spaceshop.com"));
