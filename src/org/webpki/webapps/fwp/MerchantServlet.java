@@ -82,7 +82,9 @@ public class MerchantServlet extends HttpServlet {
             "<div class='header'>Back to Merchant</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-              "<div class='comment'>" +
+              "<div class='comment'>")
+        .append(ADServlet.sectionReference("seq-6"))
+        .append(
               "This part is still to be written..." +
               "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
               "</div>" +

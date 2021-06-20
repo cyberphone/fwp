@@ -105,7 +105,9 @@ public class IssuerServlet extends HttpServlet {
                 "<div class='header'>Received by the Issuer</div>" +
     
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                  "<div class='comment'>" +
+                  "<div class='comment'>")
+            .append(ADServlet.sectionReference("seq-10"))
+            .append(
                   "This part is still to be written..." +
                   "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
                   "</div>" +

@@ -57,9 +57,18 @@ public class PSPServlet extends HttpServlet {
             FWPWalletCore.failed("Missing PSP request");
             return;
         }
+        PSPRequest decodedPspRequest = new PSPRequest(JSONParser.parse(pspRequest));
+        
+        // This is wrong, PSPs have databases with merchant data.
+        String payee = decodedPspRequest.getPaymentRequest().getPayee();
+        if (!payee.equals("Space Shop")) {
+            throw new IOException("Unexpected merchant name: " + payee);
+        }
+        
+        // Russian doll like messaging is cool.
         IssuerRequest issuerRequest = 
-                new IssuerRequest(new PSPRequest(JSONParser.parse(pspRequest)),
-                                  // This is wrong, merchant hosts are stored in a PSP database
+                new IssuerRequest(decodedPspRequest,
+                                  // This is wrong, PSPs have databases with merchant data.
                                   request.getServerName(),
                                   new GregorianCalendar());
         StringBuilder html = new StringBuilder(
@@ -74,7 +83,9 @@ public class PSPServlet extends HttpServlet {
             "<div class='header'>PSP Action</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-              "<div class='comment'>" +
+              "<div class='comment'>")
+        .append(ADServlet.sectionReference("seq-8"))
+        .append(
               "This part is still to be written..." +
               "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
               "</div>" +
