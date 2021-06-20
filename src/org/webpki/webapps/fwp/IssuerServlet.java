@@ -58,6 +58,8 @@ public class IssuerServlet extends HttpServlet {
     
     public static final String ISSUER_REQUEST = "issuerRequest";
     
+    static long transactionId = 56807446412l;
+    
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -112,10 +114,13 @@ public class IssuerServlet extends HttpServlet {
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-10"))
             .append(
-                  "This part is still to be written..." +
-                  "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
+                  "If you have reached this far, the payment request has been verified " +
+                  "to be authentic and a payment operation is being initiated." +
+                  "<div style='margin-top:0.4em'>Thank you for testing!</div>" +
                   "</div>" +
                 "</div>" +
+
+                "<div class='header' style='margin:1.5em 0 1em 0'>Transaction Details</div>" +
                   
                 "<div style='overflow-x:auto'>" +
                   "<table class='tftable'>" +
@@ -124,6 +129,9 @@ public class IssuerServlet extends HttpServlet {
             .append("</td></tr>" +
                     "<tr><th>Currency</th><td>")
             .append(fwpPaymentRequest.getCurrency())
+            .append("</td></tr>" +
+                    "<tr><th>Transaction Id</th><td>")
+            .append(String.format("%012d", transactionId++))
             .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
             .append(ISODateTime.formatDateTime(new GregorianCalendar(),
@@ -141,13 +149,19 @@ public class IssuerServlet extends HttpServlet {
                     "<tr><th>Payee Account</th><td>")
             .append(pspRequest.getReceiveAccount())
             .append("</td></tr>" +
-                    "<tr><th>Payee Request Id</th><td>")
+                    "<tr><th>Payee&nbsp;Request&nbsp;Id</th><td>")
             .append(fwpPaymentRequest.getRequestId())
             .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
-                    "<tr><th>kurt</th><td>murthdshufsydufysdyfudsyfuysduyfusdyufydsuyfhghghgghghghghghghghghghghghgusdyufy</td></tr>" +
-                  "</table>" +
+
+                    "<tr><th>Payer Account</th><td>")
+            .append(fwpAssertion.getAccountId())
+            .append("</td></tr>" +
+                    "<tr><th>Card Serial</th><td>")
+            .append(fwpAssertion.getSerialNumber())
+            .append("</td></tr>" +
+                 "</table>" +
                 "</div>");
             
             HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
