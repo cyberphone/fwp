@@ -120,15 +120,22 @@ public class IssuerServlet extends HttpServlet {
                   "</div>" +
                 "</div>" +
 
-                "<div class='header' style='margin:1.5em 0 1em 0'>Transaction Details</div>" +
-                  
-                "<div style='overflow-x:auto'>" +
+                "<div style='overflow-x:auto;margin-top:1.5em'>" +
                   "<table class='tftable'>" +
+  
+                  "<tr><th colspan='2' style='text-align:center'>Transaction Core Data</th></tr>" +
+
                     "<tr><th>Amount</th><td>")
             .append(fwpPaymentRequest.getAmount())
             .append("</td></tr>" +
                     "<tr><th>Currency</th><td>")
             .append(fwpPaymentRequest.getCurrency())
+            .append("</td></tr>" +
+                    "<tr><th>Payee&nbsp;Account</th><td>")
+            .append(pspRequest.getReceiveAccount())
+            .append("</td></tr>" +
+                    "<tr><th>Payer&nbsp;Account</th><td>")
+            .append(fwpAssertion.getAccountId())
             .append("</td></tr>" +
                     "<tr><th>Transaction Id</th><td>")
             .append(String.format("%012d", transactionId++))
@@ -140,28 +147,48 @@ public class IssuerServlet extends HttpServlet {
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
 
-                    "<tr><th>Payee Name</th><td>")
+                    "<tr><th colspan='2' style='text-align:center'>Payee Information</th></tr>" +
+
+                    "<tr><th>Common Name</th><td>")
             .append(fwpPaymentRequest.getPayeeName())
             .append("</td></tr>" +
-                    "<tr><th>Payee Host</th><td>")
+                    "<tr><th>Host Name</th><td>")
             .append(fwpAssertion.getPayeeHost())
             .append("</td></tr>" +
-                    "<tr><th>Payee Account</th><td>")
-            .append(pspRequest.getReceiveAccount())
-            .append("</td></tr>" +
-                    "<tr><th>Payee&nbsp;Request&nbsp;Id</th><td>")
+                    "<tr><th>Request&nbsp;Id</th><td>")
             .append(fwpPaymentRequest.getRequestId())
             .append("</td></tr>" +
-
+                    "<tr><th>Time Stamp</th><td>")
+            .append(ISODateTime.formatDateTime(pspRequest.getTimeStamp(),
+                                               ISODateTime.UTC_NO_SUBSECONDS))
+            .append("</td></tr>" +
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
 
-                    "<tr><th>Payer Account</th><td>")
-            .append(fwpAssertion.getAccountId())
-            .append("</td></tr>" +
+                    "<tr><th colspan='2' style='text-align:center'>Payer Information</th></tr>" +
+
                     "<tr><th>Card Serial</th><td>")
             .append(fwpAssertion.getSerialNumber())
             .append("</td></tr>" +
-                 "</table>" +
+                    "<tr><th>Client&nbsp;System</th><td>")
+            .append(fwpAssertion.getOperatingSystem().getName())
+            .append(' ')
+            .append(fwpAssertion.getOperatingSystem().getVersion())
+            .append(", ")
+            .append(fwpAssertion.getUserAgent().getName())
+            .append(' ')
+            .append(fwpAssertion.getUserAgent().getVersion())
+            .append("</td></tr>" +
+                    "<tr><th>Auth&nbsp;Method</th><td>")
+            .append(fwpAssertion.getUserAuthorizationMethod().toString())
+            .append("</td></tr>" +
+                    "<tr><th>IP&nbsp;Address</th><td>")
+            .append(pspRequest.getClientIp())
+            .append("</td></tr>" +
+                    "<tr><th>Time Stamp</th><td>")
+            .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
+                                               ISODateTime.LOCAL_NO_SUBSECONDS))
+            .append("</td></tr>" +
+                  "</table>" +
                 "</div>");
             
             HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);

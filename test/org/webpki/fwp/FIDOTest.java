@@ -225,6 +225,8 @@ public class FIDOTest {
         assertTrue("account", decoder.getAccountId().equals("FR7630002111110020050014382"));
         assertTrue("sn", decoder.getSerialNumber().equals("057862932"));
         assertTrue("pm", decoder.getPaymentMethod().equals("https://bankdirect.com"));
+        assertTrue("os", decoder.getOperatingSystem().getName().equals("Android"));
+        assertTrue("ua", decoder.getUserAgent().getVersion().equals("103"));
         long now = new GregorianCalendar().getTimeInMillis();
         long then = decoder.getTimeStamp().getTimeInMillis();
         assertTrue("time", now >= then && now - then < 10000);

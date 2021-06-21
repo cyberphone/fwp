@@ -29,8 +29,37 @@ import org.webpki.cbor.CBORObject;
  * FWP relying party side assertion support.
  */
 public class FWPAssertionDecoder {
-
     
+    public class PlatformNameVersion {
+        String name;
+        String version;
+        
+        public String getName() {
+            return name;
+        }
+        
+        public String getVersion() {
+            return version;
+        }
+        
+        PlatformNameVersion(CBORObject nameVersion) throws IOException {
+            this.name = nameVersion.getMap().getObject(
+                    FWPElements.CBOR_PDSUB_NAME).getTextString();
+            this.version = nameVersion.getMap().getObject(
+                    FWPElements.CBOR_PDSUB_VERSION).getTextString();
+        }
+    }
+    
+    PlatformNameVersion operatingSystem;
+    public PlatformNameVersion getOperatingSystem() {
+        return operatingSystem;
+    }
+    
+    PlatformNameVersion userAgent;
+    public PlatformNameVersion getUserAgent() {
+        return userAgent;
+    }
+
     GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
         return timeStamp;
@@ -122,7 +151,10 @@ public class FWPAssertionDecoder {
         // Platform Data
         CBORMap platformData = fwpAssertion.getObject(
                 FWPElements.PLATFORM_DATA.cborLabel).getMap();
-        platformData.scan();
+        operatingSystem = new PlatformNameVersion(
+                platformData.getObject(FWPElements.CBOR_PD_OPERATING_SYSTEM));
+        userAgent = new PlatformNameVersion(
+                platformData.getObject(FWPElements.CBOR_PD_USER_AGENT));
 
         // User Authorization Method
         userAuthorizationMethod = FWPElements.getUserAuthorizationMethod(fwpAssertion.getObject(
