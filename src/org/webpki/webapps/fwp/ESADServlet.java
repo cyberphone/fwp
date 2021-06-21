@@ -98,7 +98,7 @@ public class ESADServlet extends HttpServlet {
                 
                 "<div style='display:flex;justify-content:center'>" +
                   "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doFinalize()\">" +
-                    "Next step - Finalize Assertion" +
+                    "<i>Finalize</i> Assertion" +
                   "</div>" +
                 "</div>" +
 
@@ -119,7 +119,7 @@ public class ESADServlet extends HttpServlet {
                 "  }, 1000);\n" +
                 "}\n").toString();
 
-                HTML.standardPage(response, js, html);
+                HTML.standardPage(response, Actors.FWP, js, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

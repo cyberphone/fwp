@@ -73,7 +73,7 @@ public class WalletAdminServlet extends HttpServlet {
                    "</div>" +
                 "</div>");
     
-            HTML.standardPage(response, null, html);
+            HTML.standardPage(response, Actors.FWP, null, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }
@@ -106,7 +106,7 @@ public class WalletAdminServlet extends HttpServlet {
             walletCookie.setSecure(true);
             response.addCookie(walletCookie);
             
-            HTML.standardPage(response, null, html);
+            HTML.standardPage(response, Actors.FWP, null, html);
 
             logger.info("Deleted payment cards for user: " + userId);
         } catch (Exception e) {

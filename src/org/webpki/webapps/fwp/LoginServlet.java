@@ -135,7 +135,7 @@ public class LoginServlet extends HttpServlet {
             "  }\n" +
 
             "}\n").toString();
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.ISSUER, js, html);
     }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -200,7 +200,7 @@ public class LoginServlet extends HttpServlet {
             // In our case we have no application using the authentication...
             session.invalidate();
 
-            HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
+            HTML.standardPage(response, Actors.ISSUER, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

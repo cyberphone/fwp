@@ -85,8 +85,14 @@ public class MerchantServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-6"))
         .append(
-              "This part is still to be written..." +
-              "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
+              "The <span class='actor'>Merchant</span> has received the authorization response " +
+              "from the <span class='actor'>Wallet</span> and now " +
+              "needs to take the user authorization (together with other data), " +
+              "to a suitable Payment System Provider " +
+              "(<span class='actor'>PSP</span>) " +
+              "for fulfillment." +
+              "<div style='margin-top:0.4em'>Below is a <i>non-normative</i> " +
+              "sample <span class='actor'>PSP</span> message.</div>" +
               "</div>" +
             "</div>" +
               
@@ -117,6 +123,6 @@ public class MerchantServlet extends HttpServlet {
         "  }, 1000);\n" +
         "}\n").toString();
         
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.MERCHANT, js, html);
     }
 }

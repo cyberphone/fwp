@@ -18,6 +18,10 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -25,6 +29,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.webpki.fwp.FWPPaymentRequest;
 
 import org.webpki.json.JSONOutputFormats;
 
@@ -40,9 +46,22 @@ public class BuyServlet extends HttpServlet {
     
     private static final String NOTIFIER = "notifier";
     
+    private static String lastDate;
+    private static int lastCount;
+    static synchronized String getRequestId() {
+        String newDate = new SimpleDateFormat("yyyyMMdd.").format(new Date());
+        if (!newDate.equals(lastDate)) {
+            lastDate = newDate;
+            lastCount = 0;
+        }
+        return lastDate + String.format("%04d", ++lastCount);
+    }
+    
    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        FWPPaymentRequest samplePaymentRequest = 
+                new FWPPaymentRequest("Space Shop", getRequestId(), "435.00", "EUR");
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='pr'>" +
         
@@ -85,7 +104,7 @@ public class BuyServlet extends HttpServlet {
 
         String js = new StringBuilder(
             "const paymentRequest = ")
-        .append(FWPService.samplePaymentRequest.serializeAsJSON(JSONOutputFormats.PRETTY_JS_NATIVE))
+        .append(samplePaymentRequest.serializeAsJSON(JSONOutputFormats.PRETTY_JS_NATIVE))
         .append(
             ";\n" +
         
@@ -93,14 +112,7 @@ public class BuyServlet extends HttpServlet {
             "  'https://bankdirect.com',\n" +
             "  'https://supercard.com'\n" +
             "]\n" +
-/*
-            "const accountData = {" +
-            " id: 'FR7630002111110020050014382',\n" +
-            " pm: 'https://bank<table>\\'\\u20acdirect.com',\n" +
-            " sn: '0057162932',\n" +
-            " ii: 'https://mybank.fr/payment'\n" +
-            "};\n" +
-*/            
+         
             "function unsupported(target) {\n" +
             "  let notifier = document.getElementById('" + NOTIFIER + "');\n" +
             "  notifier.style.top = (target.getBoundingClientRect().top + window.scrollY - " +
@@ -119,6 +131,6 @@ public class BuyServlet extends HttpServlet {
                 FWPWalletCore.PAYMENT_METHODS + ": paymentMethods});\n" +
             "  document.forms.shoot.submit();\n" +
             "}\n").toString();
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.MERCHANT, js, html);
     }
 }

@@ -86,8 +86,14 @@ public class PSPServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-8"))
         .append(
-              "This part is still to be written..." +
-              "<div style='margin-top:0.4em'>Thanx for testing anyway!</div>" +
+              "The <span class='actor'>PSP</span> has received a payment request message " +
+              "from the <span class='actor'>Merchant</span>, " +
+              "and now needs to route the request to the proper <span class='actor'>Issuer</span>. " +
+              "Although not shown here, " +
+              "the <span class='actor'>PSP</span> also <i>authenticates</i> the " +
+              "<span class='actor'>Merchant</span>." +
+              "<div style='margin-top:0.4em'>Below is a <i>non-normative</i> " +
+              "sample <span class='actor'>Issuer</span> message.</div>" +
               "</div>" +
             "</div>" +
               
@@ -118,6 +124,6 @@ public class PSPServlet extends HttpServlet {
         "  }, 1000);\n" +
         "}\n").toString();
         
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.PSP, js, html);
     }
 }

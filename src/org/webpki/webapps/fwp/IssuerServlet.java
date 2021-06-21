@@ -149,7 +149,7 @@ public class IssuerServlet extends HttpServlet {
 
                     "<tr><th colspan='2' style='text-align:center'>Payee Information</th></tr>" +
 
-                    "<tr><th>Common Name</th><td>")
+                    "<tr><th>Common&nbsp;Name</th><td>")
             .append(fwpPaymentRequest.getPayeeName())
             .append("</td></tr>" +
                     "<tr><th>Host Name</th><td>")
@@ -191,7 +191,7 @@ public class IssuerServlet extends HttpServlet {
                   "</table>" +
                 "</div>");
             
-            HTML.standardPage(response, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
+            HTML.standardPage(response, Actors.ISSUER, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

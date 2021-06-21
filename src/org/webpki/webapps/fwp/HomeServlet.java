@@ -35,6 +35,7 @@ public class HomeServlet extends HttpServlet {
             throws IOException, ServletException {
 
         HTML.standardPage(response,
+                          Actors.SITE,
                           "window.addEventListener('load', function(event) {\n" +
                           "  if (!window.PublicKeyCredential) {\n" +
                           "    document.getElementById('" + BUTTONS_ID +

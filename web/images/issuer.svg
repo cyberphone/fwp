@@ -1,0 +1,39 @@
+<svg width='110' height='72' xmlns='http://www.w3.org/2000/svg'>
+  <title>Issuer Symbol</title>
+  <!-- Anders Rundgren 2021-->
+  <defs>
+    <linearGradient id='bankPillar' x1='0' x2='1'>
+      <stop offset='0' stop-color='#606060'/>
+      <stop offset='0.4' stop-color='#fffbed'/>
+      <stop offset='0.6' stop-color='#f9fce3'/>
+      <stop offset='1' stop-color='#606060'/>
+    </linearGradient>
+    <filter height='200%' id='bankShaddow' width='200%' x='-50%' y='-50%'>
+      <feGaussianBlur stdDeviation='2'/>
+    </filter>
+    <linearGradient id="bankFront" x1="0.5" x2="0.5" y1="0" y2="1">
+      <stop offset="0" stop-color="#e0e07b"/>
+      <stop offset="0.35" stop-color="#f7f7e1"/>
+      <stop offset="0.65" stop-color="#f7f7e1"/>
+      <stop offset="1" stop-color="#e0e07b"/>
+    </linearGradient>
+    <linearGradient id="bankRoof" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eeefdc"/>
+      <stop offset="1" stop-color="#e9f7dc" stop-opacity="0.99609"/>
+    </linearGradient>
+  </defs>
+  <g fill='#b0b0b0' filter='url(#bankShaddow)'>
+    <path d='m19.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m41,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m62.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m 84,17.5 h 17 v 11 H 95 V 64 H 84'/>
+  </g>
+  <rect fill='url(#bankPillar)' height='35.5' width='11' x='17' y='27'/>
+  <rect fill='url(#bankPillar)' height='35.5' width='11' x='38.66' y='27'/>
+  <rect fill='url(#bankPillar)' height='35.5' width='11' x='60.33' y='27'/>
+  <rect fill='url(#bankPillar)' height='35.5' width='11' x='82' y='27'/>
+  <path d='m10,16l45,-15l45,15' fill='url(#bankRoof)' stroke='grey' stroke-linecap='round'/>
+  <rect fill='url(#bankFront)' height='10' stroke='grey' width='90' x='10' y='16.5'/>
+  <rect fill='url(#bankFront)' height='4' stroke='grey' width='100' x='5' y='67'/>
+  <rect fill='url(#bankFront)' height='4' stroke='grey' width='90' x='10' y='63'/>
+</svg>

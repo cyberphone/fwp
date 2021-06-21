@@ -37,8 +37,6 @@ import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
-import org.webpki.fwp.FWPPaymentRequest;
-
 import org.webpki.jose.JOSEKeyWords;
 
 import org.webpki.json.JSONParser;
@@ -52,8 +50,6 @@ public class FWPService extends InitPropertyReader implements ServletContextList
     static Logger logger = Logger.getLogger(FWPService.class.getName());
 
     static DataSource jdbcDataSource;
-    
-    static FWPPaymentRequest samplePaymentRequest;
     
     static KeyPair issuerEncryptionKey;
     
@@ -96,14 +92,6 @@ public class FWPService extends InitPropertyReader implements ServletContextList
             /////////////////////////////////////////////////////////////////////////////////////////////
             logging = getPropertyBoolean("logging");
             
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            // Merchant
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            samplePaymentRequest = new FWPPaymentRequest("Space Shop",
-                                                         "7040566321",
-                                                         "435.00",
-                                                         "EUR");
- 
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Issuer data
             /////////////////////////////////////////////////////////////////////////////////////////////

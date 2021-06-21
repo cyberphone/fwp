@@ -78,7 +78,7 @@ public class SADServlet extends HttpServlet {
         .append(
               "The FIDO signature has now been added. " +
               "<div style='margin-top:0.4em'>Since FWP is a <i>privacy-centric scheme</i>, " +
-              "the data is not yet ready for release.</div>" +
+              "the authorization data is not yet ready for release.</div>" +
               "</div>" +
             "</div>" +
 
@@ -89,7 +89,7 @@ public class SADServlet extends HttpServlet {
             
             "<div style='display:flex;justify-content:center'>" +
               "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doEncrypt()\">" +
-              "Next Step - Encrypt Authorization" +
+              "<i>Encrypt</i> Authorization" +
               "</div>" +
             "</div>" +
 
@@ -114,6 +114,6 @@ public class SADServlet extends HttpServlet {
             "  }, 1000);\n" +
             "}\n").toString();
 
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.FWP, js, html);
     }
 }

@@ -11,6 +11,11 @@ a {
   font-weight:bold;
 }
 
+.actor {
+  color:darkgreen;
+  font-weight:500;
+}
+
 .ctbl {
   padding-bottom:1em;
   word-break:break-all;

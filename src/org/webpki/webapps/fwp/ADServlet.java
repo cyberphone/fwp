@@ -141,7 +141,7 @@ public class ADServlet extends HttpServlet {
 
                 "<div style='display:flex;justify-content:center'>" +
                   "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doPay()\">" +
-                    "Authorize (Sign) using FIDO" +
+                    "Authorize (Sign) using FIDO..." +
                   "</div>" +
                 "</div>" +
 
@@ -212,7 +212,7 @@ public class ADServlet extends HttpServlet {
                 "  }\n" +
 
                 "}\n").toString();
-            HTML.standardPage(response, js, html);
+            HTML.standardPage(response, Actors.FWP, js, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

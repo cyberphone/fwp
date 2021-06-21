@@ -132,7 +132,7 @@ public class PaymentRequestServlet extends HttpServlet {
                     "  }, 1000);\n" +
                     "}\n").toString();
 
-            HTML.standardPage(response, js, html); 
+            HTML.standardPage(response, Actors.FWP, js, html); 
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

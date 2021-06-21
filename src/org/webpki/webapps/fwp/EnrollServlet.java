@@ -171,7 +171,7 @@ public class EnrollServlet extends HttpServlet {
                 "  }\n" +
                 
                 "}\n").toString();
-            HTML.standardPage(response, js, html);
+            HTML.standardPage(response, Actors.ISSUER, js, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }
@@ -191,6 +191,6 @@ public class EnrollServlet extends HttpServlet {
                   "Buy Something..." +
               "</div>" +
             "</div>");
-        HTML.standardPage(response, null, html);
+        HTML.standardPage(response, Actors.ISSUER, null, html);
     }
 }

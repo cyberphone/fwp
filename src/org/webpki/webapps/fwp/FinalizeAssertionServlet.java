@@ -123,6 +123,6 @@ public class FinalizeAssertionServlet extends HttpServlet {
             "  }, 1000);\n" +
             "}\n").toString();
 
-        HTML.standardPage(response, js, html);
+        HTML.standardPage(response, Actors.FWP, js, html);
     }
 }

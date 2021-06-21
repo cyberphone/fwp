@@ -75,21 +75,20 @@ public class HTML {
         }
     }
     
-    static String getHTML(String javascript, String box) {
+    static String getHTML(Actors actor, String javascript, String box) {
         StringBuilder html = new StringBuilder(HTML_INIT);
         if (javascript != null) {
             html.append("<script>\n'use strict';\n").append(javascript)
                     .append("</script>");
         }
-        html.append("</head><body>" +
+        html.append(
+            "</head><body>" +
             "<div style='display:flex;flex-wrap:wrap-reverse;justify-content:space-between'>" +
             "<div><img src='images/thelab.svg' " +
             "style='cursor:pointer;height:25pt;padding-bottom:10pt;margin-right:30pt'" +
-            " onclick=\"document.location.href='home'\" title='Home of the lab...'/></div>" +
-            "<div style='display:flex;padding-bottom:10pt'>" +
-            "<a href='https://github.com/cyberphone/fwp' target='_blank'><img src='images/fwp.svg' " +
-            "style='height:25pt' " +
-            "title='Specifications, source code, etc.'/></a>" +
+            " onclick=\"document.location.href='home'\" title='Home of the lab...'/></div>")
+        .append(actor.html)
+        .append(
             "</div>" +
             "</div>")
          .append(box).append("</body></html>");
@@ -148,19 +147,11 @@ public class HTML {
             "</textarea></div>";
     }
     
-    static void standardPage(HttpServletResponse response, 
-                            String javaScript,
-                            StringBuilder html) throws IOException, ServletException {
-        HTML.output(response, HTML.getHTML(javaScript, html.toString()));
-    }
-
-    public static void noWebCryptoPage(HttpServletResponse response)
-            throws IOException, ServletException {
-        HTML.output(
-                response,
-                HTML.getHTML(
-                        null,
-                        "Your Browser Doesn't Support WebCrypto :-("));
+    static void standardPage(HttpServletResponse response,
+                             Actors actor,
+                             String javaScript,
+                             StringBuilder html) throws IOException, ServletException {
+        HTML.output(response, HTML.getHTML(actor, javaScript, html.toString()));
     }
 
     static String javaScript(String string) {
@@ -194,6 +185,7 @@ public class HTML {
             error.append("\n  at " + entry);
         }
         standardPage(response,
+                     Actors.SITE,
                      null,
                      new StringBuilder(
             "<div class='header' style='color:red'>Something went wrong...</div>" +
