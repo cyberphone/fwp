@@ -42,7 +42,7 @@ public enum Actors {
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='images/issuer.svg' " +
         "style='height:35pt' " +
-        "title='Issuer'/>");
+        "title='Issuer (bank)'/>");
     
     String html;
 

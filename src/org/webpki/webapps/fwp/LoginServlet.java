@@ -61,10 +61,10 @@ public class LoginServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "Login is not a part of FIDO Web Pay, but associated FIDO authenticators " +
+                  "Although login is not a part of FIDO Web Pay, associated FIDO authenticators " +
                   "can <i>optionally</i> be used for authentication as well." +
                   "<div style='margin-top:0.4em'>Note that for <i>authentication</i> (unlike " +
-                  "for payments), the normal FIDO domain constraints apply.  That is, " +
+                  "for payments), normal FIDO domain constraints apply.  That is, " +
                   "logins are restricted to the actual <span class='actor'>Issuer</span>.</div>" +
               "</div>" +
             "</div>" +
@@ -164,7 +164,8 @@ public class LoginServlet extends HttpServlet {
             
                     "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                       "<div class='comment'>" +
-                         "This is what the login returned from the user database." +
+                         "This is what the login returned from the " +
+                         "<span class='actor'>Issuer</span> database." +
                       "</div>" +
                     "</div>" +
 

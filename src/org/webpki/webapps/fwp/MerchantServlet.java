@@ -93,6 +93,10 @@ public class MerchantServlet extends HttpServlet {
               "for fulfillment." +
               "<div style='margin-top:0.4em'>Below is a <i>non-normative</i> " +
               "sample <span class='actor'>PSP</span> message.</div>" +
+              "<div style='margin-top:0.4em'>Note: &quot;backend&quot; processing " +
+              "is <i>invisible</i> for the <span class='actor'>User</span>; " +
+              "he/she stays in the <span class='actor'>Merchant</span> context " +
+              "throughout the payment journey!</div>" +
               "</div>" +
             "</div>" +
               
