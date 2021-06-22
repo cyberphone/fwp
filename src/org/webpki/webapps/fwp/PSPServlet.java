@@ -86,7 +86,7 @@ public class PSPServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-8"))
         .append(
-              "The <span class='actor'>PSP</span> has received a payment request message " +
+              ": The <span class='actor'>PSP</span> has received a payment request message " +
               "from the <span class='actor'>Merchant</span>, " +
               "and now needs to route the request to the proper <span class='actor'>Issuer</span>. " +
               "Although not shown here, " +

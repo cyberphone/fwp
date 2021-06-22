@@ -76,7 +76,7 @@ public class SADServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-4.3"))
         .append(
-              "The FIDO signature has now been added. " +
+              ": The FIDO signature has now been added. " +
               "<div style='margin-top:0.4em'>Since FWP is a <i>privacy-centric scheme</i>, " +
               "the authorization data is not yet ready for release.</div>" +
               "</div>" +

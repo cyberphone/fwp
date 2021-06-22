@@ -108,9 +108,9 @@ public class BuyServlet extends HttpServlet {
         .append(
             ";\n" +
         
-            "const paymentMethods = [\n" +
-            "  'https://bankdirect.com',\n" +
-            "  'https://supercard.com'\n" +
+            "const networks = [\n" +
+            "  {name: 'https://bankdirect.com'},\n" +
+            "  {name: 'https://supercard.com'}\n" +
             "]\n" +
          
             "function unsupported(target) {\n" +
@@ -128,7 +128,7 @@ public class BuyServlet extends HttpServlet {
             "  document.getElementById('" + FWPWalletCore.WALLET_REQUEST + 
                 "').value = JSON.stringify({" + 
                 FWPWalletCore.PAYMENT_REQUEST + ": paymentRequest, " +
-                FWPWalletCore.PAYMENT_METHODS + ": paymentMethods});\n" +
+                FWPWalletCore.NETWORKS + ": networks});\n" +
             "  document.forms.shoot.submit();\n" +
             "}\n").toString();
         HTML.standardPage(response, Actors.MERCHANT, js, html);

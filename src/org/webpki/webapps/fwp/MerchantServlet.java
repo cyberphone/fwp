@@ -85,7 +85,7 @@ public class MerchantServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-6"))
         .append(
-              "The <span class='actor'>Merchant</span> has received the authorization response " +
+              ": The <span class='actor'>Merchant</span> has received the authorization response " +
               "from the <span class='actor'>Wallet</span> and now " +
               "needs to take the user authorization (together with other data), " +
               "to a suitable Payment System Provider " +

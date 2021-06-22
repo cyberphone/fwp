@@ -67,7 +67,7 @@ public class FWPWalletCore {
     // Wallet internal call
     static final String WALLET_INTERNAL          = "walletInternal";
 
-    static final String PAYMENT_METHODS          = "paymentMethods";
+    static final String NETWORKS                 = "networks";
     static final String PAYMENT_REQUEST          = "paymentRequest";
     static final String ACCOUNT_DATA             = "accountData";
 

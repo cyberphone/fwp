@@ -84,7 +84,7 @@ public class ESADServlet extends HttpServlet {
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-4.4"))
             .append(
-                  "The authorization data has now been signed and encrypted, " +
+                  ": The authorization data has now been signed and encrypted, " +
                   "the latter using an <i>issuer-specific key</i>." +
                   "<div style='margin-top:0.4em'>However, payment backend processing needs some data " +
                   "in clear in order to perform its work.</div>" +

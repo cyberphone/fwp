@@ -114,7 +114,7 @@ public class IssuerServlet extends HttpServlet {
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-10"))
             .append(
-                  "If you have reached this far, the payment request has been verified " +
+                  ": If you have reached this far, the payment request has been verified " +
                   "to be authentic and a payment operation is being initiated." +
                   "<div style='margin-top:0.4em'>Thank you for testing!</div>" +
                   "</div>" +

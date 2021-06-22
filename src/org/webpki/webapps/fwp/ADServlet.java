@@ -58,7 +58,7 @@ public class ADServlet extends HttpServlet {
 
     static String sectionReference(String section) {
         return "<a href='" + "https://fido-web-pay.github.io/specification#" + section +
-                  "' target='_blank'>" + section + "</a>:  ";
+                  "' target='_blank'>" + section + "</a>";
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -119,7 +119,7 @@ public class ADServlet extends HttpServlet {
                   "<div class='comment'>")
             .append(sectionReference("seq-4.2"))
             .append(
-                  "The payment data to authorize. " +
+                  ": The payment data to authorize. " +
                   "This data is (after SHA256-digesting), used as the FIDO &quot;challenge&quot;. " +
                   "That is, <i>there is no FIDO authentication server</i> because FWP builds on a " +
                   "&quot;Card&nbsp;Present&quot; <i>authorization</i> concept like " +

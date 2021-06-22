@@ -66,15 +66,15 @@ public class PaymentRequestServlet extends HttpServlet {
             }
 
             // 
-            JSONArrayReader paymentMethods = 
-                    walletRequestJson.getArray(FWPWalletCore.PAYMENT_METHODS);
+            JSONArrayReader networks = walletRequestJson.getArray(FWPWalletCore.NETWORKS);
             JSONObjectReader paymentRequest =
                     walletRequestJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
             JSONObjectWriter walletInternal = new JSONObjectWriter()
                     .setObject(FWPWalletCore.PAYMENT_REQUEST, paymentRequest)
                     .setObject(FWPWalletCore.ACCOUNT_DATA, new JSONObjectWriter()
                             .setString(FWPWalletCore.ACCOUNT_ID, "FR7630002111110020050014382")
-                            .setString(FWPWalletCore.PAYMENT_METHOD, paymentMethods.getString())
+                            .setString(FWPWalletCore.PAYMENT_METHOD,
+                                       networks.getObject().getString("name"))
                             .setString(FWPWalletCore.SERIAL_NUMBER, "0057162932")
                             .setString(FWPWalletCore.ISSUER_ID, "https://mybank.fr/payment"));
              
@@ -93,9 +93,9 @@ public class PaymentRequestServlet extends HttpServlet {
 
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>")
-            .append(ADServlet.sectionReference("seq-2"))
+            .append(ADServlet.sectionReference("seq-1"))
             .append(
-                  "This is what the Merchant's call to the W3C PaymentRequest API " +
+                  ": This is what the Merchant's call to the W3C PaymentRequest API " +
                   "boils down to.  The wallet UI has not yet been written so " +
                   "we just go for the first payment method that matches any of the " +
                   "ones specified by the Merchant." +
