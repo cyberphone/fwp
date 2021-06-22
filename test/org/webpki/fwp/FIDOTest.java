@@ -116,7 +116,7 @@ public class FIDOTest {
  
     void test(JSONObjectReader vector) throws Exception {
         String userAgent = vector.getString("userAgent");
-        String token = vector.getString("token");
+        String authenticator = vector.getString("authenticator");
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");
         byte[] createChallenge = create.getBinary(FWPCrypto.CHALLENGE);

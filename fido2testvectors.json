@@ -1,6 +1,6 @@
 [{
   "userAgent": "Chrome90/W10",
-  "token": "Windows Hello",
+  "authenticator": "Windows Hello",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "5UBX2l8hj-K0LHxy_J8kSHwtiDNE-j6N4yU2pMJbWRo",
@@ -22,7 +22,7 @@
   }
 },{
   "userAgent": "Chrome90/Android10",
-  "token": "AndroidKeystore",
+  "authenticator": "AndroidKeystore",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "9zop8MpE_zeySq15QUr_MyOCuDygzU-3rCcui7FsJkY",
@@ -44,7 +44,7 @@
   }
 },{
   "userAgent": "Chrome90/W10",
-  "token": "Yubico",
+  "authenticator": "Yubico",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "cHs2wCH_F0ZYrYxof3GA68vpQ3RVbik55Bl5iBAXFw4",
@@ -66,7 +66,7 @@
   }
 },{
   "userAgent": "Firefox88/W10",
-  "token": "Windows Hello",
+  "authenticator": "Windows Hello",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "NrDxtVXeUy5OPrhd5z2ztQX3aLw43MalyZIfqqlyX-o",
@@ -88,7 +88,7 @@
   }
 },{
   "userAgent": "iPhone/iOS14.2",
-  "token": "Apple",
+  "authenticator": "Apple",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "1Z4m-O7Lmi762WffOu5jSXSnJfF93HHwWd52BhNhrUQ",
