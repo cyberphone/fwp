@@ -55,32 +55,36 @@ public class PaymentRequestServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String walletRequest = request.getParameter(FWPWalletCore.WALLET_REQUEST);
+        String walletRequest = request.getParameter(WalletCore.WALLET_REQUEST);
         if (walletRequest == null) {
-            FWPWalletCore.failed("Missing wallet request");
+            WalletCore.failed("Missing wallet request");
         }
         logger.info(walletRequest);
         JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
         try {
             // Get the enrolled user.
-            String userId = FWPWalletCore.getWalletCookie(request);
+            String userId = WalletCore.getWalletCookie(request);
             if (userId == null) {
                 response.sendRedirect("walletadmin");
                 return;
             }
             // What the Merchant wants...
             JSONObjectReader paymentRequest =
-                    walletRequestJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
+                    walletRequestJson.getObject(WalletCore.PAYMENT_REQUEST);
             
-            // Lookup virtual cards in database
+            // Lookup virtual cards in the wallet database
             ArrayList<DataBaseOperations.VirtualCard> virtualCards;
-            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 virtualCards = DataBaseOperations.getVirtualCards(userId, connection);
-            }           
+            }
+            if (virtualCards.isEmpty()) {
+                response.sendRedirect("walletadmin");
+                return;
+            }
 
             // Match against Merchant list
             JSONObjectWriter walletInternal = null;
-            JSONArrayReader networks = walletRequestJson.getArray(FWPWalletCore.NETWORKS);
+            JSONArrayReader networks = walletRequestJson.getArray(WalletCore.NETWORKS);
             while (networks.hasMore()) {
                 JSONObjectReader network = networks.getObject();
                 String paymentMethod = network.getString("name");
@@ -88,14 +92,15 @@ public class PaymentRequestServlet extends HttpServlet {
                     if (paymentMethod.equals(virtualCard.paymentMethod)) {
                         // First matching, we go for that for now...
                         walletInternal = new JSONObjectWriter()
-                            .setObject(FWPWalletCore.PAYMENT_REQUEST, paymentRequest)
-                            .setObject(FWPWalletCore.SELECTED_CARD, new JSONObjectWriter()
-                                .setString(FWPWalletCore.CREDENTIAL_ID, virtualCard.credentialId)
-                                .setString(FWPWalletCore.ACCOUNT_ID, virtualCard.accountId)
-                                .setString(FWPWalletCore.PAYMENT_METHOD, paymentMethod)
-                                .setString(FWPWalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
-                                .setBinary(FWPWalletCore.PUBLIC_KEY, virtualCard.publicKey)
-                                .setString(FWPWalletCore.ISSUER_ID, "https://mybank.fr/payment"));
+                            .setObject(WalletCore.PAYMENT_REQUEST, paymentRequest)
+                            .setObject(WalletCore.SELECTED_CARD, new JSONObjectWriter()
+                                .setString(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
+                                .setString(WalletCore.ACCOUNT_ID, virtualCard.accountId)
+                                .setString(WalletCore.PAYMENT_METHOD, paymentMethod)
+                                .setString(WalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
+                                .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
+                                // Hard-coded at the moment
+                                .setString(WalletCore.ISSUER_ID, WalletService.issuerId));
                         break;
                     }
                 }
@@ -103,12 +108,15 @@ public class PaymentRequestServlet extends HttpServlet {
                     break;
                 }
             }
+            if (walletInternal == null) {
+                throw new IOException("No matching card");
+            }
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='ad'>" +
-                "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
-                    "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL + "' value='")
+                "<input type='hidden' id='" + WalletCore.FWP_SAD + 
+                    "' name='" + WalletCore.FWP_SAD + "'/>" +
+                "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
             .append(HTML.encode(walletInternal.serializeToString(JSONOutputFormats.NORMALIZED),
                                 false))
             .append(
@@ -148,14 +156,14 @@ public class PaymentRequestServlet extends HttpServlet {
 
             String js = new StringBuilder(
 
-                    FWPWalletCore.GO_HOME_JAVASCRIPT +
+                    WalletCore.GO_HOME_JAVASCRIPT +
                     
                     "function doContinue() {\n" +
                     "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
                     "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
                     "  setTimeout(function() {\n" +
                     "    document.forms.shoot.submit();\n" +
-                    "  }, 1000);\n" +
+                    "  }, 500);\n" +
                     "}\n").toString();
 
             HTML.standardPage(response, Actors.FWP, js, html); 

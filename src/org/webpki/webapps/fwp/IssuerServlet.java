@@ -68,7 +68,7 @@ public class IssuerServlet extends HttpServlet {
         try {
             String issuerRequest = request.getParameter(ISSUER_REQUEST);
             if (issuerRequest == null) {
-                FWPWalletCore.failed("Missing Issuer request");
+                WalletCore.failed("Missing Issuer request");
                 return;
             }
             // Now the real work begins...
@@ -89,10 +89,10 @@ public class IssuerServlet extends HttpServlet {
                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
-                    if (!FWPService.issuerKeyId.equals(keyId)) {
+                    if (!WalletService.issuerKeyId.equals(keyId)) {
                         throw new GeneralSecurityException("Unknown keyId: " + keyId);
                     }
-                    return FWPService.issuerEncryptionKey.getPrivate();
+                    return WalletService.issuerEncryptionKey.getPrivate();
                 }
                 
             }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
@@ -111,7 +111,7 @@ public class IssuerServlet extends HttpServlet {
             
             // And of course, verify that this assertion belongs to a valid account!
             String userId;
-            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 userId = DataBaseOperations.authorize(fwpAssertion.getAccountId(),
                                                       fwpAssertion.getSerialNumber(),
                                                       fwpAssertion.getPublicKey(),
@@ -209,7 +209,7 @@ public class IssuerServlet extends HttpServlet {
                   "</table>" +
                 "</div>");
             
-            HTML.standardPage(response, Actors.ISSUER, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
+            HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

@@ -158,6 +158,13 @@ CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
         VALUES(p_UserId,
                "FR7630002111110020050014382",
                "https://bankdirect.com");
+
+    INSERT INTO PAYMENT_CARDS(UserId,
+                              AccountId,
+                              PaymentMethod) 
+        VALUES(p_UserId,
+               "4532 5620 0500 3239",
+               "https://supercard.com");
   END
 //
 
@@ -167,15 +174,6 @@ CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
     DELETE Target FROM PAYMENT_CARDS As Target
         INNER JOIN USERS ON USERS.UserId = Target.UserId
         WHERE USERS.UserId = p_UserId;
-  END
-//
-
-CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN,
-                                    IN p_UserId CHAR(36))
-  BEGIN
-    SET p_Found = EXISTS (SELECT * FROM USERS
-        INNER JOIN PAYMENT_CARDS ON USERS.UserId = PAYMENT_CARDS.UserId
-        WHERE USERS.UserId = p_UserId);
   END
 //
 
@@ -284,15 +282,7 @@ CALL ASSERT_TRUE(@Status = 2, "Authz failed");
 CALL AuthorizeSP(@Status, @OutUserId, @OutAccountId, @OutSerialNumber, @WrongS256KeyHash);
 CALL ASSERT_TRUE(@Status = 3, "Authz failed");
    
-CALL HasPaymentCardsSP(@found, @UserId);
-
-CALL ASSERT_TRUE(@found = TRUE, "Must have");
-
 CALL DeletePaymentCardsSP(@UserId);
-
-CALL HasPaymentCardsSP(@found, @UserId);
-
-CALL ASSERT_TRUE(@found = FALSE, "Must NOT have");
 
 CALL AuthenticateSP(@Status, @UserId, @S256KeyHash);
 CALL ASSERT_TRUE(@Status = 0, "Auth failed");

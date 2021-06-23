@@ -65,8 +65,8 @@ public class BuyServlet extends HttpServlet {
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='pr'>" +
         
-            "<input type='hidden' id='" + FWPWalletCore.WALLET_REQUEST + 
-                "' name='" + FWPWalletCore.WALLET_REQUEST + "'/>" +
+            "<input type='hidden' id='" + WalletCore.WALLET_REQUEST + 
+                "' name='" + WalletCore.WALLET_REQUEST + "'/>" +
 
             "<div class='header'>Checkout Time!</div>" +
 
@@ -110,6 +110,7 @@ public class BuyServlet extends HttpServlet {
         
             "const networks = [\n" +
             "  {name: 'https://bankdirect.com'},\n" +
+            "  {name: 'https://othernet.com'},\n" +
             "  {name: 'https://supercard.com'}\n" +
             "]\n" +
          
@@ -121,14 +122,14 @@ public class BuyServlet extends HttpServlet {
             "  notifier.style.visibility = 'visible';\n" +
             "  setTimeout(function() {\n" +
             "    notifier.style.visibility = 'hidden';\n" +
-            "  }, 1000);\n" +
+            "  }, 500);\n" +
             "}\n\n" +
 
             "function doPay() {\n" +
-            "  document.getElementById('" + FWPWalletCore.WALLET_REQUEST + 
+            "  document.getElementById('" + WalletCore.WALLET_REQUEST + 
                 "').value = JSON.stringify({" + 
-                FWPWalletCore.PAYMENT_REQUEST + ": paymentRequest, " +
-                FWPWalletCore.NETWORKS + ": networks});\n" +
+                WalletCore.PAYMENT_REQUEST + ": paymentRequest, " +
+                WalletCore.NETWORKS + ": networks});\n" +
             "  document.forms.shoot.submit();\n" +
             "}\n").toString();
         HTML.standardPage(response, Actors.MERCHANT, js, html);

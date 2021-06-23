@@ -37,7 +37,7 @@ public class DataBaseOperations {
     static Logger logger = Logger.getLogger(DataBaseOperations.class.getCanonicalName());
     
     static void testConnection() throws SQLException {
-        try (Connection connection = FWPService.jdbcDataSource.getConnection();) { }
+        try (Connection connection = WalletService.jdbcDataSource.getConnection();) { }
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,6 @@ public class DataBaseOperations {
             stmt.execute();
         }
     }
-
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Delete user                                                                                //
@@ -82,29 +81,11 @@ public class DataBaseOperations {
         }
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Check if the user (which may not exist) has payment cards                                  //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    static boolean hasPaymentCards(String userId, Connection connection) throws SQLException {
-/*
-        CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN, IN p_UserId CHAR(36))
-
-*/
-        try (CallableStatement stmt = connection.prepareCall("{call HasPaymentCardsSP(?,?)}");) {
-            stmt.registerOutParameter(1, java.sql.Types.BOOLEAN);
-            stmt.setString(2, userId);
-            stmt.execute();
-            return stmt.getBoolean(1);
-        }
-    }
-   
     static class CoreClientData {
         String credentialId;
         byte[] cosePublicKey;
         String cardHolder;
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // WebAuthn on Android as well as FWP presume that the key handle (CredentialId) is known.    //
@@ -169,14 +150,13 @@ public class DataBaseOperations {
                 "USERS.UserId = PAYMENT_CARDS.UserId WHERE USERS.UserId = ?;");) {
             stmt.setString(1, userId);
             try (ResultSet rs = stmt.executeQuery();) {
-                if (!rs.next()) {
-                    throw new IOException("No cards found, you need to reenroll");
+                if (rs.next()) {
+                    virtualCards.add(new VirtualCard(rs.getString(1),
+                                                     rs.getBytes(2), 
+                                                     String.valueOf(rs.getInt(3)),
+                                                     rs.getString(4),
+                                                     rs.getString(5)));
                 }
-                virtualCards.add(new VirtualCard(rs.getString(1),
-                                                 rs.getBytes(2), 
-                                                 String.valueOf(rs.getInt(3)),
-                                                 rs.getString(4),
-                                                 rs.getString(5)));
             }
         }
         return virtualCards;
@@ -244,5 +224,4 @@ public class DataBaseOperations {
             }
         }
     }
-    
 }

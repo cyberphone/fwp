@@ -54,7 +54,7 @@ public class WalletAdminServlet extends HttpServlet {
                   "</div>" +
                 "</div>");
     
-            html.append(FWPWalletCore.hasPaymentCards(request) ?
+            html.append(WalletCore.hasPaymentCards(request) ?
     
                 "<form name='shoot' method='POST' action='walletadmin'></form>" +
                 "<div style='display:flex;justify-content:center'>" +
@@ -83,10 +83,10 @@ public class WalletAdminServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // The user ID is stored in a persistent cookie.
-            String userId = FWPWalletCore.getWalletCookie(request);
+            String userId = WalletCore.getWalletCookie(request);
             
             // This is the only database call needed for deleting payment cards (all of them...).
-            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 DataBaseOperations.deletePaymentCards(userId, connection);
             }
             
@@ -101,7 +101,7 @@ public class WalletAdminServlet extends HttpServlet {
                     "</form>");
 
             // We remove the cookie as well.
-            Cookie walletCookie = new Cookie(FWPWalletCore.WALLET_COOKIE, "");
+            Cookie walletCookie = new Cookie(WalletCore.WALLET_COOKIE, "");
             walletCookie.setMaxAge(0);  // 100 days.
             walletCookie.setSecure(true);
             response.addCookie(walletCookie);

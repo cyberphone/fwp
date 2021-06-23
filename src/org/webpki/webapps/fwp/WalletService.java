@@ -45,15 +45,17 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
 
-public class FWPService extends InitPropertyReader implements ServletContextListener {
+public class WalletService extends InitPropertyReader implements ServletContextListener {
 
-    static Logger logger = Logger.getLogger(FWPService.class.getName());
+    static Logger logger = Logger.getLogger(WalletService.class.getName());
 
     static DataSource jdbcDataSource;
     
     static KeyPair issuerEncryptionKey;
     
     static String issuerKeyId = "x25519:2021:01";
+    
+    static String issuerId = "https://mybank.fr/payment";
     
     static KeyEncryptionAlgorithms issuerKeyEncryptionAlgorithm = 
             KeyEncryptionAlgorithms.ECDH_ES_A256KW;

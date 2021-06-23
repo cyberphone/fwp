@@ -58,27 +58,27 @@ public class FIDOEnrollServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // Get the input (request) data.
-            JSONObjectReader requestJson = FWPWalletCore.getJSON(request);
+            JSONObjectReader requestJson = WalletCore.getJSON(request);
             
             // Prepare for writing a response.
             JSONObjectWriter resultJson = new JSONObjectWriter();
             
             // The FIDO server is stateful and its state MUST be checked
             // with that of the client.
-            String phase = requestJson.getString(FWPWalletCore.PHASE_JSON);
+            String phase = requestJson.getString(WalletCore.PHASE_JSON);
 
             // Tentative: return the same phase info as in the request.
-            resultJson.setString(FWPWalletCore.PHASE_JSON, phase);
+            resultJson.setString(WalletCore.PHASE_JSON, phase);
             
             // Determine where are in the process.
-            if (phase.equals(FWPWalletCore.INIT_PHASE)) {
+            if (phase.equals(WalletCore.INIT_PHASE)) {
 
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
                 // Due to limitations in FIDO credential management we
                 // reuse an existing user ID if there is one.
-                String userId = FWPWalletCore.getWalletCookie(request);
+                String userId = WalletCore.getWalletCookie(request);
                 if (userId == null) {
                     userId = UUID.randomUUID().toString();
                     logger.info("Created new user: " + userId);
@@ -94,20 +94,20 @@ public class FIDOEnrollServlet extends HttpServlet {
                 
                 // We must also keep a copy of emitted data in a server session.
                 // The client can only partially be trusted!
-                session.setAttribute(FWPWalletCore.ATTR_REGISTER_DATA, 
+                session.setAttribute(WalletCore.ATTR_REGISTER_DATA, 
                                      new JSONObjectReader(resultJson));
 
-            } else if (phase.equals(FWPWalletCore.FINALIZE_PHASE)) {
+            } else if (phase.equals(WalletCore.FINALIZE_PHASE)) {
  
                 // Finalizing! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
-                    FWPWalletCore.failed("Missing finalize session");
+                    WalletCore.failed("Missing finalize session");
                 }
                 JSONObjectReader registerData = 
-                        (JSONObjectReader) session.getAttribute(FWPWalletCore.ATTR_REGISTER_DATA);
+                        (JSONObjectReader) session.getAttribute(WalletCore.ATTR_REGISTER_DATA);
                 if (registerData == null) {
-                    FWPWalletCore.failed("Enrollment register data missing");
+                    WalletCore.failed("Enrollment register data missing");
                 }
 
                 // Check that we are in "sync".
@@ -115,14 +115,14 @@ public class FIDOEnrollServlet extends HttpServlet {
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                         registerData.getBinary(FWPCrypto.CHALLENGE))) {
-                    FWPWalletCore.failed("Challenge mismatch");
+                    WalletCore.failed("Challenge mismatch");
                 }
 
                 // User ID is central.
                 String userId = registerData.getString(FWPCrypto.USER_ID);
 
                 // Get card holder name.
-                String cardHolder = requestJson.getString(FWPWalletCore.CARD_HOLDER_JSON);
+                String cardHolder = requestJson.getString(WalletCore.CARD_HOLDER_JSON);
                 
                 // Get credintialId.  To simplify things a bit we keep it in B64U notation.
                 String credentialId = requestJson.getString(FWPCrypto.CREDENTIAL_ID);
@@ -134,9 +134,9 @@ public class FIDOEnrollServlet extends HttpServlet {
                 byte[] rawPublicKey = FWPCrypto.extractFidoPublicKey(attestationObject);
 
  // Test only
-if (cardHolder.equals("-1")) FWPWalletCore.failed(cardHolder);  // Hard server error
+if (cardHolder.equals("-1")) WalletCore.failed(cardHolder);  // Hard server error
 if (cardHolder.equals("-2")) { // Soft server error
-    FWPWalletCore.softError(response, resultJson, "Sorry, something isn't as it should");
+    WalletCore.softError(response, resultJson, "Sorry, something isn't as it should");
     return;
 }
                 
@@ -144,7 +144,7 @@ if (cardHolder.equals("-2")) { // Soft server error
                 // issuing the requested payment credentials.
  
                 // A single call will do the trick.
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                     // Store basic data.
                     DataBaseOperations.initiateUserAccount(userId, 
                                                            cardHolder,
@@ -154,20 +154,20 @@ if (cardHolder.equals("-2")) { // Soft server error
                 }
 
                 // To enable the Web emulator, put the UUID in a persistent cookie. 
-                Cookie walletCookie = new Cookie(FWPWalletCore.WALLET_COOKIE, userId);
+                Cookie walletCookie = new Cookie(WalletCore.WALLET_COOKIE, userId);
                 walletCookie.setMaxAge(8640000);  // 100 days.
                 walletCookie.setSecure(true);
                 response.addCookie(walletCookie);
 
                 logger.info("Initiated user: " + userId);
             } else {
-                FWPWalletCore.failed("Unknown phase: " + phase);
+                WalletCore.failed("Unknown phase: " + phase);
             }
-            FWPWalletCore.returnJSON(response, resultJson);
+            WalletCore.returnJSON(response, resultJson);
 
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.log(Level.SEVERE, FWPWalletCore.getStackTrace(e, message));
+            logger.log(Level.SEVERE, WalletCore.getStackTrace(e, message));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             PrintWriter writer = response.getWriter();
             writer.print(message);

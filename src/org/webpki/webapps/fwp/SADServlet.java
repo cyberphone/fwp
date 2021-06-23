@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -47,24 +45,23 @@ public class SADServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String signedAuthorizationB64U = request.getParameter(FWPWalletCore.FWP_SAD);
+        String signedAuthorizationB64U = request.getParameter(WalletCore.FWP_SAD);
         if (signedAuthorizationB64U == null) {
-            FWPWalletCore.failed("Missing signed authorization data");
+            WalletCore.failed("Missing signed authorization data");
             return;
         }
-        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        String walletInternal = request.getParameter(WalletCore.WALLET_INTERNAL);
         if (walletInternal == null) {
-            FWPWalletCore.failed("Missing wallet data");
+            WalletCore.failed("Missing wallet data");
             return;
         }
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='esad'>" +
-            "<input type='hidden' name='" + FWPWalletCore.FWP_SAD +
-            "' value='")
+            "<input type='hidden' name='" + WalletCore.FWP_SAD + "' value='")
         .append(signedAuthorizationB64U)
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL+ "' value='")
+            "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL+ "' value='")
         .append(HTML.encode(walletInternal, false))
         .append(
             "'/>" +
@@ -95,7 +92,7 @@ public class SADServlet extends HttpServlet {
 
             "<div class='staticbox'>")
         .append(HTML.encode(CBORObject.decode(
-                    Base64.getUrlDecoder().decode(signedAuthorizationB64U)).toString(), true)
+                    WalletCore.base64UrlDecode(signedAuthorizationB64U)).toString(), true)
                 .replace("9:&nbsp;", 
                         "<span style='color:grey;word-break:normal'>// The platform data is " +
                           "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
@@ -104,14 +101,14 @@ public class SADServlet extends HttpServlet {
         
         String js = new StringBuilder(
 
-            FWPWalletCore.GO_HOME_JAVASCRIPT +
+            WalletCore.GO_HOME_JAVASCRIPT +
             
             "function doEncrypt() {\n" +
             "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
             "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
             "  setTimeout(function() {\n" +
             "    document.forms.shoot.submit();\n" +
-            "  }, 1000);\n" +
+            "  }, 500);\n" +
             "}\n").toString();
 
         HTML.standardPage(response, Actors.FWP, js, html);

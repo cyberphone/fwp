@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -49,30 +47,30 @@ public class ESADServlet extends HttpServlet {
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
         try {
-            String signedAuthorizationDataB64U = request.getParameter(FWPWalletCore.FWP_SAD);
+            String signedAuthorizationDataB64U = request.getParameter(WalletCore.FWP_SAD);
             if (signedAuthorizationDataB64U == null) {
-                FWPWalletCore.failed("FWP assertion missing");
+                WalletCore.failed("FWP assertion missing");
             }
-            String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+            String walletInternal = request.getParameter(WalletCore.WALLET_INTERNAL);
             if (walletInternal == null) {
-                FWPWalletCore.failed("Missing wallet data");
+                WalletCore.failed("Missing wallet data");
                 return;
             }            
             CBORMap encrypted = 
-                    new CBORAsymKeyEncrypter(FWPService.issuerEncryptionKey.getPublic(),
-                                             FWPService.issuerKeyEncryptionAlgorithm,
-                                             FWPService.issuerContentEncryptionAlgorithm)
-                .setKeyId(FWPService.issuerKeyId).encrypt(
-                        Base64.getUrlDecoder().decode(signedAuthorizationDataB64U));
+                    new CBORAsymKeyEncrypter(WalletService.issuerEncryptionKey.getPublic(),
+                                             WalletService.issuerKeyEncryptionAlgorithm,
+                                             WalletService.issuerContentEncryptionAlgorithm)
+                .setKeyId(WalletService.issuerKeyId).encrypt(
+                        WalletCore.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='finalizeassertion'>" +
-                "<input type='hidden' name='" + FWPWalletCore.FWP_ESAD + 
+                "<input type='hidden' name='" + WalletCore.FWP_ESAD + 
                 "' value='")
-            .append(Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted.encode()))
+            .append(WalletCore.base64UrlEncode(encrypted.encode()))
             .append(
                 "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL + "' value='")
+                "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
             .append(HTML.encode(walletInternal, false))
             .append(
                 "'/>" +
@@ -109,14 +107,14 @@ public class ESADServlet extends HttpServlet {
  
             String js = new StringBuilder(
 
-                FWPWalletCore.GO_HOME_JAVASCRIPT +
+                WalletCore.GO_HOME_JAVASCRIPT +
                 
                 "function doFinalize() {\n" +
                 "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
                 "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
                 "  setTimeout(function() {\n" +
                 "    document.forms.shoot.submit();\n" +
-                "  }, 1000);\n" +
+                "  }, 500);\n" +
                 "}\n").toString();
 
                 HTML.standardPage(response, Actors.FWP, js, html);

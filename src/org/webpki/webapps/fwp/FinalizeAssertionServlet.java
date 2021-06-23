@@ -51,33 +51,33 @@ public class FinalizeAssertionServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String encryptedSignedAuthorizationB64U = request.getParameter(FWPWalletCore.FWP_ESAD);
+        String encryptedSignedAuthorizationB64U = request.getParameter(WalletCore.FWP_ESAD);
         if (encryptedSignedAuthorizationB64U == null) {
-            FWPWalletCore.failed("Missing encrypted signed authorization data");
+            WalletCore.failed("Missing encrypted signed authorization data");
             return;
         }
-        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        String walletInternal = request.getParameter(WalletCore.WALLET_INTERNAL);
         if (walletInternal == null) {
-            FWPWalletCore.failed("Missing wallet data");
+            WalletCore.failed("Missing wallet data");
             return;
         }     
         JSONObjectReader accountData = 
-                JSONParser.parse(walletInternal).getObject(FWPWalletCore.SELECTED_CARD);
+                JSONParser.parse(walletInternal).getObject(WalletCore.SELECTED_CARD);
         FWPJsonAssertion fwpAssertion =
-                new FWPJsonAssertion(accountData.getString(FWPWalletCore.PAYMENT_METHOD),
-                                     accountData.getString(FWPWalletCore.ISSUER_ID),
+                new FWPJsonAssertion(accountData.getString(WalletCore.PAYMENT_METHOD),
+                                     accountData.getString(WalletCore.ISSUER_ID),
                                      Base64.getUrlDecoder().decode(
                                              encryptedSignedAuthorizationB64U));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='merchant'>" +
-            "<input type='hidden' name='" + FWPWalletCore.FWP_ASSERTION +
+            "<input type='hidden' name='" + WalletCore.FWP_ASSERTION +
             "' value='")
         .append(HTML.encode(fwpAssertion.serialize(), false))
         .append(
             "'/>" +
-            "<input type='hidden' name='" + FWPWalletCore.PAYMENT_REQUEST + "' value='")
+            "<input type='hidden' name='" + WalletCore.PAYMENT_REQUEST + "' value='")
         .append(HTML.encode(JSONParser.parse(walletInternal).getObject(
-                FWPWalletCore.PAYMENT_REQUEST).serializeToString(JSONOutputFormats.NORMALIZED),
+                WalletCore.PAYMENT_REQUEST).serializeToString(JSONOutputFormats.NORMALIZED),
                             false))
         .append(
             "'/>" +
@@ -120,14 +120,14 @@ public class FinalizeAssertionServlet extends HttpServlet {
             "</div>");
         String js = new StringBuilder(
 
-            FWPWalletCore.GO_HOME_JAVASCRIPT +
+            WalletCore.GO_HOME_JAVASCRIPT +
             
             "function doReturn() {\n" +
             "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
             "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
             "  setTimeout(function() {\n" +
             "    document.forms.shoot.submit();\n" +
-            "  }, 1000);\n" +
+            "  }, 500);\n" +
             "}\n").toString();
 
         HTML.standardPage(response, Actors.FWP, js, html);

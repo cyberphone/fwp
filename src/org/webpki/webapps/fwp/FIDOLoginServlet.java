@@ -18,7 +18,9 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.security.PublicKey;
+
 import java.sql.Connection;
 
 import java.util.logging.Logger;
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpSession;
 
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+
 import org.webpki.crypto.CryptoRandom;
 
 import org.webpki.fwp.FWPCrypto;
@@ -59,41 +62,41 @@ public class FIDOLoginServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // Get the input (request) data.
-            JSONObjectReader requestJson = FWPWalletCore.getJSON(request);
+            JSONObjectReader requestJson = WalletCore.getJSON(request);
             
             // Prepare for writing a response.
             JSONObjectWriter resultJson = new JSONObjectWriter();
             
             // The FIDO server is stateful and its state MUST be checked
             // with that of the client.
-            String phase = requestJson.getString(FWPWalletCore.PHASE_JSON);
+            String phase = requestJson.getString(WalletCore.PHASE_JSON);
 
             // Tentative: return the same phase info as in the request.
-            resultJson.setString(FWPWalletCore.PHASE_JSON, phase);
+            resultJson.setString(WalletCore.PHASE_JSON, phase);
             
             // Get the enrolled user.
-            String userId = FWPWalletCore.getWalletCookie(request);
+            String userId = WalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPWalletCore.softError(response, resultJson, MISSING_ENROLL);
+                WalletCore.softError(response, resultJson, MISSING_ENROLL);
                 return;
             }
             
             // Determine where are in the process.
-            if (phase.equals(FWPWalletCore.INIT_PHASE)) {
+            if (phase.equals(WalletCore.INIT_PHASE)) {
 
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
                 // Clear existing login if any.
-                session.removeAttribute(FWPWalletCore.ATTR_LOGGED_IN_USER);
+                session.removeAttribute(WalletCore.ATTR_LOGGED_IN_USER);
 
                 // We need to specify which FIDO key to use.                 
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                     // Get FIDO credentialId.
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
                     if (coreClientData == null) {
-                        FWPWalletCore.softError(response, resultJson, "User is missing, you need to reenroll");
+                        WalletCore.softError(response, resultJson, "User is missing, you need to reenroll");
                         return;
                     }
                     resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
@@ -104,21 +107,21 @@ public class FIDOLoginServlet extends HttpServlet {
                 resultJson.setBinary(FWPCrypto.CHALLENGE, challenge);
 
                 // This what we send but we must also 
-                session.setAttribute(FWPWalletCore.ATTR_LOGIN_DATA, new JSONObjectReader(resultJson));
+                session.setAttribute(WalletCore.ATTR_LOGIN_DATA, new JSONObjectReader(resultJson));
 
-            } else if (phase.equals(FWPWalletCore.FINALIZE_PHASE)) {
+            } else if (phase.equals(WalletCore.FINALIZE_PHASE)) {
  
                 // Login response! Now we must have an HTTP session.
                 HttpSession session = request.getSession(false);
                 if (session == null) {
-                    FWPWalletCore.failed("Missing finalize session");
+                    WalletCore.failed("Missing finalize session");
                 }
                 
                 // Get the object holding the login session in progress.
                 JSONObjectReader loginData = 
-                        (JSONObjectReader) session.getAttribute(FWPWalletCore.ATTR_LOGIN_DATA);
+                        (JSONObjectReader) session.getAttribute(WalletCore.ATTR_LOGIN_DATA);
                 if (loginData == null) {
-                    FWPWalletCore.failed("Login data missing");
+                    WalletCore.failed("Login data missing");
                 }
 
                 // Check that we are in "sync".
@@ -126,7 +129,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                     loginData.getBinary(FWPCrypto.CHALLENGE))) {
-                    FWPWalletCore.failed("Challenge mismatch");
+                    WalletCore.failed("Challenge mismatch");
                 }
 
                 // Here we are supposed to the check the signature....
@@ -134,7 +137,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
                 
                 // Now, we have all client data needed to verify the signature.
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                     // Get the anticipated public key
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
@@ -151,17 +154,17 @@ public class FIDOLoginServlet extends HttpServlet {
 
                 // We did it, set logged-in attribute.
                 // Note that the session cookie is returned and set via the fetch() operation.
-                session.setAttribute(FWPWalletCore.ATTR_LOGGED_IN_USER, userId);
+                session.setAttribute(WalletCore.ATTR_LOGGED_IN_USER, userId);
                 
                 logger.info("Logged-in user: " + userId);
             } else {
-                FWPWalletCore.failed("Unknown phase: " + phase);
+                WalletCore.failed("Unknown phase: " + phase);
             }
-            FWPWalletCore.returnJSON(response, resultJson);
+            WalletCore.returnJSON(response, resultJson);
 
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.log(Level.SEVERE, FWPWalletCore.getStackTrace(e, message));
+            logger.log(Level.SEVERE, WalletCore.getStackTrace(e, message));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             PrintWriter writer = response.getWriter();
             writer.print(message);

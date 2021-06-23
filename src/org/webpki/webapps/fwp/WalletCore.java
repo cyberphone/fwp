@@ -18,8 +18,12 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import java.util.Base64;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -40,7 +44,7 @@ import org.webpki.webutil.ServletUtil;
 /**
  * Common FWP wallet emulator functions and constants.
  */
-public class FWPWalletCore {
+public class WalletCore {
 
     // The center of it all...
     static final String WALLET_COOKIE            = "WALLET";
@@ -143,7 +147,7 @@ public class FWPWalletCore {
             "  history.pushState(null, null, 'home');\n" +
             "});\n";
 
-    static Logger logger = Logger.getLogger(FWPWalletCore.class.getName());
+    static Logger logger = Logger.getLogger(WalletCore.class.getName());
 
     static String getWalletCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -155,13 +159,14 @@ public class FWPWalletCore {
         return null;
     }
     
-    static boolean hasPaymentCards(HttpServletRequest request) throws SQLException {
+    static boolean hasPaymentCards(HttpServletRequest request) 
+            throws SQLException, IOException, GeneralSecurityException {
         String claimedUserId = getWalletCookie(request);
         if (claimedUserId == null) {
             return false;
         }
-        try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-            return DataBaseOperations.hasPaymentCards(claimedUserId, connection);
+        try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            return !DataBaseOperations.getVirtualCards(claimedUserId, connection).isEmpty();
         }
     }
 
@@ -196,7 +201,7 @@ public class FWPWalletCore {
     static void softError(HttpServletResponse response, 
                           JSONObjectWriter json,
                           String errorMesseage) throws IOException {
-        FWPWalletCore.returnJSON(response, json.setString(FWPWalletCore.ERROR_JSON, errorMesseage));
+        WalletCore.returnJSON(response, json.setString(WalletCore.ERROR_JSON, errorMesseage));
     }
 
     static void failed(String what) throws IOException {
@@ -221,5 +226,13 @@ public class FWPWalletCore {
             }
         }
         return error.toString();
+    }
+    
+    static String base64UrlEncode(byte[] bytes) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+    
+    static byte[] base64UrlDecode(String b64u) {
+        return Base64.getUrlDecoder().decode(b64u);
     }
 }

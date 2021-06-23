@@ -97,7 +97,7 @@ public class HTML {
 
     static void output(HttpServletResponse response, String html)
             throws IOException, ServletException {
-        if (FWPService.logging) {
+        if (WalletService.logging) {
             logger.info(html);
         }
         response.setContentType("text/html; charset=utf-8");

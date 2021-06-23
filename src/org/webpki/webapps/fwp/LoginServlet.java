@@ -87,13 +87,13 @@ public class LoginServlet extends HttpServlet {
         String js = new StringBuilder(
             "const serviceUrl = 'fidologin';\n" +
 
-            FWPWalletCore.FWP_JAVASCRIPT +
+            WalletCore.FWP_JAVASCRIPT +
 
             "async function doLogin() {\n" +
             "  try {\n" +
             "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
             "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-            "    const initPhase = await exchangeJSON({},'" + FWPWalletCore.INIT_PHASE + "');\n" +
+            "    const initPhase = await exchangeJSON({},'" + WalletCore.INIT_PHASE + "');\n" +
 
             "    const options = {\n" +
             "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
@@ -120,7 +120,7 @@ public class LoginServlet extends HttpServlet {
                          FWPCrypto.CLIENT_DATA_JSON_JSON + 
                          ":arrBufToB64url(result.response.clientDataJSON)},'" +
 
-                         FWPWalletCore.FINALIZE_PHASE + "');\n" +
+                         WalletCore.FINALIZE_PHASE + "');\n" +
 
             "    document.forms.shoot.submit();\n" +
 
@@ -146,14 +146,14 @@ public class LoginServlet extends HttpServlet {
             throws IOException, ServletException {
         try {
             // Get the enrolled user.
-            String userId = FWPWalletCore.getWalletCookie(request);
+            String userId = WalletCore.getWalletCookie(request);
             if (userId == null) {
-                FWPWalletCore.failed("User ID missing, have you enrolled?");
+                WalletCore.failed("User ID missing, have you enrolled?");
             }
             
             // Lookup in database
             DataBaseOperations.CoreClientData coreClientData;
-            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 // Get the anticipated public key
                 coreClientData = DataBaseOperations.getCoreClientData(userId, connection);
             }
@@ -206,7 +206,7 @@ public class LoginServlet extends HttpServlet {
             // In our case we have no application using the authentication...
             session.invalidate();
 
-            HTML.standardPage(response, Actors.ISSUER, FWPWalletCore.GO_HOME_JAVASCRIPT, html);
+            HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

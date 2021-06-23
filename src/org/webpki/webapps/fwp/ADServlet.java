@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -29,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORObject;
+
+import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
@@ -62,15 +62,15 @@ public class ADServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String walletInternal = request.getParameter(FWPWalletCore.WALLET_INTERNAL);
+        String walletInternal = request.getParameter(WalletCore.WALLET_INTERNAL);
         if (walletInternal == null) {
-            FWPWalletCore.failed("Missing wallet data");
+            WalletCore.failed("Missing wallet data");
         }
         logger.info(walletInternal);
         JSONObjectReader walletInternalJson = JSONParser.parse(walletInternal);
         try {
             // Get the enrolled user.
-            String userId = FWPWalletCore.getWalletCookie(request);
+            String userId = WalletCore.getWalletCookie(request);
             if (userId == null) {
                 response.sendRedirect("walletadmin");
                 return;
@@ -78,25 +78,25 @@ public class ADServlet extends HttpServlet {
 
             // Build Authorization Data (AD)
             JSONObjectReader selectedCard =
-                    walletInternalJson.getObject(FWPWalletCore.SELECTED_CARD);
+                    walletInternalJson.getObject(WalletCore.SELECTED_CARD);
             JSONObjectReader paymentRequest =
-                    walletInternalJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
-             byte[] fwpAssertion = new FWPAssertionBuilder()
+                    walletInternalJson.getObject(WalletCore.PAYMENT_REQUEST);
+             byte[] unsignedAssertion = new FWPAssertionBuilder()
                     .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
-                    .setAccountData(selectedCard.getString(FWPWalletCore.ACCOUNT_ID),
-                                    selectedCard.getString(FWPWalletCore.SERIAL_NUMBER),
-                                    selectedCard.getString(FWPWalletCore.PAYMENT_METHOD))
+                    .setAccountData(selectedCard.getString(WalletCore.ACCOUNT_ID),
+                                    selectedCard.getString(WalletCore.SERIAL_NUMBER),
+                                    selectedCard.getString(WalletCore.PAYMENT_METHOD))
                     .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                     .setPayeeHost(request.getServerName())
                     .setPlatformData("Android", "10.0", "Chrome", "103")
                     .create(new FWPCrypto.FWPPreSigner(
-                            selectedCard.getBinary(FWPWalletCore.PUBLIC_KEY)));
+                            selectedCard.getBinary(WalletCore.PUBLIC_KEY)));
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='sad'>" +
-                "<input type='hidden' id='" + FWPWalletCore.FWP_SAD + 
-                    "' name='" + FWPWalletCore.FWP_SAD + "'/>" +
-                "<input type='hidden' name='" + FWPWalletCore.WALLET_INTERNAL + "' value='")
+                "<input type='hidden' id='" + WalletCore.FWP_SAD + 
+                    "' name='" + WalletCore.FWP_SAD + "'/>" +
+                "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
             .append(HTML.encode(walletInternal, false))
             .append(
                 "'/>" +
@@ -135,7 +135,7 @@ public class ADServlet extends HttpServlet {
                 "</div>" +
 
                 "<div class='staticbox'>")
-            .append(HTML.encode(CBORObject.decode(fwpAssertion).toString(), true)
+            .append(HTML.encode(CBORObject.decode(unsignedAssertion).toString(), true)
                     .replace("9:&nbsp;", 
                              "<span style='color:grey;word-break:normal'>// The platform data is " +
                                "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
@@ -144,27 +144,26 @@ public class ADServlet extends HttpServlet {
 
             String js = new StringBuilder(
 
-                FWPWalletCore.GO_HOME_JAVASCRIPT +
+                WalletCore.GO_HOME_JAVASCRIPT +
                 
                 "const serviceUrl = 'fidopay';\n" +
 
-                FWPWalletCore.FWP_JAVASCRIPT +
+                WalletCore.FWP_JAVASCRIPT +
 
                 "async function doPay() {\n" +
                 "  try {\n" +
                 "    document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "    const initPhase = await exchangeJSON({" + FWPWalletCore.FWP_AD + 
-                  ": '" + 
-                  Base64.getUrlEncoder().withoutPadding().encodeToString(fwpAssertion) +
-                  "'},'" + FWPWalletCore.INIT_PHASE + "');\n" +
 
                 "    const options = {\n" +
-                "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
+                "      challenge: b64urlToU8arr('" +
+                            WalletCore.base64UrlEncode(
+                                    HashAlgorithms.SHA256.digest(unsignedAssertion)) +
+                       "'),\n" +
 
                 "      allowCredentials: [{type: 'public-key', " +
                            "id: b64urlToU8arr('" + 
-                                              selectedCard.getString(FWPWalletCore.CREDENTIAL_ID) 
+                                              selectedCard.getString(WalletCore.CREDENTIAL_ID) 
                                               + "')}],\n" +
 
                 "      userVerification: 'preferred',\n" +
@@ -175,7 +174,7 @@ public class ADServlet extends HttpServlet {
 //                "    console.log(options);\n" +
                 "    const result = await navigator.credentials.get({ publicKey: options });\n" +
 //                "    console.log(result);\n" +
-                "    const finalizePhase = await exchangeJSON({" + 
+                "    const returnJson = await exchangeJSON({" + 
 
                              FWPCrypto.AUTHENTICATOR_DATA_JSON + 
                              ":arrBufToB64url(result.response.authenticatorData)," +
@@ -184,12 +183,15 @@ public class ADServlet extends HttpServlet {
                              ":arrBufToB64url(result.response.signature)," +
 
                              FWPCrypto.CLIENT_DATA_JSON_JSON + 
-                             ":arrBufToB64url(result.response.clientDataJSON)},'" +
+                             ":arrBufToB64url(result.response.clientDataJSON)," +
 
-                             FWPWalletCore.FINALIZE_PHASE + "');\n" +
+                             WalletCore.FWP_AD + 
+                             ": '" + 
+                             WalletCore.base64UrlEncode(unsignedAssertion) +
+                             "'}, null);\n" +
 
-                "    document.getElementById('" + FWPWalletCore.FWP_SAD + 
-                    "').value = finalizePhase." + FWPWalletCore.FWP_SAD + ";\n" +
+                "    document.getElementById('" + WalletCore.FWP_SAD + 
+                    "').value = returnJson." + WalletCore.FWP_SAD + ";\n" +
                 "    document.forms.shoot.submit();\n" +
 
                 // Errors are effectively aborting so a single try-catch does the trick.

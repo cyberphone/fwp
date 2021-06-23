@@ -51,14 +51,14 @@ public class MerchantServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String fwpAssertion = request.getParameter(FWPWalletCore.FWP_ASSERTION);
+        String fwpAssertion = request.getParameter(WalletCore.FWP_ASSERTION);
         if (fwpAssertion == null) {
-            FWPWalletCore.failed("Missing FWP assertion");
+            WalletCore.failed("Missing FWP assertion");
             return;
         }
-        String paymentRequest = request.getParameter(FWPWalletCore.PAYMENT_REQUEST);
+        String paymentRequest = request.getParameter(WalletCore.PAYMENT_REQUEST);
         if (paymentRequest == null) {
-            FWPWalletCore.failed("Missing payment request");
+            WalletCore.failed("Missing payment request");
             return;
         }    
         FWPJsonAssertion fwpJsonAssertion = 
@@ -117,14 +117,14 @@ public class MerchantServlet extends HttpServlet {
             "</div>");
         String js = new StringBuilder(
         
-        FWPWalletCore.GO_HOME_JAVASCRIPT +
+        WalletCore.GO_HOME_JAVASCRIPT +
   
         "function doReturn() {\n" +
         "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
         "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
         "  setTimeout(function() {\n" +
         "    document.forms.shoot.submit();\n" +
-        "  }, 1000);\n" +
+        "  }, 500);\n" +
         "}\n").toString();
         
         HTML.standardPage(response, Actors.MERCHANT, js, html);

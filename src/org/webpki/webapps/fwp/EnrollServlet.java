@@ -46,7 +46,7 @@ public class EnrollServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         try {
-            boolean alreadyEnrolled = FWPWalletCore.hasPaymentCards(request);
+            boolean alreadyEnrolled = WalletCore.hasPaymentCards(request);
             StringBuilder html = new StringBuilder(alreadyEnrolled ?
                 "<div class='header'>Enroll Payment Cards</div>" +
     
@@ -98,13 +98,13 @@ public class EnrollServlet extends HttpServlet {
             String js = alreadyEnrolled ? null : new StringBuilder(
                 "const serviceUrl = 'fidoenroll';\n" +
 
-                FWPWalletCore.FWP_JAVASCRIPT +
+                WalletCore.FWP_JAVASCRIPT +
 
                 "async function doEnroll() {\n" +
                 "  try {\n" +
                 "    document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "    const initPhase = await exchangeJSON({},'" + FWPWalletCore.INIT_PHASE + "');\n" +
+                "    const initPhase = await exchangeJSON({},'" + WalletCore.INIT_PHASE + "');\n" +
      
                 "    let userId = initPhase." + FWPCrypto.USER_ID + ";\n" +
                 "    let publicKey = {\n" +
@@ -144,7 +144,7 @@ public class EnrollServlet extends HttpServlet {
 //                "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
 
-                         FWPWalletCore.CARD_HOLDER_JSON + ":" +
+                         WalletCore.CARD_HOLDER_JSON + ":" +
                          "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
 
                          // Core FIDO return data
@@ -156,7 +156,7 @@ public class EnrollServlet extends HttpServlet {
                          FWPCrypto.CLIENT_DATA_JSON_JSON + 
                          ":arrBufToB64url(result.response." + FWPCrypto.CLIENT_DATA_JSON_JSON + ")},'" +
 
-                         FWPWalletCore.FINALIZE_PHASE + "');\n" +
+                         WalletCore.FINALIZE_PHASE + "');\n" +
 
                 "    document.forms.shoot.submit();\n" +
 

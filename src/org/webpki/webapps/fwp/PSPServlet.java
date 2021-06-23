@@ -54,7 +54,7 @@ public class PSPServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         String pspRequest = request.getParameter(PSP_REQUEST);
         if (pspRequest == null) {
-            FWPWalletCore.failed("Missing PSP request");
+            WalletCore.failed("Missing PSP request");
             return;
         }
         PSPRequest decodedPspRequest = new PSPRequest(JSONParser.parse(pspRequest));
@@ -65,7 +65,7 @@ public class PSPServlet extends HttpServlet {
             throw new IOException("Unexpected merchant name: " + payeeName);
         }
         
-        // Russian doll like messaging is cool.
+        // Russian doll messaging is cool.
         IssuerRequest issuerRequest = 
                 new IssuerRequest(decodedPspRequest,
                                   // This is wrong, PSPs have databases with merchant data.
@@ -114,14 +114,14 @@ public class PSPServlet extends HttpServlet {
             "</div>");
         String js = new StringBuilder(
         
-        FWPWalletCore.GO_HOME_JAVASCRIPT +
+        WalletCore.GO_HOME_JAVASCRIPT +
   
         "function doReturn() {\n" +
         "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
         "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
         "  setTimeout(function() {\n" +
         "    document.forms.shoot.submit();\n" +
-        "  }, 1000);\n" +
+        "  }, 500);\n" +
         "}\n").toString();
         
         HTML.standardPage(response, Actors.PSP, js, html);
