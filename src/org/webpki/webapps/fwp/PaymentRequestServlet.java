@@ -18,6 +18,10 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.sql.Connection;
+
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -64,19 +68,41 @@ public class PaymentRequestServlet extends HttpServlet {
                 response.sendRedirect("walletadmin");
                 return;
             }
-
-            // 
-            JSONArrayReader networks = walletRequestJson.getArray(FWPWalletCore.NETWORKS);
+            // What the Merchant wants...
             JSONObjectReader paymentRequest =
                     walletRequestJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
-            JSONObjectWriter walletInternal = new JSONObjectWriter()
-                    .setObject(FWPWalletCore.PAYMENT_REQUEST, paymentRequest)
-                    .setObject(FWPWalletCore.ACCOUNT_DATA, new JSONObjectWriter()
-                            .setString(FWPWalletCore.ACCOUNT_ID, "FR7630002111110020050014382")
-                            .setString(FWPWalletCore.PAYMENT_METHOD,
-                                       networks.getObject().getString("name"))
-                            .setString(FWPWalletCore.SERIAL_NUMBER, "0057162932")
-                            .setString(FWPWalletCore.ISSUER_ID, "https://mybank.fr/payment"));
+            
+            // Lookup virtual cards in database
+            ArrayList<DataBaseOperations.VirtualCard> virtualCards;
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                virtualCards = DataBaseOperations.getVirtualCards(userId, connection);
+            }           
+
+            // Match against Merchant list
+            JSONObjectWriter walletInternal = null;
+            JSONArrayReader networks = walletRequestJson.getArray(FWPWalletCore.NETWORKS);
+            while (networks.hasMore()) {
+                JSONObjectReader network = networks.getObject();
+                String paymentMethod = network.getString("name");
+                for (DataBaseOperations.VirtualCard virtualCard : virtualCards) {
+                    if (paymentMethod.equals(virtualCard.paymentMethod)) {
+                        // First matching, we go for that for now...
+                        walletInternal = new JSONObjectWriter()
+                            .setObject(FWPWalletCore.PAYMENT_REQUEST, paymentRequest)
+                            .setObject(FWPWalletCore.SELECTED_CARD, new JSONObjectWriter()
+                                .setString(FWPWalletCore.CREDENTIAL_ID, virtualCard.credentialId)
+                                .setString(FWPWalletCore.ACCOUNT_ID, virtualCard.accountId)
+                                .setString(FWPWalletCore.PAYMENT_METHOD, paymentMethod)
+                                .setString(FWPWalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
+                                .setBinary(FWPWalletCore.PUBLIC_KEY, virtualCard.publicKey)
+                                .setString(FWPWalletCore.ISSUER_ID, "https://mybank.fr/payment"));
+                        break;
+                    }
+                }
+                if (walletInternal != null) {
+                    break;
+                }
+            }
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='ad'>" +

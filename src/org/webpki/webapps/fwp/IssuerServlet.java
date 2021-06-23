@@ -22,6 +22,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.sql.Connection;
+
 import java.util.GregorianCalendar;
 
 import java.util.logging.Logger;
@@ -70,7 +72,8 @@ public class IssuerServlet extends HttpServlet {
                 return;
             }
             // Now the real work begins...
-            IssuerRequest decodedIssuerRequest = new IssuerRequest(JSONParser.parse(issuerRequest));
+            IssuerRequest decodedIssuerRequest = 
+                    new IssuerRequest(JSONParser.parse(issuerRequest));
             PSPRequest pspRequest = decodedIssuerRequest.getPspRequest();
             FWPJsonAssertion fwpJsonAssertion = pspRequest.getFwpAssertion();
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
@@ -96,7 +99,8 @@ public class IssuerServlet extends HttpServlet {
             // Succeeded.
             
             // Decode assertion.
-            FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
+            FWPAssertionDecoder fwpAssertion = 
+                    new FWPAssertionDecoder(fwpAssertionBinary);
             // Succeeded = the data is "technically" OK, and the signature verified.
             
             // Check merchant claim.
@@ -105,6 +109,14 @@ public class IssuerServlet extends HttpServlet {
             // Check that the user haven't been phished.
             compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
             
+            // And of course, verify that this assertion belongs to a valid account!
+            String userId;
+            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
+                userId = DataBaseOperations.authorize(fwpAssertion.getAccountId(),
+                                                      fwpAssertion.getSerialNumber(),
+                                                      fwpAssertion.getPublicKey(),
+                                                      connection);
+            }
 
             StringBuilder html = new StringBuilder(
     
@@ -137,6 +149,9 @@ public class IssuerServlet extends HttpServlet {
                     "<tr><th>Payer&nbsp;Account</th><td>")
             .append(fwpAssertion.getAccountId())
             .append("</td></tr>" +
+                    "<tr><th>Payment&nbsp;Method</th><td>")
+            .append(fwpAssertion.getPaymentMethod())
+            .append("</td></tr>" +
                     "<tr><th>Transaction Id</th><td>")
             .append(String.format("%012d", transactionId++))
             .append("</td></tr>" +
@@ -166,6 +181,9 @@ public class IssuerServlet extends HttpServlet {
 
                     "<tr><th colspan='2' style='text-align:center'>Payer Information</th></tr>" +
 
+                    "<tr><th>User Id</th><td>")
+            .append(userId)
+            .append("</td></tr>" +
                     "<tr><th>Card Serial</th><td>")
             .append(fwpAssertion.getSerialNumber())
             .append("</td></tr>" +

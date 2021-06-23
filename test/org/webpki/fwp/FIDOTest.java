@@ -210,7 +210,8 @@ public class FIDOTest {
     @Test
     public void DecodeAssertions() throws Exception {
         KeyPair keyPair = readKey("p256");
-        fwpPreSigner = new FWPCrypto.FWPPreSigner(keyPair.getPublic());
+        fwpPreSigner = new FWPCrypto.FWPPreSigner(
+             CBORPublicKey.encode(keyPair.getPublic()).encode());
         FWPAssertionDecoder decoder = 
                 new FWPAssertionDecoder(buildGoodPaymenRequest(null, keyPair.getPrivate()));
         FWPPaymentRequest paymentRequest = decoder.getPaymentRequest();

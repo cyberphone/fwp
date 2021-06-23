@@ -62,7 +62,7 @@ public class FinalizeAssertionServlet extends HttpServlet {
             return;
         }     
         JSONObjectReader accountData = 
-                JSONParser.parse(walletInternal).getObject(FWPWalletCore.ACCOUNT_DATA);
+                JSONParser.parse(walletInternal).getObject(FWPWalletCore.SELECTED_CARD);
         FWPJsonAssertion fwpAssertion =
                 new FWPJsonAssertion(accountData.getString(FWPWalletCore.PAYMENT_METHOD),
                                      accountData.getString(FWPWalletCore.ISSUER_ID),

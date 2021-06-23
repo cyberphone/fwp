@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
 import org.webpki.crypto.KeyAlgorithms;
@@ -159,6 +160,8 @@ public class LoginServlet extends HttpServlet {
             
             HttpSession session = request.getSession(false);
             
+            CBORObject publicKey = CBORObject.decode(coreClientData.cosePublicKey);
+            
             StringBuilder html = new StringBuilder(
                     "<div class='header'>Login Succeeded!</div>" +
             
@@ -191,12 +194,11 @@ public class LoginServlet extends HttpServlet {
                 .append("</div>" +
 
                         "<div class='ctblh'>FIDO ")
-                .append(KeyAlgorithms.getKeyAlgorithm(coreClientData.publicKey).getKeyType())
+                .append(KeyAlgorithms.getKeyAlgorithm(CBORPublicKey.decode(publicKey)).getKeyType())
                 .append(
                         " Public Key (COSE)</div>" +
                         "<div class='ctbl'>")
-                    .append(HTML.encode(
-                            CBORPublicKey.encode(coreClientData.publicKey).toString(), true))
+                .append(HTML.encode(publicKey.toString(), true))
                 .append("</div>" +
 
                     "</div>");

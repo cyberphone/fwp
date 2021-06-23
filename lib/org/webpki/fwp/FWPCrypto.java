@@ -136,19 +136,19 @@ public class FWPCrypto {
 
     public static class FWPPreSigner {
 
-        PublicKey publicKey;
+        CBORObject publicKey;
 
-        public FWPPreSigner(PublicKey publicKey) {
-            this.publicKey = publicKey;
+        public FWPPreSigner(byte[] cosePublicKey) throws IOException {
+            this.publicKey = CBORObject.decode(cosePublicKey);
         }
 
         CBORMap appendSignatureObject() throws IOException, GeneralSecurityException {
-            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(publicKey);
+            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(CBORPublicKey.decode(publicKey));
 
             // Add the authorization container map including the members that
             // also are signed.
             return new CBORMap().setObject(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
-                                .setObject(AS_PUBLIC_KEY, CBORPublicKey.encode(publicKey));
+                                .setObject(AS_PUBLIC_KEY, publicKey);
         }
     }
 

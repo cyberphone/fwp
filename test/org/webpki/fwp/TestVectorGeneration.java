@@ -31,7 +31,7 @@ import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORAsymKeyEncrypter;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
-
+import org.webpki.cbor.CBORPublicKey;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 
@@ -109,7 +109,8 @@ public class TestVectorGeneration {
         GregorianCalendar time = ISODateTime.parseDateTime("2021-06-17T12:34:07+02:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
-        FWPCrypto.FWPPreSigner fwpSigner = new FWPCrypto.FWPPreSigner(p256.getPublic());
+        FWPCrypto.FWPPreSigner fwpSigner =
+                new FWPCrypto.FWPPreSigner(CBORPublicKey.encode(p256.getPublic()).encode());
        
         FWPPaymentRequest paymentRequest = 
                 new FWPPaymentRequest("Space Shop", "7040566321", "435.00", "EUR");

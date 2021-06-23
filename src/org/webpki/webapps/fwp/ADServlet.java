@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-
 import java.util.Base64;
 
 import java.util.logging.Logger;
@@ -78,30 +76,21 @@ public class ADServlet extends HttpServlet {
                 return;
             }
 
-            // We need to specify which FIDO key to use.                 
-            DataBaseOperations.CoreClientData coreClientData;
-            try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                // Get FIDO credentialId.
-                coreClientData = 
-                        DataBaseOperations.getCoreClientData(userId, connection);
-                if (coreClientData == null) {
-                    FWPWalletCore.failed("User is missing, you need to reenroll");
-                    return;
-                }
-            }
-            
             // Build Authorization Data (AD)
-            JSONObjectReader accountData = walletInternalJson.getObject(FWPWalletCore.ACCOUNT_DATA);
-            JSONObjectReader paymentRequest = walletInternalJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
+            JSONObjectReader selectedCard =
+                    walletInternalJson.getObject(FWPWalletCore.SELECTED_CARD);
+            JSONObjectReader paymentRequest =
+                    walletInternalJson.getObject(FWPWalletCore.PAYMENT_REQUEST);
              byte[] fwpAssertion = new FWPAssertionBuilder()
                     .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
-                    .setAccountData(accountData.getString(FWPWalletCore.ACCOUNT_ID),
-                                    accountData.getString(FWPWalletCore.SERIAL_NUMBER),
-                                    accountData.getString(FWPWalletCore.PAYMENT_METHOD))
+                    .setAccountData(selectedCard.getString(FWPWalletCore.ACCOUNT_ID),
+                                    selectedCard.getString(FWPWalletCore.SERIAL_NUMBER),
+                                    selectedCard.getString(FWPWalletCore.PAYMENT_METHOD))
                     .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                     .setPayeeHost(request.getServerName())
                     .setPlatformData("Android", "10.0", "Chrome", "103")
-                    .create(new FWPCrypto.FWPPreSigner(coreClientData.publicKey));
+                    .create(new FWPCrypto.FWPPreSigner(
+                            selectedCard.getBinary(FWPWalletCore.PUBLIC_KEY)));
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='sad'>" +
@@ -174,7 +163,9 @@ public class ADServlet extends HttpServlet {
                 "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
 
                 "      allowCredentials: [{type: 'public-key', " +
-                           "id: b64urlToU8arr(initPhase." + FWPCrypto.CREDENTIAL_ID + ")}],\n" +
+                           "id: b64urlToU8arr('" + 
+                                              selectedCard.getString(FWPWalletCore.CREDENTIAL_ID) 
+                                              + "')}],\n" +
 
                 "      userVerification: 'preferred',\n" +
 

@@ -69,13 +69,15 @@ public class FWPWalletCore {
 
     static final String NETWORKS                 = "networks";
     static final String PAYMENT_REQUEST          = "paymentRequest";
-    static final String ACCOUNT_DATA             = "accountData";
+    static final String SELECTED_CARD            = "selectedCard";
 
-    // Sub parameters to the above
+    // Sub parameters to SELECTED_CARD
     static final String PAYMENT_METHOD           = "paymentMethod";
+    static final String CREDENTIAL_ID            = "credentialId";
     static final String SERIAL_NUMBER            = "serialNumber";
     static final String ACCOUNT_ID               = "accountId";
     static final String ISSUER_ID                = "issuerId";
+    static final String PUBLIC_KEY               = "publicKey";
 
     // Returned client data
     static final String CARD_HOLDER_JSON         = "cardHolder";

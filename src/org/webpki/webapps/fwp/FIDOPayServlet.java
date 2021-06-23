@@ -19,8 +19,6 @@ package org.webpki.webapps.fwp;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import java.sql.Connection;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -77,19 +75,6 @@ public class FIDOPayServlet extends HttpServlet {
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
-                // We need to specify which FIDO key to use.                 
-                DataBaseOperations.CoreClientData coreClientData;
-                try (Connection connection = FWPService.jdbcDataSource.getConnection();) {
-                    // Get FIDO credentialId.
-                    coreClientData = 
-                            DataBaseOperations.getCoreClientData(userId, connection);
-                    if (coreClientData == null) {
-                        FWPWalletCore.softError(response, resultJson, "User is missing, you need to reenroll");
-                        return;
-                    }
-                    resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
-                }
-
                 // Get the Authorization Data (AD).
                 byte[]unsignedAssertion = requestJson.getBinary(FWPWalletCore.FWP_AD);
 

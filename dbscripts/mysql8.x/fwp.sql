@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015-2020 WebPKI.org (http://webpki.org).
+ *  Copyright 2015-2021 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -101,19 +101,19 @@ CREATE TABLE PAYMENT_CARDS (
 -- Note: a payment card holds an external representation of an Account ID
 -- like an IBAN or Card Number
 
-    SerialNumber   INT           NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
+    SerialNumber    INT          NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
 
     UserId          CHAR(36)     NOT NULL,                               -- Owner
 
     AccountId       VARCHAR(30)  NOT NULL,                               -- Account Reference
     
-    PaymentMethodUrl VARCHAR(50) NOT NULL,                               -- Payment method URL
+    PaymentMethod   VARCHAR(50)  NOT NULL,                               -- Payment method URL
 
     Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
 
     PRIMARY KEY (SerialNumber),
     FOREIGN KEY (UserId) REFERENCES USERS(UserId) ON DELETE CASCADE
-);
+) AUTO_INCREMENT=20500123;                                              -- Impress :)
 
 
 DELIMITER //
@@ -154,7 +154,7 @@ CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
     -- Add payment cards...
     INSERT INTO PAYMENT_CARDS(UserId,
                               AccountId,
-                              PaymentMethodUrl) 
+                              PaymentMethod) 
         VALUES(p_UserId,
                "FR7630002111110020050014382",
                "https://bankdirect.com");
@@ -211,9 +211,41 @@ CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
   END
 //
 
+CREATE PROCEDURE AuthorizeSP (OUT p_Status INT,
+                              OUT p_UserId CHAR(36),
+                              IN p_AccountId VARCHAR(30),
+                              IN p_SerialNumber INT,
+                              IN p_S256KeyHash BINARY(32))
+  BEGIN
+    DECLARE v_S256KeyHash BINARY(32);
+    DECLARE v_AccountId VARCHAR(30);
+
+    SELECT USERS.UserID,
+           USERS.S256KeyHash,
+           PAYMENT_CARDS.AccountId
+        INTO 
+           p_UserId,
+           v_S256KeyHash,
+           v_AccountId
+        FROM USERS INNER JOIN PAYMENT_CARDS ON USERS.UserId = PAYMENT_CARDS.UserId
+        WHERE PAYMENT_CARDS.SerialNumber = p_SerialNumber;
+            
+    IF p_UserId IS NULL THEN
+      SET p_Status = 1;    -- No such card
+    ELSEIF v_AccountId <> p_AccountId THEN
+      SET p_Status = 2;    -- Non-matching account
+    ELSEIF v_S256KeyHash <> p_S256KeyHash THEN
+      SET p_Status = 3;    -- Non-matching key
+    ELSE                       
+      SET p_Status = 0;    -- Success
+    END IF;
+  END
+//
+
 DELIMITER ;
 
 -- Run a few tests
+SET collation_connection = 'utf8mb4_unicode_ci';
 
 SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 SET @CardHolder = "Luke Skywalker";
@@ -226,6 +258,32 @@ SET @WrongUserId = "3fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 
 CALL InitiateUserAccountSP(@UserId, @CardHolder, @CredentialId, @DummyPublicKey, @S256KeyHash);
 
+SELECT USERS.CredentialId,
+       USERS.S256KeyHash, 
+       PAYMENT_CARDS.SerialNumber,
+       PAYMENT_CARDS.AccountId, 
+       PAYMENT_CARDS.PaymentMethod
+   INTO
+       @OutCredentialId,
+       @OutS256KeyHash,
+       @OutSerialNumber,
+       @OutAccountId,
+       @OutPaymentMethod
+   FROM USERS INNER JOIN PAYMENT_CARDS 
+   ON USERS.UserId = PAYMENT_CARDS.UserId
+   WHERE USERS.UserId = @UserId
+   LIMIT 1;
+
+CALL AuthorizeSP(@Status, @OutUserId, @OutAccountId, @OutSerialNumber, @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 0, "Authz failed");
+CALL ASSERT_TRUE(@OutUserId = @UserId, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, @OutAccountId, 23, @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 1, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, "hi", @OutSerialNumber, @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 2, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, @OutAccountId, @OutSerialNumber, @WrongS256KeyHash);
+CALL ASSERT_TRUE(@Status = 3, "Authz failed");
+   
 CALL HasPaymentCardsSP(@found, @UserId);
 
 CALL ASSERT_TRUE(@found = TRUE, "Must have");
@@ -257,7 +315,7 @@ CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @OutCardHolder, NULL);
 CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
 -- Remove all test data
-
+SET SQL_SAFE_UPDATES = 0;
 DELETE FROM USERS;
 
 SET @Result = 'SUCCESSFUL';

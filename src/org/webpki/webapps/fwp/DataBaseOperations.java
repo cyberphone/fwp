@@ -19,16 +19,16 @@ package org.webpki.webapps.fwp;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
-import org.webpki.cbor.CBORObject;
-import org.webpki.cbor.CBORPublicKey;
+import java.util.logging.Logger;
 
 import org.webpki.crypto.HashAlgorithms;
 
@@ -101,7 +101,7 @@ public class DataBaseOperations {
    
     static class CoreClientData {
         String credentialId;
-        PublicKey publicKey;
+        byte[] cosePublicKey;
         String cardHolder;
     }
 
@@ -130,10 +130,56 @@ public class DataBaseOperations {
             }
             CoreClientData coreClientData = new CoreClientData();
             coreClientData.credentialId = credentialId;
-            coreClientData.publicKey = CBORPublicKey.decode(CBORObject.decode(stmt.getBytes(2)));
+            coreClientData.cosePublicKey = stmt.getBytes(2);
             coreClientData.cardHolder = stmt.getString(3);
             return coreClientData;
         }
+    }
+    
+    static class VirtualCard {
+        String credentialId;
+        byte[] publicKey;
+        String serialNumber;
+        String accountId;
+        String paymentMethod;
+        
+        VirtualCard(String credentialId, 
+                    byte[] cosePublicKey, 
+                    String serialNumber, 
+                    String accountId,
+                    String paymentMethod) {
+            this.credentialId = credentialId;
+            this.publicKey = cosePublicKey;
+            this.serialNumber = serialNumber;
+            this.accountId = accountId;
+            this.paymentMethod = paymentMethod;
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // FIDO Web Pay: Get our enrolled virtual cards if there are any                              //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static ArrayList<VirtualCard> getVirtualCards(String userId, Connection connection)
+            throws IOException, SQLException, GeneralSecurityException {
+        ArrayList<VirtualCard> virtualCards = new  ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT USERS.CredentialId, USERS.PublicKey, PAYMENT_CARDS.SerialNumber, " +
+                "PAYMENT_CARDS.AccountId, PAYMENT_CARDS.PaymentMethod FROM " +
+                "USERS INNER JOIN PAYMENT_CARDS ON " +
+                "USERS.UserId = PAYMENT_CARDS.UserId WHERE USERS.UserId = ?;");) {
+            stmt.setString(1, userId);
+            try (ResultSet rs = stmt.executeQuery();) {
+                if (!rs.next()) {
+                    throw new IOException("No cards found, you need to reenroll");
+                }
+                virtualCards.add(new VirtualCard(rs.getString(1),
+                                                 rs.getBytes(2), 
+                                                 String.valueOf(rs.getInt(3)),
+                                                 rs.getString(4),
+                                                 rs.getString(5)));
+            }
+        }
+        return virtualCards;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,4 +209,40 @@ public class DataBaseOperations {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // FIDO Web Pay: Verify that the account related data matches                                 //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    static String authorize(String accountId,
+                            String serialNumber,
+                            byte[] rawPublicKey,
+                            Connection connection)
+            throws IOException, SQLException, GeneralSecurityException {
+/*
+        CREATE PROCEDURE AuthorizeSP (OUT p_Status INT,
+                                      OUT p_UserId CHAR(36),
+                                      IN p_AccountId VARCHAR(30),
+                                      IN p_SerialNumber INT,
+                                      IN p_S256KeyHash BINARY(32))
+*/
+        try (CallableStatement stmt = 
+                connection.prepareCall("{call AuthorizeSP(?,?,?,?,?)}");) {
+            stmt.registerOutParameter(1, java.sql.Types.INTEGER);
+            stmt.registerOutParameter(2, java.sql.Types.CHAR);
+            stmt.setString(3, accountId);
+            stmt.setInt(4, Integer.valueOf(serialNumber));
+            stmt.setBytes(5, HashAlgorithms.SHA256.digest(rawPublicKey));
+            stmt.execute();
+            switch (stmt.getInt(1)) {
+                case 0:
+                    return stmt.getString(2);
+                case 1:
+                    throw new GeneralSecurityException("No such card: " + serialNumber);
+                case 2:
+                    throw new GeneralSecurityException("No such account: " + accountId);
+                default:
+                    throw new GeneralSecurityException("Non-matching key hash");
+            }
+        }
+    }
+    
 }
