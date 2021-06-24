@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015-2020 WebPKI.org (http://webpki.org).
+ *  Copyright 2015-2021 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -73,16 +73,18 @@ CREATE TABLE USERS (
 
     -- The FWP wallet is obliged including the associated public key in
     -- assertions.  Here it is stored in the CBOR/COSE format.
+    -- It is used for FIDO/WebAuthn but is also used by the FWP wallet
+    -- for inclusion in assertions.
     
     PublicKey       VARBINARY(300) NOT NULL,
 
 
-    -- Authentication of FWP assertions is performed by verifying that 
-    -- both the SHA256 of the public key and claimed UserId match.
-    -- This is typically performed after having verified that the
-    -- signature is valid.
-
+    -- Authorization of FWP assertions is performed by verifying that 
+    -- the SHA256 of the public key match the claimed public key.
+    
     S256KeyHash     BINARY(32)   NOT NULL,
+    
+    ClientIpAddress VARCHAR(50)  NOT NULL,                               -- Admin data
 
     Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
                                                                         
@@ -99,19 +101,19 @@ CREATE TABLE PAYMENT_CARDS (
 -- Note: a payment card holds an external representation of an Account ID
 -- like an IBAN or Card Number
 
-    SerialNumber   INT           NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
+    SerialNumber    INT          NOT NULL  AUTO_INCREMENT,               -- Unique ID/Serial number
 
     UserId          CHAR(36)     NOT NULL,                               -- Owner
 
     AccountId       VARCHAR(30)  NOT NULL,                               -- Account Reference
     
-    PaymentMethodUrl VARCHAR(50) NOT NULL,                               -- Payment method URL
+    PaymentMethod   VARCHAR(50)  NOT NULL,                               -- Payment method URL
 
     Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
 
     PRIMARY KEY (SerialNumber),
     FOREIGN KEY (UserId) REFERENCES USERS(UserId) ON DELETE CASCADE
-);
+) AUTO_INCREMENT=20500123;                                              -- Impress :)
 
 
 DELIMITER //
@@ -132,7 +134,8 @@ CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                                         IN p_CardHolder VARCHAR(50),
                                         IN p_CredentialId VARCHAR(100),
                                         IN p_PublicKey VARBINARY(300),
-                                        IN p_S256KeyHash BINARY(32))
+                                        IN p_S256KeyHash BINARY(32),
+                                        IN p_ClientIpAddress VARCHAR(50))
   BEGIN
     -- To make it simple, clear previous entry...
     DELETE FROM USERS WHERE UserId = p_UserId;
@@ -142,20 +145,29 @@ CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                       CardHolder,
                       CredentialId,
                       PublicKey,
-                      S256KeyHash) 
+                      S256KeyHash,
+                      ClientIpAddress) 
         VALUES(p_UserId,
                p_CardHolder,
                p_CredentialId,
                p_PublicKey,
-               p_S256KeyHash);
+               p_S256KeyHash,
+               p_ClientIpAddress);
                
     -- Add payment cards...
     INSERT INTO PAYMENT_CARDS(UserId,
                               AccountId,
-                              PaymentMethodUrl) 
+                              PaymentMethod) 
         VALUES(p_UserId,
                "FR7630002111110020050014382",
                "https://bankdirect.com");
+
+    INSERT INTO PAYMENT_CARDS(UserId,
+                              AccountId,
+                              PaymentMethod) 
+        VALUES(p_UserId,
+               "4532 5620 0500 3239",
+               "https://supercard.com");
   END
 //
 
@@ -165,15 +177,6 @@ CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
     DELETE Target FROM PAYMENT_CARDS As Target
         INNER JOIN USERS ON USERS.UserId = Target.UserId
         WHERE USERS.UserId = p_UserId;
-  END
-//
-
-CREATE PROCEDURE HasPaymentCardsSP (OUT p_Found BOOLEAN,
-                                    IN p_UserId CHAR(36))
-  BEGIN
-    SET p_Found = EXISTS (SELECT * FROM USERS
-        INNER JOIN PAYMENT_CARDS ON USERS.UserId = PAYMENT_CARDS.UserId
-        WHERE USERS.UserId = p_UserId);
   END
 //
 
@@ -209,30 +212,84 @@ CREATE PROCEDURE AuthenticateSP (OUT p_Status INT,
   END
 //
 
+CREATE PROCEDURE AuthorizeSP (OUT p_Status INT,
+                              OUT p_UserId CHAR(36),
+                              OUT p_CardHolder VARCHAR(50),
+                              IN p_SerialNumber INT,
+                              IN p_AccountId VARCHAR(30),
+                              IN p_S256KeyHash BINARY(32))
+  BEGIN
+    DECLARE v_S256KeyHash BINARY(32);
+    DECLARE v_AccountId VARCHAR(30);
+
+    SELECT USERS.UserID,
+           USERS.CardHolder,
+           USERS.S256KeyHash,
+           PAYMENT_CARDS.AccountId
+        INTO 
+           p_UserId,
+           p_CardHolder,
+           v_S256KeyHash,
+           v_AccountId
+        FROM USERS INNER JOIN PAYMENT_CARDS ON USERS.UserId = PAYMENT_CARDS.UserId
+        WHERE PAYMENT_CARDS.SerialNumber = p_SerialNumber;
+            
+    IF p_UserId IS NULL THEN
+      SET p_Status = 1;    -- No such card
+    ELSEIF v_AccountId <> p_AccountId THEN
+      SET p_Status = 2;    -- Non-matching account
+    ELSEIF v_S256KeyHash <> p_S256KeyHash THEN
+      SET p_Status = 3;    -- Non-matching key
+    ELSE                       
+      SET p_Status = 0;    -- Success
+    END IF;
+  END
+//
+
 DELIMITER ;
 
 -- Run a few tests
+SET collation_connection = 'utf8mb4_unicode_ci';
 
 SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 SET @CardHolder = "Luke Skywalker";
 SET @CredentialId = "gfdgddrer4535srwrsrwr";
+SET @ClientIpAddress = "202.56.22.89";
 SET @S256KeyHash = x'b3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
 SET @DummyPublicKey = x'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 SET @WrongS256KeyHash = x'c3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
 SET @WrongUserId = "3fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 
-CALL InitiateUserAccountSP(@UserId, @CardHolder, @CredentialId, @DummyPublicKey, @S256KeyHash);
+CALL InitiateUserAccountSP(@UserId, @CardHolder, @CredentialId, @DummyPublicKey, @S256KeyHash, @ClientIpAddress);
 
-CALL HasPaymentCardsSP(@found, @UserId);
+SELECT USERS.CredentialId,
+       USERS.S256KeyHash, 
+       PAYMENT_CARDS.SerialNumber,
+       PAYMENT_CARDS.AccountId, 
+       PAYMENT_CARDS.PaymentMethod
+   INTO
+       @OutCredentialId,
+       @OutS256KeyHash,
+       @OutSerialNumber,
+       @OutAccountId,
+       @OutPaymentMethod
+   FROM USERS INNER JOIN PAYMENT_CARDS 
+   ON USERS.UserId = PAYMENT_CARDS.UserId
+   WHERE USERS.UserId = @UserId
+   LIMIT 1;
 
-CALL ASSERT_TRUE(@found = TRUE, "Must have");
-
+CALL AuthorizeSP(@Status, @OutUserId, @OutCardHolder, @OutSerialNumber, @OutAccountId, @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 0, "Authz failed");
+CALL ASSERT_TRUE(@OutUserId = @UserId, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, @OutCardHolder, 23, @OutAccountId, @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 1, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, @OutCardHolder, @OutSerialNumber, "hi", @OutS256KeyHash);
+CALL ASSERT_TRUE(@Status = 2, "Authz failed");
+CALL AuthorizeSP(@Status, @OutUserId, @OutCardHolder, @OutSerialNumber, @OutAccountId, @WrongS256KeyHash);
+CALL ASSERT_TRUE(@Status = 3, "Authz failed");
+   
 CALL DeletePaymentCardsSP(@UserId);
-
-CALL HasPaymentCardsSP(@found, @UserId);
-
-CALL ASSERT_TRUE(@found = FALSE, "Must NOT have");
 
 CALL AuthenticateSP(@Status, @UserId, @S256KeyHash);
 CALL ASSERT_TRUE(@Status = 0, "Auth failed");
@@ -255,7 +312,7 @@ CALL GetCoreClientDataSP(@OutCredentialId, @OutPublicKey, @OutCardHolder, NULL);
 CALL ASSERT_TRUE(@OutCredentialId IS NULL, "CredentialId failed");
 
 -- Remove all test data
-
+SET SQL_SAFE_UPDATES = 0;
 DELETE FROM USERS;
 
 SET @Result = 'SUCCESSFUL';

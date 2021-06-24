@@ -150,6 +150,7 @@ if (cardHolder.equals("-2")) { // Soft server error
                                                            cardHolder,
                                                            credentialId,
                                                            rawPublicKey,
+                                                           request.getRemoteAddr(),
                                                            connection);
                 }
 

@@ -31,11 +31,11 @@ import org.webpki.util.ISODateTime;
  */
 public class PSPRequest {
 
-    public static final String PAYMENT_REQUEST = "paymentRequest";
-    public static final String FWP_ASSERTION   = "fwpAssertion";
-    public static final String RECEIVE_ACCOUNT = "receiveAccount";
-    public static final String CLIENT_IP       = "clientIp";
-    public static final String TIME_STAMP      = "timeStamp";
+    public static final String PAYMENT_REQUEST   = "paymentRequest";
+    public static final String FWP_ASSERTION     = "fwpAssertion";
+    public static final String RECEIVE_ACCOUNT   = "receiveAccount";
+    public static final String CLIENT_IP_ADDRESS = "clientIpAddress";
+    public static final String TIME_STAMP        = "timeStamp";
 
     
     FWPPaymentRequest paymentRequest;
@@ -53,9 +53,9 @@ public class PSPRequest {
         return receiveAccount;
     }
 
-    String clientIp;
-    public String getClientIp() {
-        return clientIp;
+    String clientIpAddress;
+    public String getClientIpAddress() {
+        return clientIpAddress;
     }    
 
     GregorianCalendar timeStamp;
@@ -70,19 +70,19 @@ public class PSPRequest {
         paymentRequest = new FWPPaymentRequest(reader.getObject(PAYMENT_REQUEST));
         fwpAssertion = new FWPJsonAssertion(reader.getObject(FWP_ASSERTION));
         receiveAccount = reader.getString(RECEIVE_ACCOUNT);
-        clientIp = reader.getString(CLIENT_IP);
+        clientIpAddress = reader.getString(CLIENT_IP_ADDRESS);
         timeStamp = reader.getDateTime(TIME_STAMP, ISODateTime.COMPLETE);
     }
     
     public PSPRequest(FWPPaymentRequest paymentRequest,
                       FWPJsonAssertion fwpAssertion,
                       String receiveAccount,
-                      String clientIp,
+                      String clientIpAddress,
                       GregorianCalendar timeStamp) {
         this.paymentRequest = paymentRequest;
         this.fwpAssertion = fwpAssertion;
         this.receiveAccount = receiveAccount;
-        this.clientIp = clientIp;
+        this.clientIpAddress = clientIpAddress;
         this.timeStamp = timeStamp;
     }
     
@@ -95,7 +95,7 @@ public class PSPRequest {
                 .setObject(PAYMENT_REQUEST, paymentRequest.getWriter())
                 .setObject(FWP_ASSERTION, fwpAssertion.getWriter())
                 .setString(RECEIVE_ACCOUNT, receiveAccount)
-                .setString(CLIENT_IP, clientIp)
+                .setString(CLIENT_IP_ADDRESS, clientIpAddress)
                 .setDateTime(TIME_STAMP, timeStamp, ISODateTime.UTC_NO_SUBSECONDS);
     }
     

@@ -110,12 +110,12 @@ public class IssuerServlet extends HttpServlet {
             compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
             
             // And of course, verify that this assertion belongs to a valid account!
-            String userId;
+            DataBaseOperations.AuthorizedInfo authorizedInfo;
             try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
-                userId = DataBaseOperations.authorize(fwpAssertion.getAccountId(),
-                                                      fwpAssertion.getSerialNumber(),
-                                                      fwpAssertion.getPublicKey(),
-                                                      connection);
+                authorizedInfo = DataBaseOperations.authorize(fwpAssertion.getSerialNumber(),
+                                                              fwpAssertion.getAccountId(),
+                                                              fwpAssertion.getPublicKey(),
+                                                              connection);
             }
 
             StringBuilder html = new StringBuilder(
@@ -181,8 +181,11 @@ public class IssuerServlet extends HttpServlet {
 
                     "<tr><th colspan='2' style='text-align:center'>Payer Information</th></tr>" +
 
+                    "<tr><th>User Name</th><td>")
+            .append(HTML.encode(authorizedInfo.cardHolder, true))
+            .append("</td></tr>" +
                     "<tr><th>User Id</th><td>")
-            .append(userId)
+            .append(authorizedInfo.userId)
             .append("</td></tr>" +
                     "<tr><th>Card Serial</th><td>")
             .append(fwpAssertion.getSerialNumber())
@@ -200,7 +203,7 @@ public class IssuerServlet extends HttpServlet {
             .append(fwpAssertion.getUserAuthorizationMethod().toString())
             .append("</td></tr>" +
                     "<tr><th>IP&nbsp;Address</th><td>")
-            .append(pspRequest.getClientIp())
+            .append(pspRequest.getClientIpAddress())
             .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
             .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
