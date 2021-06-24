@@ -33,19 +33,33 @@ public class CardServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
+    static final String USER = "p1";
+    static final String ACCOUNT = "p2";
+    
     private static final String SVG = 
         "<?xml version='1.0' encoding='utf-8'?>" +
         "<svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>" +
         "<rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>" +
         "<text font-size='30' font-family='Roboto,sans-serif' text-anchor='middle'>" +
-        "<tspan x='78' y='43'>Payment</tspan>" +
-        "<tspan x='78' y='79'>Card</tspan>" +
+        "<tspan x='78' y='43'>" + USER + "</tspan>" +
+        "<tspan x='78' y='79'>" + ACCOUNT + "</tspan>" +
         "</text>" +
         "</svg>";
+    
+    String getParameter(String name, HttpServletRequest request) {
+        String value = request.getParameter(name);
+        if (value == null) {
+            return "Undefined";
+        }
+        return value;
+    }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         
-        WalletCore.returnSVG(response, SVG);
+        String svg = SVG.replace(USER, getParameter(USER, request))
+                        .replace(ACCOUNT, getParameter(ACCOUNT, request));
+        
+        WalletCore.returnSVG(response, svg);
     }
 }

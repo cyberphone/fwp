@@ -97,7 +97,6 @@ public class WalletCore {
     // Init/finalize phase session attributes
     static final String ATTR_REGISTER_DATA       = "registerdata";
     static final String ATTR_LOGIN_DATA          = "logindata";
-    static final String ATTR_PAY_DATA            = "paydata";
     
     // When logged in this attribute contain the user ID.
     static final String ATTR_LOGGED_IN_USER      = "user";
