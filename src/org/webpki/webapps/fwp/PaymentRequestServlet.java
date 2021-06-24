@@ -31,13 +31,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 /**
- * This is the wallet UI (which is yet missing)
+ * This is the request by the Merchant.
  *
  */
 public class PaymentRequestServlet extends HttpServlet {
@@ -48,9 +49,7 @@ public class PaymentRequestServlet extends HttpServlet {
     
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID     = "wait";
-    private static final String FAILED_ID      = "fail";
     private static final String ACTIVATE_ID    = "activate";
-
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -82,46 +81,45 @@ public class PaymentRequestServlet extends HttpServlet {
             }
 
             // Match against Merchant list
-            JSONObjectWriter walletInternal = null;
+            JSONArrayWriter matching = null;
             JSONArrayReader networks = walletRequestJson.getArray(WalletCore.NETWORKS);
             while (networks.hasMore()) {
                 JSONObjectReader network = networks.getObject();
                 String paymentMethod = network.getString("name");
                 for (DataBaseOperations.VirtualCard virtualCard : virtualCards) {
                     if (paymentMethod.equals(virtualCard.paymentMethod)) {
-                        // First matching, we go for that for now...
-                        walletInternal = new JSONObjectWriter()
-                            .setObject(WalletCore.PAYMENT_REQUEST, paymentRequest)
-                            .setObject(WalletCore.SELECTED_CARD, new JSONObjectWriter()
+                        if (matching == null) {
+                            matching = new JSONArrayWriter();
+                        }
+                        matching.setObject(new JSONObjectWriter()
                                 .setString(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
+                                .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
                                 .setString(WalletCore.ACCOUNT_ID, virtualCard.accountId)
+                                .setString(WalletCore.CARD_HOLDER, virtualCard.cardHolder)
                                 .setString(WalletCore.PAYMENT_METHOD, paymentMethod)
                                 .setString(WalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
-                                .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
                                 // Hard-coded at the moment
                                 .setString(WalletCore.ISSUER_ID, WalletService.issuerId));
-                        break;
                     }
                 }
-                if (walletInternal != null) {
-                    break;
-                }
             }
-            if (walletInternal == null) {
+            if (matching == null) {
                 throw new IOException("No matching card");
             }
-             
+            
+            JSONObjectWriter walletInternal = new JSONObjectWriter()
+                    .setObject(WalletCore.PAYMENT_REQUEST, paymentRequest)
+                    .setArray(WalletCore.MATCHING_CARDS, matching);
+            
             StringBuilder html = new StringBuilder(
-                "<form name='shoot' method='POST' action='ad'>" +
+                "<form name='shoot' method='POST' action='ui'>" +
                 "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
             .append(HTML.encode(walletInternal.serializeToString(JSONOutputFormats.NORMALIZED),
                                 false))
             .append(
-                "'/>" +
-                "</form>" +
-
+                "'/></form>" +
                 "<div class='header'>Payment Request</div>" +
-
+    
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-1"))
@@ -138,8 +136,6 @@ public class PaymentRequestServlet extends HttpServlet {
                       "style='padding-top:2em;display:none' alt='waiting'/>" +
                 "</div>" +
 
-                "<div id='" + FAILED_ID + "' class='errorText'></div>" +
-
                 "<div style='display:flex;justify-content:center'>" +
                   "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
                     "Continue..." +
@@ -153,17 +149,17 @@ public class PaymentRequestServlet extends HttpServlet {
 
             String js = new StringBuilder(
 
-                    WalletCore.GO_HOME_JAVASCRIPT +
-                    
-                    "function doContinue() {\n" +
-                    "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
-                    "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                    "  setTimeout(function() {\n" +
-                    "    document.forms.shoot.submit();\n" +
-                    "  }, 500);\n" +
-                    "}\n").toString();
+                WalletCore.GO_HOME_JAVASCRIPT +
+                
+                "function doContinue() {\n" +
+                "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'none';\n" +
+                "  document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
+                "  setTimeout(function() {\n" +
+                "    document.forms.shoot.submit();\n" +
+                "  }, 500);\n" +
+                "}\n").toString();
 
-            HTML.standardPage(response, Actors.FWP, js, html); 
+            HTML.standardPage(response, Actors.FWP, js.toString(), html); 
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

@@ -30,6 +30,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CardServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.CardServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>FIDOEnrollServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.FIDOEnrollServlet</servlet-class>
     </servlet>    
@@ -43,7 +48,12 @@
         <servlet-name>PaymentRequestServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.PaymentRequestServlet</servlet-class>
     </servlet>
-    
+
+     <servlet>
+        <servlet-name>WalletUIServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.WalletUIServlet</servlet-class>
+    </servlet>
+   
     <servlet>
         <servlet-name>ADServlet</servlet-name>
         <servlet-class>org.webpki.webapps.fwp.ADServlet</servlet-class>
@@ -108,7 +118,12 @@
         <servlet-name>WalletAdminServlet</servlet-name>
         <url-pattern>/walletadmin</url-pattern>
     </servlet-mapping>
-    
+
+    <servlet-mapping>
+        <servlet-name>CardServlet</servlet-name>
+        <url-pattern>/card</url-pattern>
+    </servlet-mapping>    
+
     <servlet-mapping>
         <servlet-name>FIDOEnrollServlet</servlet-name>
         <url-pattern>/fidoenroll</url-pattern>
@@ -122,6 +137,11 @@
     <servlet-mapping>
         <servlet-name>PaymentRequestServlet</servlet-name>
         <url-pattern>/pr</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>WalletUIServlet</servlet-name>
+        <url-pattern>/ui</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

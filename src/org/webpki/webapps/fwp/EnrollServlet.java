@@ -144,7 +144,7 @@ public class EnrollServlet extends HttpServlet {
 //                "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
 
-                         WalletCore.CARD_HOLDER_JSON + ":" +
+                         WalletCore.CARD_HOLDER + ":" +
                          "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
 
                          // Core FIDO return data

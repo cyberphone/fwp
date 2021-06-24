@@ -157,7 +157,7 @@ public class DataBaseOperations {
                 "USERS.UserId = PAYMENT_CARDS.UserId WHERE USERS.UserId = ?;");) {
             stmt.setString(1, userId);
             try (ResultSet rs = stmt.executeQuery();) {
-                if (rs.next()) {
+                while (rs.next()) {
                     virtualCards.add(new VirtualCard(rs.getString(1),
                                                      rs.getBytes(2),
                                                      rs.getString(3),

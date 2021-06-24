@@ -55,6 +55,7 @@ public class WalletCore {
     static final String HTTP_CONTENT_TYPE_HEADER = "Content-Type";
 
     static final String JSON_CONTENT_TYPE        = "application/json";
+    static final String SVG_CONTENT_TYPE         = "image/svg+xml";
     
     // Used by the client and server to keep sync
     static final String PHASE_JSON               = "phase";
@@ -73,6 +74,7 @@ public class WalletCore {
 
     static final String NETWORKS                 = "networks";
     static final String PAYMENT_REQUEST          = "paymentRequest";
+    static final String MATCHING_CARDS           = "matchingCards";
     static final String SELECTED_CARD            = "selectedCard";
 
     // Sub parameters to SELECTED_CARD
@@ -83,8 +85,8 @@ public class WalletCore {
     static final String ISSUER_ID                = "issuerId";
     static final String PUBLIC_KEY               = "publicKey";
 
-    // Returned client data
-    static final String CARD_HOLDER_JSON         = "cardHolder";
+    // Used for enrollment and in the wallet
+    static final String CARD_HOLDER              = "cardHolder";
 
     // FWP core
     static final String FWP_AD                   = "ad";
@@ -189,6 +191,18 @@ public class WalletCore {
         }
         byte[] rawData = json.serializeToBytes(JSONOutputFormats.NORMALIZED);
         response.setContentType(JSON_CONTENT_TYPE);
+        response.setHeader(HTTP_PRAGMA, "No-Cache");
+        response.setDateHeader(HTTP_EXPIRES, 0);
+        // Chunked data seems unnecessary here
+        response.setContentLength(rawData.length);
+        ServletOutputStream serverOutputStream = response.getOutputStream();
+        serverOutputStream.write(rawData);
+        serverOutputStream.flush();
+    }
+    
+    static void returnSVG(HttpServletResponse response, String svg) throws IOException {
+        byte[] rawData = svg.getBytes("utf-8");
+        response.setContentType(SVG_CONTENT_TYPE);
         response.setHeader(HTTP_PRAGMA, "No-Cache");
         response.setDateHeader(HTTP_EXPIRES, 0);
         // Chunked data seems unnecessary here
