@@ -46,21 +46,6 @@ public class WalletUIServlet extends HttpServlet {
     private static final String WAITING_ID     = "wait";
     private static final String ACTIVATE_ID    = "activate";
 
-    private StringBuilder cardSelector(JSONArrayReader cards) throws IOException {
-        StringBuilder selector = new StringBuilder(
-            "<div style='display:flex;align-items:center;flex-direction:column;margin-top:15pt'>" +
-              "<div>");
-        int i = 0;
-        while (cards.hasMore()) {
-            selector.append("<div onclick='selectCard(")
-                    .append(i++)
-                    .append(")'>")
-                    .append(cards.getObject().getString(WalletCore.ACCOUNT_ID))
-                    .append("</div>");
-        }
-        return selector.append("</div></div>");
-    }
-
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -90,10 +75,9 @@ public class WalletUIServlet extends HttpServlet {
               "the list of supported methods supplied by the " +
               "<span class='actor'>Merchant</span> will be shown." +
              "</div>" +
-            "</div>");
-             
-        html.append(cardSelector(walletInternalJson.getArray(WalletCore.MATCHING_CARDS)))
-        .append(
+            "</div>" +
+
+            "<img id='card' src=''/>" +
   
             "<div style='display:flex;justify-content:center'>" +
               "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
@@ -122,6 +106,9 @@ public class WalletUIServlet extends HttpServlet {
             "  if (selectedCard != cards[index]) {\n" +
             "    console.log('new card:' + index);\n" +
             "    selectedCard = cards[index];\n" +
+            "    document.getElementById('card').src='card?p1='+" +
+                 "encodeURIComponent(selectedCard." + WalletCore.ACCOUNT_ID + ")+'&p2=' +" +
+                 "encodeURIComponent(selectedCard." + WalletCore.CARD_HOLDER + ");\n" +
             "  }\n" +
             "}\n" +
             

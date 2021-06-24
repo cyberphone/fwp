@@ -40,7 +40,7 @@ public class CardServlet extends HttpServlet {
         "<?xml version='1.0' encoding='utf-8'?>" +
         "<svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>" +
         "<rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>" +
-        "<text font-size='30' font-family='Roboto,sans-serif' text-anchor='middle'>" +
+        "<text font-size='15' font-family='Roboto,sans-serif' text-anchor='middle'>" +
         "<tspan x='78' y='43'>" + USER + "</tspan>" +
         "<tspan x='78' y='79'>" + ACCOUNT + "</tspan>" +
         "</text>" +
