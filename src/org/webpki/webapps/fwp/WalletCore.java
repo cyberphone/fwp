@@ -176,17 +176,17 @@ public class WalletCore {
             throw new IOException("Unexpected MIME type:" + request.getContentType());
         }
         JSONObjectReader parsedJson = JSONParser.parse(ServletUtil.getData(request));
-//        if (FWPService.logging) {
+        if (WalletService.logging) {
             logger.info("User agent: " + request.getHeader("user-agent"));
             logger.info("Received: " + parsedJson.toString());
-  //      }
+        }
         return parsedJson;
     }
 
     static void returnJSON(HttpServletResponse response, JSONObjectWriter json) throws IOException {
- //       if (FWPService.logging) {
+        if (WalletService.logging) {
             logger.info("To be returned: " + json.toString());
-//        }
+        }
         byte[] rawData = json.serializeToBytes(JSONOutputFormats.NORMALIZED);
         response.setContentType(JSON_CONTENT_TYPE);
         response.setHeader(HTTP_PRAGMA, "No-Cache");

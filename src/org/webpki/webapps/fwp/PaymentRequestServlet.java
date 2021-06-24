@@ -59,7 +59,6 @@ public class PaymentRequestServlet extends HttpServlet {
         if (walletRequest == null) {
             WalletCore.failed("Missing wallet request");
         }
-        logger.info(walletRequest);
         JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
         try {
             // Get the enrolled user.

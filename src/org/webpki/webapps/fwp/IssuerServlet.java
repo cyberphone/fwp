@@ -127,7 +127,7 @@ public class IssuerServlet extends HttpServlet {
             .append(ADServlet.sectionReference("seq-10"))
             .append(
                   ": If you have reached this far, the payment request has been verified " +
-                  "to be authentic and a payment operation is being initiated." +
+                  "for correctness and a payment operation is being initiated." +
                   "<div style='margin-top:0.4em'>Thank you for testing!</div>" +
                   "</div>" +
                 "</div>" +
@@ -192,8 +192,8 @@ public class IssuerServlet extends HttpServlet {
             .append("</td></tr>" +
                     "<tr><th>Client&nbsp;System</th><td>")
             .append(fwpAssertion.getOperatingSystem().getName())
-            .append(' ')
-            .append(fwpAssertion.getOperatingSystem().getVersion())
+            .append(fwpAssertion.getOperatingSystem().getVersion().equals("N/A") ? "" :
+                " " + fwpAssertion.getOperatingSystem().getVersion())
             .append(", ")
             .append(fwpAssertion.getUserAgent().getName())
             .append(' ')

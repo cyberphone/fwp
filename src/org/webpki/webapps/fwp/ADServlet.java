@@ -58,7 +58,7 @@ public class ADServlet extends HttpServlet {
         return "<a href='" + "https://fido-web-pay.github.io/specification#" + section +
                   "' target='_blank'>" + section + "</a>";
     }
-
+    
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -66,7 +66,6 @@ public class ADServlet extends HttpServlet {
         if (walletInternal == null) {
             WalletCore.failed("Missing wallet data");
         }
-        logger.info(walletInternal);
         JSONObjectReader walletInternalJson = JSONParser.parse(walletInternal);
         try {
             // Get the enrolled user.
@@ -75,6 +74,8 @@ public class ADServlet extends HttpServlet {
                 response.sendRedirect("walletadmin");
                 return;
             }
+            
+            SystemDetection system = new SystemDetection(request.getHeader("user-agent"));
 
             // Build Authorization Data (AD)
             JSONObjectReader selectedCard =
@@ -88,7 +89,10 @@ public class ADServlet extends HttpServlet {
                                     selectedCard.getString(WalletCore.PAYMENT_METHOD))
                     .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                     .setPayeeHost(request.getServerName())
-                    .setPlatformData("Android", "10.0", "Chrome", "103")
+                    .setPlatformData(system.operatingSystemName,
+                                     system.operatingSystemVersion,
+                                     system.browserName,
+                                     system.browserVersion)
                     .create(new FWPCrypto.FWPPreSigner(
                             selectedCard.getBinary(WalletCore.PUBLIC_KEY)));
              
@@ -135,10 +139,7 @@ public class ADServlet extends HttpServlet {
                 "</div>" +
 
                 "<div class='staticbox'>")
-            .append(HTML.encode(CBORObject.decode(unsignedAssertion).toString(), true)
-                    .replace("9:&nbsp;", 
-                             "<span style='color:grey;word-break:normal'>// The platform data is " +
-                               "currently not authentic</span><br>&nbsp;&nbsp;9:&nbsp;"))
+            .append(HTML.encode(CBORObject.decode(unsignedAssertion).toString(), true))
             .append(
                 "</div>");
 
