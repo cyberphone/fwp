@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -61,13 +59,12 @@ public class FinalizeAssertionServlet extends HttpServlet {
             WalletCore.failed("Missing wallet data");
             return;
         }     
-        JSONObjectReader accountData = 
+        JSONObjectReader selectedCard = 
                 JSONParser.parse(walletInternal).getObject(WalletCore.SELECTED_CARD);
         FWPJsonAssertion fwpAssertion =
-                new FWPJsonAssertion(accountData.getString(WalletCore.PAYMENT_METHOD),
-                                     accountData.getString(WalletCore.ISSUER_ID),
-                                     Base64.getUrlDecoder().decode(
-                                             encryptedSignedAuthorizationB64U));
+                new FWPJsonAssertion(selectedCard.getString(WalletCore.PAYMENT_METHOD),
+                                     selectedCard.getString(WalletCore.ISSUER_ID),
+                                     WalletCore.base64UrlDecode(encryptedSignedAuthorizationB64U));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='merchant'>" +
             "<input type='hidden' name='" + WalletCore.FWP_ASSERTION +

@@ -113,8 +113,6 @@ public class PaymentRequestServlet extends HttpServlet {
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='ad'>" +
-                "<input type='hidden' id='" + WalletCore.FWP_SAD + 
-                    "' name='" + WalletCore.FWP_SAD + "'/>" +
                 "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
             .append(HTML.encode(walletInternal.serializeToString(JSONOutputFormats.NORMALIZED),
                                 false))
