@@ -28,17 +28,17 @@
     <path d='m62.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
     <path d='m 84,17.5 h 17 v 11 H 95 V 64 H 84'/>
   </g>
-  <rect fill='url(#bankPillar)' height='37' width='11' x='17' y='26'/>
-  <rect fill='url(#bankPillar)' height='37' width='11' x='38.66' y='26'/>
-  <rect fill='url(#bankPillar)' height='37' width='11' x='60.33' y='26'/>
-  <rect fill='url(#bankPillar)' height='37' width='11' x='82' y='26'/>
-  <path d='m10.3,16.5 l44.70,-15 l44.70,15' fill='url(#bankRoof)' stroke='grey' stroke-width='1' stroke-linecap='round'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='17' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='38.66' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='60.33' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='82' y='26'/>
+  <path d='m10.3,16 l44.70,-15 l44.70,15' fill='url(#bankRoof)' stroke='grey' stroke-width='1' stroke-linecap='round'/>
   <g stroke-width='0.7' stroke='grey'>
-  <rect fill='url(#bankFront)' height='10' width='90' x='10' y='16.5'/>
-  <rect fill='url(#bankFront)' height='4' width='100' x='5' y='67'/>
-  <rect fill='url(#bankFront)' height='4' width='90' x='10' y='63'/>
+  <rect fill='url(#bankFront)' height='10' width='90' x='10' y='16'/>
+  <rect fill='url(#bankFront)' height='4' width='100' x='5' y='67.5'/>
+  <rect fill='url(#bankFront)' height='4' width='90' x='10' y='63.5'/>
   </g>
-  <text x='55' y='24.4' font-size='8' font-weight='bold' font-family='Roboto,sans-serif' text-anchor='middle' fill='#707070'>
+  <text x='55' y='23.9' font-size='8' font-weight='bold' font-family='Roboto,sans-serif' text-anchor='middle' fill='#707070'>
 B&#xa0;&#xa0;A&#xa0;&#xa0;N&#xa0;&#xa0;K
 </text>
 </svg>
