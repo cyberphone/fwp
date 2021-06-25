@@ -83,8 +83,12 @@ public class WalletUIServlet extends HttpServlet {
             "</div>" +
 
             "<div style='display:flex;align-items:center;flex-direction:column;margin-top:1.5em'>" +
-            "<div style='display:flex;align-items:center;flex-direction:column;border-width:1px;border-style:solid;border-color:grey;padding:1em'>" +
-            "<img id='card' src='' style='width:30em;max-width:80%'/>" +
+            "<div style='display:flex;align-items:center;flex-direction:column;border-width:1px 2px 2px 1px;border-style:solid;border-color:black'>" +
+            "<div style='width:100%;background-color:black'><div style='padding:0.3em 0.8em;color:white'>")
+        .append(request.getServerName())
+        .append(
+            "</div></div>" +
+            "<img id='card' src='' style='width:30em;max-width:80%;margin-top:1.5em'/>" +
             "<table style='margin-top:1em'>" +
             "<tr><th>Payee</th><td>")
         .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_PAYEE_NAME))
@@ -99,10 +103,10 @@ public class WalletUIServlet extends HttpServlet {
             "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
                   "style='padding-top:1.5em;display:none' alt='waiting'/>" +
 
-            "<div style='display:none' id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
+            "<div style='display:none;margin-bottom:1em' id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
                 "Continue..." +
             "</div>" +
-                
+
             "</div>" +
             "</div>");
         
