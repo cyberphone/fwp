@@ -72,9 +72,9 @@ public class BuyServlet extends HttpServlet {
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>" +
-                  "This is a temporary arrangement where you just pay &#x20ac;&#x2009;435." +
-                  "<div style='margin-top:0.4em'>It will later be replaced by a " +
-                  "simple merchant application.</div>" +
+                  "Since this proof-of-concept and test application is only about " +
+                  "payments, the shopping session is assumed to already have been " +
+                  "carried out.  Here you just pay &#x20ac;&#x2009;435 &#x1f60e;" +
               "</div>" +
             "</div>" +
 

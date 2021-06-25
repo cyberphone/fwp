@@ -26,7 +26,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.json.JSONArrayReader;
+import org.webpki.fwp.FWPPaymentRequest;
+
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONOutputFormats;
@@ -71,23 +72,38 @@ public class WalletUIServlet extends HttpServlet {
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-2"))
         .append(
-              ": Select a payment card.  Only the cards matching the " +
-              "the list of supported methods supplied by the " +
+              ": Select a payment card and authorize the payment request. " +
+              "Only the cards in the " +
+              "<span class='actor'>Wallet</span> matching the " +
+              "list of supported methods supplied by the " +
               "<span class='actor'>Merchant</span> will be shown." +
+              "<div style='margin-top:0.4em'>You change card by <i>swiping</i> " +
+              "the card image to the left or right.</div>" +
              "</div>" +
             "</div>" +
 
-            "<img id='card' src=''/>" +
-  
-            "<div style='display:flex;justify-content:center'>" +
-              "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
-                  "style='padding-top:2em;display:none' alt='waiting'/>" +
-            "</div>" +
+            "<div style='display:flex;align-items:center;flex-direction:column;margin-top:1.5em'>" +
+            "<div style='display:flex;align-items:center;flex-direction:column;border-width:1px;border-style:solid;border-color:grey;padding:1em'>" +
+            "<img id='card' src='' style='width:30em;max-width:80%'/>" +
+            "<table style='margin-top:1em'>" +
+            "<tr><th>Payee</th><td>")
+        .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_PAYEE_NAME))
+        .append(
+            "</td></tr>" +
+            "<tr><th>Total</th><td>&#x20ac; ")
+        .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_AMOUNT))
+        .append(
+            "</td></tr>" +
+            "</table>" +
+            
+            "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+                  "style='padding-top:1.5em;display:none' alt='waiting'/>" +
 
-            "<div style='display:flex;justify-content:center'>" +
-              "<div style='display:none' id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
+            "<div style='display:none' id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
                 "Continue..." +
-              "</div>" +
+            "</div>" +
+                
+            "</div>" +
             "</div>");
         
 
@@ -95,25 +111,57 @@ public class WalletUIServlet extends HttpServlet {
 
             WalletCore.GO_HOME_JAVASCRIPT +
             
-            "let cards = ")
+            "let CARDS = ")
         .append(new JSONArrayWriter(walletInternalJson.getArray(WalletCore.MATCHING_CARDS))
                 .serializeToString(JSONOutputFormats.PRETTY_JS_NATIVE))
         .append(
             ";\n" +
-            "let selectedCard;\n" +
+            "let cardIndex = 0;\n" +
+            "let cardImage = null;\n" +
                     
-            "function selectCard(index) {\n" +
-            "  if (selectedCard != cards[index]) {\n" +
-            "    console.log('new card:' + index);\n" +
-            "    selectedCard = cards[index];\n" +
-            "    document.getElementById('card').src='card?p1='+" +
+            "function selectCard() {\n" +
+            "  let selectedCard = CARDS[cardIndex];\n" +
+            "  cardImage.src='card?p1='+" +
                  "encodeURIComponent(selectedCard." + WalletCore.ACCOUNT_ID + ")+'&p2=' +" +
                  "encodeURIComponent(selectedCard." + WalletCore.CARD_HOLDER + ");\n" +
+            "}\n" +
+                 
+            "let swipeStartPosition = null;\n" +
+            
+            "function unify(e) { return e.changedTouches ? e.changedTouches[0] : e };\n" +
+            
+            "function beginSwipe(e) { e.preventDefault(); swipeStartPosition = unify(e).clientX };\n" +
+            
+            "function endSwipe(e) {\n" +
+            "  if (swipeStartPosition || swipeStartPosition === 0) {\n" +
+            "    let dx = unify(e).clientX - swipeStartPosition;\n" +
+            "    swipeStartPosition = null\n" +
+            "    if (Math.abs(dx) > 30) {\n" +
+            "      if (dx > 0 && cardIndex < CARDS.length - 1) {\n" +
+            "        cardIndex++;\n" +
+            "      } else if (dx < 0 && cardIndex > 0) {\n" +
+            "        cardIndex--;\n" +
+            "      } else {\n" +
+            "        return;\n" +
+            "      }\n" +
+            "      selectCard();\n" +
+            "    } else {\n" +
+            //"      toast("Swipe to the left or right to change account/card", cardImage);\n" +
+            "    }\n" +
             "  }\n" +
             "}\n" +
-            
+        
             "window.addEventListener('load', function(event) {\n" +
-            "  selectCard(0);\n" +
+            "  cardImage = document.getElementById('card');\n" +
+            "  cardImage.addEventListener('mousedown', beginSwipe, false);\n" +
+            "  cardImage.addEventListener('touchstart', beginSwipe, false);\n" +
+
+            "  cardImage.addEventListener('touchmove', e => { e.preventDefault() }, false);\n" +
+            
+            "  cardImage.addEventListener('mouseup', endSwipe, false);\n" +
+            "  cardImage.addEventListener('touchend', endSwipe, false);\n" +
+            
+            "  selectCard();\n" +
             "  document.getElementById('" + ACTIVATE_ID + "').style.display = 'block';\n" +
             "});\n" +
             
@@ -123,10 +171,10 @@ public class WalletUIServlet extends HttpServlet {
             "  document.getElementById('" + WalletCore.WALLET_INTERNAL + 
               "').value = JSON.stringify({" + WalletCore.PAYMENT_REQUEST + ": ")
         .append(paymentRequest.serializeToString(JSONOutputFormats.PRETTY_JS_NATIVE))
-        .append(", " + WalletCore.SELECTED_CARD + ": selectedCard});\n" +
+        .append(", " + WalletCore.SELECTED_CARD + ": CARDS[cardIndex]});\n" +
             "  setTimeout(function() {\n" +
             "    document.forms.shoot.submit();\n" +
-            "  }, 500);\n" +
+            "  }, 2500);\n" +
             "}\n").toString();
 
         HTML.standardPage(response, Actors.FWP, js, html); 

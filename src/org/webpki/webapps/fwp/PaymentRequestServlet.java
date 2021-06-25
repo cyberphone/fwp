@@ -124,10 +124,11 @@ public class PaymentRequestServlet extends HttpServlet {
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-1"))
             .append(
-                  ": This is what the Merchant's call to the W3C PaymentRequest API " +
-                  "boils down to.  The wallet UI has not yet been written so " +
-                  "we just go for the first payment method that matches any of the " +
-                  "ones specified by the Merchant." +
+                  ": This is what the <span class='actor'>Merchant</span>'s " +
+                  "call to the W3C PaymentRequest API " +
+                  "boils down to, here expressed as JSON. The &quot;" + WalletCore.NETWORKS +
+                  "&quot; array holds a list of FWP compatible payment methods that the " +
+                  "<span class='actor'>Merchant</span> accepts." +
                  "</div>" +
                 "</div>" +
                 
