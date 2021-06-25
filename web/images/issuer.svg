@@ -22,6 +22,7 @@
    <stop offset="1" stop-color="#dceace"/>
     </linearGradient>
   </defs>
+  <rect x='11' y='17' width='88' height='50' fill='white'/>
   <g fill='#b0b0b0' filter='url(#bankShaddow)'>
     <path d='m19.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
     <path d='m41,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
