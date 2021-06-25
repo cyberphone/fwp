@@ -174,7 +174,7 @@ public class WalletUIServlet extends HttpServlet {
         .append(", " + WalletCore.SELECTED_CARD + ": CARDS[cardIndex]});\n" +
             "  setTimeout(function() {\n" +
             "    document.forms.shoot.submit();\n" +
-            "  }, 2500);\n" +
+            "  }, 500);\n" +
             "}\n").toString();
 
         HTML.standardPage(response, Actors.FWP, js, html); 
