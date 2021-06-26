@@ -44,20 +44,23 @@ public class SystemDetection {
         } else if (userAgent.contains("Mac OS")) {
             operatingSystemName = "Mac OS";
         }
+        boolean macFix = false;
         if (userAgent.contains("Chrome")) {
             browserName = "Chrome";
         } else if (userAgent.contains("Safari")) {
             browserName = "Safari";
+            macFix = true;
         } else if (userAgent.contains("Firefox")) {
             browserName = "Firefox";
         } else {
             return;
         }
-        int i = userAgent.indexOf(browserName + "/");
+        String target = macFix ? " Version" : browserName;
+        int i = userAgent.indexOf(target + "/");
         if (i <= 0) {
             return;
         }
-        i += browserName.length();
+        i += target.length();
         browserVersion = "";
         while (++i < userAgent.length()) {
             char c = userAgent.charAt(i);
