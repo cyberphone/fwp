@@ -201,6 +201,6 @@ public class WalletUIServlet extends HttpServlet {
             "  }, 500);\n" +
             "}\n").toString();
 
-        HTML.standardPage(response, Actors.FWP, js, html); 
+        HTML.standardPage(response, Actors.WALLET, js, html); 
     }
 }

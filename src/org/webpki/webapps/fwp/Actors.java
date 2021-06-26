@@ -28,6 +28,11 @@ public enum Actors {
         "<img src='images/wallet-internal.svg' " +
         "style='height:35pt' " +
         "title='Wallet Internal Operation'/>"),
+    WALLET   (
+            "<div style='display:flex;padding-bottom:10pt'>" +
+            "<img src='images/wallet-ui.svg' " +
+            "style='height:35pt' " +
+            "title='Wallet UI'/>"),
     MERCHANT (
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='images/merchant.svg' " +

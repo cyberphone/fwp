@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>
   <title>VISA/MC Legacy Payment</title>
-  <!-- Anders Ruyndgren 2021-->
+  <!-- Anders Rundgren 2021-->
   <rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>
   <line x1='150' y1='1' x2='150' y2='100' stroke='grey' stroke-width='2' fill='none'/>
 <svg
