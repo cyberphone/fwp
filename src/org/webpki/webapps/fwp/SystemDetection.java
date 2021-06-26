@@ -44,18 +44,21 @@ public class SystemDetection {
         } else if (userAgent.contains("Mac OS")) {
             operatingSystemName = "Mac OS";
         }
-        boolean macFix = false;
-        if (userAgent.contains("Chrome")) {
+        String versionFix = null;
+        if (userAgent.contains("Edg/")) {
+            browserName = "Edge";
+            versionFix = " Edg";
+        } else if (userAgent.contains("Chrome")) {
             browserName = "Chrome";
         } else if (userAgent.contains("Safari")) {
             browserName = "Safari";
-            macFix = true;
+            versionFix = " Version";
         } else if (userAgent.contains("Firefox")) {
             browserName = "Firefox";
         } else {
             return;
         }
-        String target = macFix ? " Version" : browserName;
+        String target = versionFix == null ? browserName : versionFix;
         int i = userAgent.indexOf(target + "/");
         if (i <= 0) {
             return;
@@ -65,7 +68,9 @@ public class SystemDetection {
         while (++i < userAgent.length()) {
             char c = userAgent.charAt(i);
             if (c < '0' || c > '9') {
-                break;
+                if (c != '.' || !browserName.equals("Safari")) {
+                    break;
+                }
             }
             browserVersion += c;
          }
