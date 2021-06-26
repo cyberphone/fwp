@@ -66,6 +66,11 @@ public class WalletUIServlet extends HttpServlet {
                                           WalletCore.WALLET_INTERNAL + "'/>" +
             "</form>" +
 
+            "<svg id='vertbar' style='position:absolute;visibility:hidden;z-index:5' " +
+            "width='3' height='30' xmlns='http://www.w3.org/2000/svg'>" +
+            "<rect x='0' y='0' width='3' height='30' rx='2' fill='grey'/>" +
+            "</svg>" +
+            
             "<div class='header'>Wallet UI</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
@@ -83,31 +88,35 @@ public class WalletUIServlet extends HttpServlet {
             "</div>" +
 
             "<div style='display:flex;align-items:center;flex-direction:column;margin-top:1.5em'>" +
-            "<div style='display:flex;align-items:center;flex-direction:column;border-width:1px 2px 2px 1px;border-style:solid;border-color:black'>" +
+            "<div style='display:flex;align-items:center;flex-direction:column;" +
+            "border-width:1px 2px 2px 1px;border-style:solid;border-color:black'>" +
             "<div style='width:100%;background-color:black'><div style='padding:0.3em 0.8em;color:white'>")
         .append(request.getServerName())
         .append(
             "</div></div>" +
-            "<img id='card' src='' style='width:30em;max-width:80%;margin-top:1.5em'/>" +
+            "<img id='card' src='' style='width:20em;max-width:80%;margin-top:1.5em'/>" +
             "<table style='margin-top:1em'>" +
-            "<tr><th>Payee</th><td>")
+            "<tr><th style='text-align:right'>Payee</th><td>&nbsp;")
         .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_PAYEE_NAME))
         .append(
             "</td></tr>" +
-            "<tr><th>Total</th><td>&#x20ac; ")
+            "<tr><th style='text-align:right'>Total</th><td>&nbsp;&#x20ac; ")
         .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_AMOUNT))
         .append(
             "</td></tr>" +
             "</table>" +
-            
-            "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
+ 
+           "<img id='" + WAITING_ID + "' src='images/waiting.gif' " +
                   "style='padding-top:1.5em;display:none' alt='waiting'/>" +
 
-            "<div style='display:none;margin-bottom:1em' id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doContinue()\">" +
-                "Continue..." +
+            "<div style='display:none;margin-bottom:1.2em' id='" + ACTIVATE_ID + 
+            "' class='stdbtn' onclick=\"doContinue()\">" +
+                "Authorize..." +
             "</div>" +
 
             "</div>" +
+            
+            "<div style='margin-top:1em'>Yes, this is a <i>prototype</i> UI...</div>" +
             "</div>");
         
 
@@ -146,11 +155,22 @@ public class WalletUIServlet extends HttpServlet {
             "      } else if (dx < 0 && cardIndex > 0) {\n" +
             "        cardIndex--;\n" +
             "      } else {\n" +
+            "        let box = cardImage.getBoundingClientRect();\n" +
+            "        let e = document.getElementById('vertbar');\n" +
+            "        e.style.top = (box.top + (cardImage.offsetHeight - 30) / 2) + 'px';\n" +
+            "        if (dx < 0) {\n" +
+            "          e.style.left = (box.left + 7) + 'px';\n" +
+            "        } else {\n" +
+            "          e.style.left = (box.right - 10) + 'px';\n" +
+            "        }\n" +
+            "        e.style.visibility='visible';\n" +
+            "        setTimeout(function() {\n" +
+            "          e.style.visibility='hidden';\n" +
+            "        }, 500);\n" +
             "        return;\n" +
             "      }\n" +
             "      selectCard();\n" +
             "    } else {\n" +
-            //"      toast("Swipe to the left or right to change account/card", cardImage);\n" +
             "    }\n" +
             "  }\n" +
             "}\n" +

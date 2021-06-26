@@ -38,8 +38,8 @@ public class CardServlet extends HttpServlet {
     
     private static final String SVG = 
         "<?xml version='1.0' encoding='utf-8'?>" +
-        "<svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>" +
-        "<rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>" +
+        "<svg width='300' height='160' xmlns='http://www.w3.org/2000/svg'>" +
+        "<rect x='1' y='1' width='297' height='158' stroke='grey' stroke-width='2' rx='10' fill='none'/>" +
         "<text font-size='15' font-family='Roboto,sans-serif' text-anchor='middle'>" +
         "<tspan x='150' y='43'>" + USER + "</tspan>" +
         "<tspan x='150' y='79'>" + ACCOUNT + "</tspan>" +
