@@ -68,8 +68,10 @@ public class SystemDetection {
         while (++i < userAgent.length()) {
             char c = userAgent.charAt(i);
             if (c < '0' || c > '9') {
-                if (c != '.' || !browserName.equals("Safari")) {
-                    break;
+                if (c == '.' && browserName.equals("Safari") && versionFix != null) {
+                    versionFix = null;
+                } else {
+                	break;
                 }
             }
             browserVersion += c;
