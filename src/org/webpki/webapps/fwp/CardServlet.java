@@ -33,18 +33,8 @@ public class CardServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
-    static final String USER = "p1";
-    static final String ACCOUNT = "p2";
-    
-    private static final String SVG = 
-        "<?xml version='1.0' encoding='utf-8'?>" +
-        "<svg width='300' height='160' xmlns='http://www.w3.org/2000/svg'>" +
-        "<rect x='1' y='1' width='297' height='158' stroke='grey' stroke-width='2' rx='10' fill='none'/>" +
-        "<text font-size='15' font-family='Roboto,sans-serif' text-anchor='middle'>" +
-        "<tspan x='150' y='43'>" + USER + "</tspan>" +
-        "<tspan x='150' y='79'>" + ACCOUNT + "</tspan>" +
-        "</text>" +
-        "</svg>";
+    static final String ACCOUNT = "p1";
+    static final String USER = "p2";
     
     String getParameter(String name, HttpServletRequest request) {
         String value = request.getParameter(name);
@@ -57,8 +47,43 @@ public class CardServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         
-        String svg = SVG.replace(USER, getParameter(USER, request))
-                        .replace(ACCOUNT, getParameter(ACCOUNT, request));
+        String user = getParameter(USER, request);
+        String account = getParameter(ACCOUNT, request);
+        boolean iban = account.startsWith("FR");
+        String svg = new StringBuilder(
+            "<?xml version='1.0' encoding='utf-8'?>" +
+            "<svg width='300' height='160' xmlns='http://www.w3.org/2000/svg'>" +
+            "<defs>" +
+            "<filter id='dropShaddow'>" +
+            "<feGaussianBlur stdDeviation='1.5'/>" +
+            "</filter>" +
+            "<linearGradient id='background' x1='0' x2='1' y1='0' y2='1'>")
+        .append(
+                iban ? 
+            "<stop offset='0.04167' stop-color='#c3f7f7'/>" +
+            "<stop offset='0.65105' stop-color='#e8f9fc'/>" +
+            "<stop offset='1' stop-color='#c3f7f7'/>" 
+                     :
+            "<stop offset='0.04167' stop-color='#fff9c9'/>" +
+            "<stop offset='0.65105' stop-color='#fffde8'/>" +
+            "<stop offset='1' stop-color='#f9f6b1'/>"
+                )
+        .append(
+            "</linearGradient>" +
+            "</defs>" +
+            "<rect x='2' y='2' width='296' height='156' rx='10' fill='black' opacity='0.3' filter='url(#dropShaddow)'/>" +
+            "<rect x='0.5' y='0.5' width='295' height='155' stroke='black' stroke-width='1' rx='10' fill='url(#background)'/>" +
+            "<text x='150' y='100' font-size='20' font-family='Roboto,sans-serif' text-anchor='middle'>" +
+            USER + 
+            "</text>" +
+            "<text x='150' y='140' font-size='15' font-family='Roboto,sans-serif' text-anchor='middle'>" +
+            ACCOUNT +
+            "</text>" +
+            "<text x='30' y='50' font-size='30' font-family='Roboto,sans-serif'>")
+        .append(iban ? "BankDirect" : "Supercard")
+        .append(
+            "</text>" +
+            "</svg>").toString().replace(USER, user).replace(ACCOUNT, account);
         
         WalletCore.returnSVG(response, svg);
     }

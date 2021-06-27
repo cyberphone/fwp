@@ -118,6 +118,12 @@ li {
   border-color:black;
 }
 
+.card {
+  width:20em;
+  max-width:80%;
+  margin-top:1.5em;
+}
+
 .errorText {
   color:red;
   font-weight:bold;

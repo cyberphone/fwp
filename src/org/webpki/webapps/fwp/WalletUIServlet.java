@@ -94,7 +94,7 @@ public class WalletUIServlet extends HttpServlet {
         .append(request.getServerName())
         .append(
             "</div></div>" +
-            "<img id='card' src='' style='width:20em;max-width:80%;margin-top:1.5em'/>" +
+            "<img id='card' src='' class='card'/>" +
             "<table style='margin-top:1em'>" +
             "<tr><th style='text-align:right'>Payee</th><td>&nbsp;")
         .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_PAYEE_NAME))

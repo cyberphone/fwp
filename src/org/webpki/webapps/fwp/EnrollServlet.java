@@ -17,7 +17,9 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
-
+import java.net.URLEncoder;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -179,18 +181,44 @@ public class EnrollServlet extends HttpServlet {
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        StringBuilder html = new StringBuilder(
-            "<div class='header'>Enrollment Succeeded</div>" +
-
-            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                "You did it!" +
-            "</div>" +
-
-            "<div style='display:flex;justify-content:center'>" +
-              "<div class='stdbtn' onclick=\"document.location.href='buy'\">" +
-                  "Buy Something..." +
-              "</div>" +
-            "</div>");
-        HTML.standardPage(response, Actors.ISSUER, null, html);
+        try {
+            // Get the enrolled user.
+            String userId = WalletCore.getWalletCookie(request);
+            
+            ArrayList<DataBaseOperations.VirtualCard> virtualCards;
+            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+                virtualCards = DataBaseOperations.getVirtualCards(userId, connection);
+            }
+            StringBuilder html = new StringBuilder(
+                "<div class='header'>Enrollment Succeeded</div>" +
+    
+                "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                "<div class='comment'>" +
+                "The following cards have been added to your wallet." +
+               "</div>" +
+               "</div>" +
+               
+               "<div style='display:flex;align-items:center;flex-direction:column'>");
+            
+            for (DataBaseOperations.VirtualCard virtualCard : virtualCards) {
+                html.append("<img src='card?p1=")
+                    .append(URLEncoder.encode(virtualCard.accountId, "utf-8"))
+                    .append("&p2=")
+                    .append(URLEncoder.encode(virtualCard.cardHolder, "utf-8"))
+                    .append("' class='card' style='width:15em'/>");
+            }
+    
+            html.append(
+                "</div>" +
+            
+                "<div style='display:flex;justify-content:center'>" +
+                  "<div class='stdbtn' onclick=\"document.location.href='buy'\">" +
+                      "Buy Something..." +
+                  "</div>" +
+                "</div>");
+            HTML.standardPage(response, Actors.ISSUER, null, html);
+        } catch (Exception e) {
+            HTML.errorPage(response, e);
+        }
     }
 }
