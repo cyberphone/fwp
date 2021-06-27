@@ -35,7 +35,7 @@ import org.webpki.fwp.FWPPaymentRequest;
 import org.webpki.json.JSONOutputFormats;
 
 /**
- * This is a temporary payment application.
+ * This is a checkout application.
  *
  */
 public class BuyServlet extends HttpServlet {

@@ -37,7 +37,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.fwp.FWPCrypto;
 
 /**
- * This is just for testing enrolled credentials
+ * Enrolled credentials can also be used for FIDO/WebAuthn.
  *
  */
 public class LoginServlet extends HttpServlet {

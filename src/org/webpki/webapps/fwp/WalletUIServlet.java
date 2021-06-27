@@ -34,7 +34,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 /**
- * This is the wallet UI (which is yet missing)
+ * This is the wallet UI when paying.
  *
  */
 public class WalletUIServlet extends HttpServlet {
@@ -94,7 +94,7 @@ public class WalletUIServlet extends HttpServlet {
         .append(request.getServerName())
         .append(
             "</div></div>" +
-            "<img id='card' src='' class='card'/>" +
+            "<img id='card' src='' class='card' style='cursor:grab' title='Swipe a card!'/>" +
             "<table style='margin-top:1em'>" +
             "<tr><th style='text-align:right'>Payee</th><td>&nbsp;")
         .append(paymentRequest.getString(FWPPaymentRequest.JSON_PR_PAYEE_NAME))

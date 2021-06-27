@@ -29,6 +29,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 
+ * Horribly primitive wallet administration UI.
+ *
+ */
+
 public class WalletAdminServlet extends HttpServlet {
     
     static Logger logger = Logger.getLogger(WalletAdminServlet.class.getName());
