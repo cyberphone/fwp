@@ -197,7 +197,8 @@ public class EnrollServlet extends HttpServlet {
                 "The following cards have been added to your wallet." +
                "</div>" +
                "</div>" +
-               
+               "<div style='display:flex;align-items:center;flex-direction:column'>" +
+             
                "<div style='display:flex;align-items:center;flex-direction:column'>");
             
             for (DataBaseOperations.VirtualCard virtualCard : virtualCards) {
@@ -205,10 +206,11 @@ public class EnrollServlet extends HttpServlet {
                     .append(URLEncoder.encode(virtualCard.accountId, "utf-8"))
                     .append("&p2=")
                     .append(URLEncoder.encode(virtualCard.cardHolder, "utf-8"))
-                    .append("' class='card' style='width:15em'/>");
+                    .append("' class='card'/>");
             }
     
             html.append(
+                "</div>" +
                 "</div>" +
             
                 "<div style='display:flex;justify-content:center'>" +
