@@ -86,7 +86,7 @@ public class BuyServlet extends HttpServlet {
               "<img src='images/fwpminiplus-pay.svg' class='payimage' " +
                  "onclick='doPay()' alt='image'/>" +
               "<img src='images/paypal-pay.svg' class='payimage' " +
-                  "onclick='unsupported(this)' style='margin:1em 0' alt='image'/>" +
+                  "onclick='unsupported(this)' style='margin:1.2em 0' alt='image'/>" +
               "<img src='images/legacy-visamc-pay.svg' class='payimage' " + 
                  "onclick='unsupported(this)' alt='image'/>" +
             "</div>" +

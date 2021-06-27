@@ -71,7 +71,7 @@ public class SystemDetection {
                 if (c == '.' && browserName.equals("Safari") && versionFix != null) {
                     versionFix = null;
                 } else {
-                	break;
+                    break;
                 }
             }
             browserVersion += c;

@@ -157,7 +157,7 @@ public class WalletUIServlet extends HttpServlet {
             "      } else {\n" +
             "        let box = cardImage.getBoundingClientRect();\n" +
             "        let e = document.getElementById('vertbar');\n" +
-            "        e.style.top = (box.top + (cardImage.offsetHeight - 30) / 2) + 'px';\n" +
+            "        e.style.top = (box.top + window.scrollY + (cardImage.offsetHeight - 30) / 2) + 'px';\n" +
             "        if (dx < 0) {\n" +
             "          e.style.left = (box.left + 7) + 'px';\n" +
             "        } else {\n" +
