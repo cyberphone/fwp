@@ -268,7 +268,7 @@ public class FIDOTest {
         // authData object.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
-        baos.writeBytes(rpId);
+        baos.write(rpId);
         baos.write(FWPCrypto.FLAG_AT);
         baos.write(new byte[] {0, 5,2,70});
         baos.write(new byte[] {0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,0});
