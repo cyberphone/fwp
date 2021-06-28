@@ -61,6 +61,9 @@ public class FWPCrypto {
     public static final String CLIENT_DATA_JSON_JSON    = "clientDataJSON";
     public static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
     public static final String SIGNATURE_JSON           = "signature";
+    
+    // For FIDO attestations only
+    public static final String AUTH_DATA_CBOR           = "authData";
 
     // Attestation Object flags
     public static final int    FLAG_ED                  = 0x80;
@@ -300,7 +303,7 @@ public class FWPCrypto {
 
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
-                .getMap().getObject("authData").getByteString();
+                .getMap().getObject(AUTH_DATA_CBOR).getByteString();
         if ((authData[32] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[32] & 0xff));

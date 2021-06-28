@@ -19,6 +19,7 @@ package org.webpki.fwp;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -34,9 +35,13 @@ import java.util.GregorianCalendar;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.webpki.cbor.CBORByteString;
+import org.webpki.cbor.CBORInteger;
+import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
+import org.webpki.crypto.CryptoRandom;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 
@@ -105,7 +110,7 @@ public class FIDOTest {
                            String rpUrl,
                            byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
-        byte[] authData = attestation.getMap().getObject("authData").getByteString();
+        byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getByteString();
 // System.out.println(DebugFormatter.getHexDebugData(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));
@@ -126,7 +131,6 @@ public class FIDOTest {
         String userId = create.getString(FWPCrypto.USER_ID);
         JSONObjectReader createResponse = vector.getObject("create.response");
         byte[] createCredentialId = createResponse.getBinary(FWPCrypto.CREDENTIAL_ID);
-        System.out.println("CL2=" + createCredentialId.length);
         CBORObject attestation = 
                 CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
@@ -246,5 +250,52 @@ public class FIDOTest {
         } catch (Exception e) {
             assertTrue("claimed", e.getMessage().contains("Claimed"));
         }
+    }
+    
+    void doOneAttestation(boolean hugeCi, boolean extension) throws Exception {
+    	String rpUrl = "https://example.com/g"; 
+        KeyPair keyPair = readKey("p256");
+        byte[] credentialId = (hugeCi ? 
+        		"0123456701234567012345670123456701234567012345670123456701234567" +
+        		"0123456701234567012345670123456701234567012345670123456701234567" +
+        		"0123456701234567012345670123456701234567012345670123456701234567" +
+        		"HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBy     " +
+        		"0123456701234567012345670123456701234567012345670123456701234567" +
+        		"0123456701234567012345670123456701234567012345670123456701234567" 
+        		                      :
+                "012345670123456701234567012ByteArrayOutputStream").getBytes("utf-8");
+        
+        // authData object.
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
+        baos.writeBytes(rpId);
+        baos.write(FWPCrypto.FLAG_AT);
+        baos.write(new byte[] {0, 5,2,70});
+        baos.write(new byte[] {0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,0});
+        baos.write(credentialId.length >> 8);
+        baos.write(credentialId.length & 0xff);
+        baos.write(credentialId);
+        
+        CBORMap publicKey = CBORPublicKey.encode(keyPair.getPublic());
+        publicKey.setObject(FWPCrypto.COSE_ALGORITHM_LABEL,
+        		            new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
+        baos.write(publicKey.encode());
+        if (extension) {
+        	baos.write(new CBORMap().setObject("blah", new CBORInteger(-3)).encode());
+        }
+        
+        byte[] attestationObject = new CBORMap()
+        		.setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORByteString(baos.toByteArray())).encode();
+        assertTrue("pubk", keyPair.getPublic().equals(
+        		CBORPublicKey.decode(CBORObject.decode(FWPCrypto.extractFidoPublicKey(attestationObject)))));
+
+        byte[] challenge = CryptoRandom.generateRandom(32);
+    }
+    
+    @Test
+    public void Attestations() throws Exception {
+    	doOneAttestation(false, false);
+    	doOneAttestation(false, true);
+    	doOneAttestation(true, false);
     }
 }
