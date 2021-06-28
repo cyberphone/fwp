@@ -29,12 +29,6 @@ public class HTML {
 
     static Logger logger = Logger.getLogger(HTML.class.getName());
 
-    static final String HTML_INIT = "<!DOCTYPE html>" +
-        "<html lang='en'><head><link rel='icon' href='images/webpkiorg.png' sizes='192x192'>" + 
-        "<meta name='viewport' content='initial-scale=1.0'/>" + 
-        "<title>FWP Lab</title>" + 
-        "<link rel='stylesheet' type='text/css' href='style.css'>";
-
     static String encode(String val, boolean codeListings) {
         if (val != null) {
             StringBuilder buf = new StringBuilder(val.length() + 8);
@@ -76,13 +70,22 @@ public class HTML {
     }
     
     static String getHTML(Actors actor, String javascript, String box) {
-        StringBuilder html = new StringBuilder(HTML_INIT);
+        String admin = actor == Actors.ADMIN ? "../" : "";
+        StringBuilder html = new StringBuilder(
+                "<!DOCTYPE html>" +
+                "<html lang='en'><head><link rel='icon' href='images/webpkiorg.png' sizes='192x192'>" + 
+                "<meta name='viewport' content='initial-scale=1.0'/>" + 
+                "<title>FWP Lab</title>" + 
+                "<link rel='stylesheet' type='text/css' href='")
+        .append(admin)
+        .append("style.css'>");
+        
         if (javascript != null) {
             html.append("<script>\n'use strict';\n")
                 .append(javascript)
                 .append("</script>");
         }
-        String admin = actor == Actors.ADMIN ? "../" : "";
+
         html.append(
             "</head><body>" +
             "<div style='display:flex;flex-wrap:wrap-reverse;justify-content:space-between'>" +
