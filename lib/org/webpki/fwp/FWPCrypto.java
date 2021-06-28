@@ -306,7 +306,7 @@ public class FWPCrypto {
                                                String.format("%2x", authData[32] & 0xff));
         }
         int i = 32 + 1 + 4 + 16;
-        int credentialIdLength = (authData[i++] << 8) + authData[i++];
+        int credentialIdLength = (authData[i++] << 8) + (authData[i++] & 0xff);
         int offset = i + credentialIdLength;
         byte[] rawPublicKeyAndOptionalExtensionData = new byte[authData.length - offset];
         System.arraycopy(authData,

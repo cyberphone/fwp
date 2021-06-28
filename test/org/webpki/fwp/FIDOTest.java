@@ -109,6 +109,9 @@ public class FIDOTest {
 // System.out.println(DebugFormatter.getHexDebugData(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));
+        int credentialIdLength = (authData[53] << 8) + (authData[54] & 0xff);
+        assertTrue("cil", credentialIdLength == credentialId.length);
+        assertTrue("ci", ArrayUtil.compare(authData, 55, credentialId, 0, credentialIdLength));
         return CBORPublicKey.decode(CBORObject.decode(
                 FWPCrypto.extractFidoPublicKey(attestation.encode())));
     }
@@ -123,6 +126,7 @@ public class FIDOTest {
         String userId = create.getString(FWPCrypto.USER_ID);
         JSONObjectReader createResponse = vector.getObject("create.response");
         byte[] createCredentialId = createResponse.getBinary(FWPCrypto.CREDENTIAL_ID);
+        System.out.println("CL2=" + createCredentialId.length);
         CBORObject attestation = 
                 CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
