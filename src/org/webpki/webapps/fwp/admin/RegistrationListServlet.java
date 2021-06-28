@@ -60,7 +60,7 @@ public class RegistrationListServlet extends HttpServlet {
 
             try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 try (PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT Created, ClientIpAddress from USERS " +
+                        "SELECT ANY_VALUE(Created), ClientIpAddress from USERS " +
                         "WHERE PublicKey IS NOT NULL " +
                         "GROUP BY ClientIpAddress LIMIT 100;");) {
                     try (ResultSet rs = stmt.executeQuery();) {
