@@ -49,7 +49,7 @@ public class WalletService extends InitPropertyReader implements ServletContextL
 
     static Logger logger = Logger.getLogger(WalletService.class.getName());
 
-    static DataSource jdbcDataSource;
+    public static DataSource jdbcDataSource;
     
     static KeyPair issuerEncryptionKey;
     

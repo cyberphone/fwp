@@ -43,6 +43,8 @@ public class WalletUIServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
+    private static final String NOTIFIER = "notifier";
+    
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID     = "wait";
     private static final String ACTIVATE_ID    = "activate";
@@ -72,7 +74,9 @@ public class WalletUIServlet extends HttpServlet {
             "</svg>" +
             
             "<div class='header'>Wallet UI</div>" +
-
+            
+            "<div id='" + NOTIFIER + "' class='toasting'>Swipe to the left or right...</div>" +
+            
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-2"))
@@ -171,6 +175,14 @@ public class WalletUIServlet extends HttpServlet {
             "      }\n" +
             "      selectCard();\n" +
             "    } else {\n" +
+            "  let notifier = document.getElementById('" + NOTIFIER + "');\n" +
+            "  notifier.style.top = (cardImage.getBoundingClientRect().top + window.scrollY + " +
+                "notifier.offsetHeight) + 'px';\n" +
+            "  notifier.style.left = ((window.innerWidth - notifier.offsetWidth) / 2) + 'px';\n" +
+            "  notifier.style.visibility = 'visible';\n" +
+            "  setTimeout(function() {\n" +
+            "    notifier.style.visibility = 'hidden';\n" +
+            "  }, 500);\n" +
             "    }\n" +
             "  }\n" +
             "}\n" +

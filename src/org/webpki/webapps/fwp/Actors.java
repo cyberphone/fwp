@@ -44,10 +44,15 @@ public enum Actors {
         "style='height:35pt' " +
         "title='Payment System Provider'/>"),
     ISSUER   (
+            "<div style='display:flex;padding-bottom:10pt'>" +
+            "<img src='images/issuer.svg' " +
+            "style='height:35pt' " +
+            "title='Issuer (bank)'/>"),
+    ADMIN    (
         "<div style='display:flex;padding-bottom:10pt'>" +
-        "<img src='images/issuer.svg' " +
+        "<img src='../images/issuer.svg' " +
         "style='height:35pt' " +
-        "title='Issuer (bank)'/>");
+        "title='Administrator'/>");
     
     String html;
 

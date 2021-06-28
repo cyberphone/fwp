@@ -104,6 +104,11 @@
         <servlet-class>org.webpki.webapps.fwp.FIDOLoginServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>RegistrationListServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.admin.RegistrationListServlet</servlet-class>
+    </servlet>
+    
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -194,6 +199,11 @@
         <url-pattern>/fidologin</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>RegistrationListServlet</servlet-name>
+        <url-pattern>/admin/reglist</url-pattern>
+    </servlet-mapping>
+
     <security-constraint>
       <web-resource-collection>
         <web-resource-name>The app</web-resource-name>
@@ -203,5 +213,28 @@
         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
       </user-data-constraint>
     </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Bank admin manager</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>manager</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>Bank admin</realm-name>
+  </login-config>
+
+  <security-role>
+    <description>The role that is required to log in as admin</description>
+    <role-name>manager</role-name>
+  </security-role>
 
 </web-app>

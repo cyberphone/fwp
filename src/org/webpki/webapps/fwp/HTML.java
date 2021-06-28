@@ -78,15 +78,23 @@ public class HTML {
     static String getHTML(Actors actor, String javascript, String box) {
         StringBuilder html = new StringBuilder(HTML_INIT);
         if (javascript != null) {
-            html.append("<script>\n'use strict';\n").append(javascript)
-                    .append("</script>");
+            html.append("<script>\n'use strict';\n")
+                .append(javascript)
+                .append("</script>");
         }
+        String admin = actor == Actors.ADMIN ? "../" : "";
         html.append(
             "</head><body>" +
             "<div style='display:flex;flex-wrap:wrap-reverse;justify-content:space-between'>" +
-            "<div><img src='images/thelab.svg' " +
+            "<div><img src='")
+        .append(admin)
+        .append(
+            "images/thelab.svg' " +
             "style='cursor:pointer;height:25pt;padding-bottom:10pt;margin-right:30pt'" +
-            " onclick=\"document.location.href='home'\" title='Home of the lab...'/></div>")
+            " onclick=\"document.location.href='")
+        .append(admin)
+        .append(
+            "home'\" title='Home of the lab...'/></div>")
         .append(actor.html)
         .append(
             "</div>" +
@@ -147,10 +155,10 @@ public class HTML {
             "</textarea></div>";
     }
     
-    static void standardPage(HttpServletResponse response,
-                             Actors actor,
-                             String javaScript,
-                             StringBuilder html) throws IOException, ServletException {
+    public static void standardPage(HttpServletResponse response,
+                                    Actors actor,
+                                    String javaScript,
+                                    StringBuilder html) throws IOException, ServletException {
         HTML.output(response, HTML.getHTML(actor, javaScript, html.toString()));
     }
 
