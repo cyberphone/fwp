@@ -68,7 +68,7 @@ CREATE TABLE USERS (
     -- However, in a server-oriented setting using the WebAuthn API the
     -- FIDO CredentialId must be known by the verifier.  
 
-    CredentialId    VARCHAR(100) NOT NULL,
+    CredentialId    VARCHAR(300) NOT NULL,
 
 
     -- The FWP wallet is obliged including the associated public key in
@@ -132,7 +132,7 @@ CREATE PROCEDURE ASSERT_TRUE (IN p_DidIt BOOLEAN,
 
 CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                                         IN p_CardHolder VARCHAR(50),
-                                        IN p_CredentialId VARCHAR(100),
+                                        IN p_CredentialId VARCHAR(300),
                                         IN p_PublicKey VARBINARY(300),
                                         IN p_S256KeyHash BINARY(32),
                                         IN p_ClientIpAddress VARCHAR(50))
@@ -180,7 +180,7 @@ CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
   END
 //
 
-CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(100),
+CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(300),
                                       OUT p_PublicKey VARBINARY(300),
                                       OUT p_CardHolder VARCHAR(50),
                                       IN p_UserId CHAR(36))
