@@ -81,7 +81,6 @@ public class FIDOEnrollServlet extends HttpServlet {
                 String userId = WalletCore.getWalletCookie(request);
                 if (userId == null) {
                     userId = UUID.randomUUID().toString();
-                    logger.info("Created new user: " + userId);
                 }
 
                 // - Provide FIDO register challenge data
@@ -160,7 +159,7 @@ if (cardHolder.equals("-2")) { // Soft server error
                 walletCookie.setSecure(true);
                 response.addCookie(walletCookie);
 
-                logger.info("Initiated user: " + userId);
+                logger.info("Successfully enrolled user: " + userId);
             } else {
                 WalletCore.failed("Unknown phase: " + phase);
             }

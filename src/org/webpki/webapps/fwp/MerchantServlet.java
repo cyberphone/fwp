@@ -79,15 +79,16 @@ public class MerchantServlet extends HttpServlet {
             "'/>" +
             "</form>" +
 
-            "<div class='header'>Back to Merchant</div>" +
+            "<div class='header'>Return to Merchant</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>")
         .append(ADServlet.sectionReference("seq-6"))
         .append(
-              ": The <span class='actor'>Merchant</span> has received the authorization response " +
-              "from the <span class='actor'>Wallet</span> and now " +
-              "needs to take the user authorization (together with other data), " +
+              ": The <span class='actor'>Merchant</span> checkout software has now " +
+              "returned the authorization response " +
+              "from the <span class='actor'>Wallet</span>.  The next step is taking " +
+              "the authorization (together with other data), " +
               "to a suitable Payment System Provider " +
               "(<span class='actor'>PSP</span>) " +
               "for fulfillment." +

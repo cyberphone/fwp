@@ -55,6 +55,7 @@ public class SADServlet extends HttpServlet {
             WalletCore.failed("Missing wallet data");
             return;
         }
+        logger.info("Successful authorization by: " + WalletCore.getWalletCookie(request));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='esad'>" +
             "<input type='hidden' name='" + WalletCore.FWP_SAD + "' value='")
