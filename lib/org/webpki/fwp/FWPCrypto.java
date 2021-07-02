@@ -119,7 +119,8 @@ public class FWPCrypto {
 
     public static byte[] directSign(byte[] unsignedFwpAssertion, 
                                     PrivateKey privateKey, 
-                                    String origin)
+                                    String origin,
+                                    int flags)
             throws IOException, GeneralSecurityException {
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
         int coseAlgorithm = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
@@ -134,7 +135,7 @@ public class FWPCrypto {
         // Hard-coded FIDO Authenticator Data
         byte[] authenticatorData = ArrayUtil.add(
                 HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
-                new byte[] {(byte) (FLAG_UP + FLAG_UV), 0, 0, 0, 0 });
+                new byte[] {(byte)flags, 0, 0, 0, 0 });
 
         // Create a FIDO compatible signature.
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)

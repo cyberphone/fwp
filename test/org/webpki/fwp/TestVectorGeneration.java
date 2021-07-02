@@ -132,7 +132,10 @@ public class TestVectorGeneration {
                 .create(fwpSigner);
         
         byte[] fwpAssertion = 
-                FWPCrypto.directSign(unsignedFwpAssertion, p256.getPrivate(), ISSUER_URL);
+                FWPCrypto.directSign(unsignedFwpAssertion,
+                		             p256.getPrivate(),
+                		             ISSUER_URL,
+                		             FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV);
 
         // ES256 generates different results for each round.  We try to limit that...
         fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
@@ -168,7 +171,7 @@ public class TestVectorGeneration {
                       "' in hexadecimal notation:\n")
               .append(DebugFormatter.getHexString(
                       authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getByteString()))
-              .append("\n(here using the UP flag and a zero counter value)\n");
+              .append("\n(here using the UP+UV flags and a zero counter value)\n");
 
         result.append("\nReturned FIDO '" + FWPCrypto.SIGNATURE_JSON + 
                       "' in hexadecimal notation:\n")

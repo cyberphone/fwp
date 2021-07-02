@@ -79,7 +79,7 @@ Relying party URL: https://mybank.fr
 
 Returned FIDO 'authenticatorData' in hexadecimal notation:
 412e175a0f0bdc06dabf0b1db79b97541c08dbacee7e31c97a553588ee922ea70500000000
-(here using the UP flag and a zero counter value)
+(here using the UP+UV flags and a zero counter value)
 
 Returned FIDO 'signature' in hexadecimal notation:
 3046022100f62898a14cfb61bcebd98e137313adb914bc942b6f9d37daf0933312ced74f68022100d4ed89843b0975628a4e649cb26214ac64a3080773ee67f0b817eb2e349e013b
