@@ -60,9 +60,10 @@ public class RegistrationListServlet extends HttpServlet {
 
             try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
                 try (PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT ANY_VALUE(Created), ClientIpAddress from USERS " +
+                        "SELECT MAX(Created) AS Instant, ClientIpAddress from USERS " +
                         "WHERE PublicKey IS NOT NULL " +
-                        "GROUP BY ClientIpAddress LIMIT 100;");) {
+                        "GROUP BY ClientIpAddress " +
+                        "ORDER BY Instant DESC LIMIT 100;");) {
                     try (ResultSet rs = stmt.executeQuery();) {
                         while (rs.next()) {
                             String ipAddress = rs.getString(2);
