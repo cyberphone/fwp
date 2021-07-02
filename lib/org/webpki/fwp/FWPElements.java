@@ -16,8 +16,6 @@
  */
 package org.webpki.fwp;
 
-import java.io.IOException;
-
 /**
  * Core elements of an FWP assertion.
  * 
@@ -31,10 +29,9 @@ public enum FWPElements {
     SERIAL_NUMBER             (5),
     PAYMENT_METHOD            (6),
     NETWORK_DATA              (7),
-    USER_AUTHORIZATION_METHOD (8),
-    PLATFORM_DATA             (9),
-    TIME_STAMP                (10),
-    AUTHORIZATION             (11);
+    PLATFORM_DATA             (8),
+    TIME_STAMP                (9),
+    AUTHORIZATION             (10);
     
     
     int cborLabel;
@@ -53,29 +50,5 @@ public enum FWPElements {
     public static final int CBOR_PDSUB_NAME          = 3;
     public static final int CBOR_PDSUB_VERSION       = 4;
     
-    public static enum UserAuthorizationMethods {
-    
-        UNSPECIFIED     (0),
-        FINGERPRINT     (1),
-        FACERECOGNITION (2),
-        PIN             (3);
-        
-        int cborValue;
-
-        UserAuthorizationMethods(int cborValue) {
-            this.cborValue = cborValue;
-        }
-    
-    }
-
-    static UserAuthorizationMethods getUserAuthorizationMethod(int cborValue) throws IOException {
-        for (UserAuthorizationMethods userAuthMeth : UserAuthorizationMethods.values()) {
-            if (userAuthMeth.cborValue == cborValue) {
-                return userAuthMeth;
-            }
-        }
-        throw new IOException("Unrecognized user authorization method: " + cborValue);
-    }
-
 }
     

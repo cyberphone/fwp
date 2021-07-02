@@ -25,6 +25,7 @@ import java.security.PublicKey;
 import java.sql.Connection;
 
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 
 import java.util.logging.Logger;
 
@@ -39,6 +40,7 @@ import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
+import org.webpki.fwp.FWPCrypto;
 import org.webpki.fwp.FWPJsonAssertion;
 import org.webpki.fwp.FWPPaymentRequest;
 import org.webpki.fwp.IssuerRequest;
@@ -61,6 +63,15 @@ public class IssuerServlet extends HttpServlet {
     public static final String ISSUER_REQUEST = "issuerRequest";
     
     static long transactionId = 56807446412l;
+    
+    StringBuilder getUserValidation(HashSet<FWPCrypto.UserValidation> userValidationFlags) {
+        StringBuilder userValidation = new StringBuilder();
+        userValidation.append("Present=")
+                      .append(userValidationFlags.contains(FWPCrypto.UserValidation.PRESENT))
+                      .append(", Verified=")
+                      .append(userValidationFlags.contains(FWPCrypto.UserValidation.VERIFIED));
+        return userValidation;
+    }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -199,8 +210,8 @@ public class IssuerServlet extends HttpServlet {
             .append(' ')
             .append(fwpAssertion.getUserAgent().getVersion())
             .append("</td></tr>" +
-                    "<tr><th>Auth&nbsp;Method</th><td>")
-            .append(fwpAssertion.getUserAuthorizationMethod().toString())
+                    "<tr><th>User&nbsp;Validation</th><td>")
+            .append(getUserValidation(fwpAssertion.getUserValidation()))
             .append("</td></tr>" +
                     "<tr><th>IP&nbsp;Address</th><td>")
             .append(pspRequest.getClientIpAddress())

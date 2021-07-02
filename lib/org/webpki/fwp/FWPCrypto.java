@@ -27,6 +27,8 @@ import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 
+import java.util.HashSet;
+
 import org.webpki.cbor.CBORByteString;
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
@@ -66,8 +68,10 @@ public class FWPCrypto {
     public static final String AUTH_DATA_CBOR           = "authData";
 
     // Attestation Object flags
-    public static final int    FLAG_ED                  = 0x80;
+    public static final int    FLAG_UP                  = 0x01;
+    public static final int    FLAG_UV                  = 0x04;
     public static final int    FLAG_AT                  = 0x40;
+    public static final int    FLAG_ED                  = 0x80;
     
     // ClientDataJSON
     public static final String CDJ_TYPE                 = "type";
@@ -86,6 +90,8 @@ public class FWPCrypto {
     static final int COSE_ALGORITHM_LABEL  = 3;
     
     static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
+    
+    public enum UserValidation {PRESENT, VERIFIED};
 
     private static byte[] addRemainingElements(CBORMap fwpAssertionInProgress,
                                                byte[] clientDataJSON,
@@ -128,7 +134,7 @@ public class FWPCrypto {
         // Hard-coded FIDO Authenticator Data
         byte[] authenticatorData = ArrayUtil.add(
                 HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
-                new byte[] { 1, 0, 0, 0, 0 });
+                new byte[] {(byte) (FLAG_UP + FLAG_UV), 0, 0, 0, 0 });
 
         // Create a FIDO compatible signature.
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
@@ -240,7 +246,8 @@ public class FWPCrypto {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpSignature(CBORMap fwpAssertion)
+    public static byte[] validateFwpSignature(CBORMap fwpAssertion,
+                                              HashSet<UserValidation> userValidationFlags)
             throws IOException, GeneralSecurityException {
         // Retrieve the authorization object.
         CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
@@ -250,6 +257,14 @@ public class FWPCrypto {
         byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
         byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
         
+        // Collect authenticator data that may be useful in disputes.
+        if ((authenticatorData[32] & FLAG_UP) != 0) {
+            userValidationFlags.add(UserValidation.PRESENT);
+        }
+        if ((authenticatorData[32] & FLAG_UV) != 0) {
+            userValidationFlags.add(UserValidation.VERIFIED);
+        }        
+
         // The public key must be available and be in COSE format.
         // Here it is converted to the Java format since this
         // is necessary for validation using Java standard tools.

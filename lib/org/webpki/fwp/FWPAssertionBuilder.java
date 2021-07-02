@@ -24,7 +24,6 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 import org.webpki.cbor.CBORDateTime;
-import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
@@ -109,12 +108,6 @@ public class FWPAssertionBuilder {
     public FWPAssertionBuilder setOptionalNetworkData(String jsonStringOrNull) throws IOException {
         return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_DATA,
                                                             JSONReader.convert(jsonStringOrNull));
-    }
-
-    public FWPAssertionBuilder setUserAuthorizationMethod(
-                          FWPElements.UserAuthorizationMethods userAuthz) throws IOException {
-        return setElement(FWPElements.USER_AUTHORIZATION_METHOD,
-                          new CBORInteger(userAuthz.cborValue));
     }
 
     public byte[] create(FWPPreSigner fwpPreSigner) throws IOException, GeneralSecurityException {

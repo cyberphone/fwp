@@ -32,7 +32,6 @@ import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.fwp.FWPAssertionBuilder;
 import org.webpki.fwp.FWPCrypto;
-import org.webpki.fwp.FWPElements;
 import org.webpki.fwp.FWPPaymentRequest;
 
 import org.webpki.json.JSONObjectReader;
@@ -87,7 +86,6 @@ public class ADServlet extends HttpServlet {
                     .setAccountData(selectedCard.getString(WalletCore.ACCOUNT_ID),
                                     selectedCard.getString(WalletCore.SERIAL_NUMBER),
                                     selectedCard.getString(WalletCore.PAYMENT_METHOD))
-                    .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                     .setPayeeHost(request.getServerName())
                     .setPlatformData(system.operatingSystemName,
                                      system.operatingSystemVersion,

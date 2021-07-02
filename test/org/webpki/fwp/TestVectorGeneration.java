@@ -106,7 +106,7 @@ public class TestVectorGeneration {
         result.append("\n\nUser FIDO key in JWK format:\n")
               .append(currPrivateKey);
         
-        GregorianCalendar time = ISODateTime.parseDateTime("2021-06-17T12:34:07+02:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2021-07-02T12:34:07+02:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
@@ -127,7 +127,6 @@ public class TestVectorGeneration {
                                 "0057162932",
                                 PAYMENT_METHOD)
                 .setPlatformData("Android", "10.0", "Chrome", "103")
-                .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
                 .setOptionalNetworkData("\"additional stuff...\"")
                 .setPayeeHost(MERCHANT_HOST)
                 .create(fwpSigner);

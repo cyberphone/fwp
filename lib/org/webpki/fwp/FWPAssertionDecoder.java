@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -63,11 +64,6 @@ public class FWPAssertionDecoder {
     GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
         return timeStamp;
-    }
-    
-    FWPElements.UserAuthorizationMethods userAuthorizationMethod;
-    public FWPElements.UserAuthorizationMethods getUserAuthorizationMethod() {
-        return userAuthorizationMethod;
     }
     
     CBORObject networkData;
@@ -123,6 +119,11 @@ public class FWPAssertionDecoder {
         return publicKey;
     }
     
+    HashSet<FWPCrypto.UserValidation> userValidation = new HashSet<>();
+    public HashSet<FWPCrypto.UserValidation> getUserValidation() {
+        return userValidation;
+    }
+    
     public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
                                                                  GeneralSecurityException {
         // Convert binary into CBOR objects.
@@ -156,10 +157,6 @@ public class FWPAssertionDecoder {
         userAgent = new PlatformNameVersion(
                 platformData.getObject(FWPElements.CBOR_PD_USER_AGENT));
 
-        // User Authorization Method
-        userAuthorizationMethod = FWPElements.getUserAuthorizationMethod(fwpAssertion.getObject(
-                FWPElements.USER_AUTHORIZATION_METHOD.cborLabel).getInt());
-        
         // Date Time
         timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
 
@@ -174,9 +171,9 @@ public class FWPAssertionDecoder {
             // We mark it as "read" to not get a problem with checkObjectForUnread().
             networkData.scan();
         }
-
+        
         // Finally, the authorization signature.
-        publicKey = FWPCrypto.validateFwpSignature(fwpAssertion);
+        publicKey = FWPCrypto.validateFwpSignature(fwpAssertion, userValidation);
 
         // Check that we didn't forgot anything or that there is "other" data.
         fwpAssertion.checkForUnread();

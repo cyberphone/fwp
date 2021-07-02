@@ -185,7 +185,6 @@ public class FIDOTest {
                             "057862932",
                             "https://bankdirect.com")
             .setPlatformData("Android", "10.0", "Chrome", "103")
-            .setUserAuthorizationMethod(FWPElements.UserAuthorizationMethods.FINGERPRINT)
             .setOptionalNetworkData(networkData)
             .create(fwpPreSigner),
             privateKey, "https://mybank.com");
@@ -228,8 +227,8 @@ public class FIDOTest {
         assertTrue("amount", paymentRequest.getAmount().equals("140.00"));
         assertTrue("currency", paymentRequest.getCurrency().equals("EUR"));
         assertTrue("host", decoder.getPayeeHost().equals("spaceshop.com"));
-        assertTrue("fp", decoder.getUserAuthorizationMethod().equals(
-                FWPElements.UserAuthorizationMethods.FINGERPRINT));
+        assertTrue("up", decoder.getUserValidation().contains(FWPCrypto.UserValidation.PRESENT));
+        assertTrue("uv", decoder.getUserValidation().contains(FWPCrypto.UserValidation.VERIFIED));
         assertTrue("nd", decoder.getNetworkData() == null);
         assertTrue("account", decoder.getAccountId().equals("FR7630002111110020050014382"));
         assertTrue("sn", decoder.getSerialNumber().equals("057862932"));
