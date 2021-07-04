@@ -80,7 +80,7 @@ public class FinalizeAssertionServlet extends HttpServlet {
             "'/>" +
             "</form>" +
 
-            "<div class='header'>Finally, the FWP Assertion!</div>" +
+            "<div class='header'>Completed FWP Assertion</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>")

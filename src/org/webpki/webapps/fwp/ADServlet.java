@@ -111,12 +111,14 @@ public class ADServlet extends HttpServlet {
             .append(sectionReference("seq-4.2"))
             .append(
                   ": The payment data to authorize. " +
-                  "This data is (after SHA256-digesting), used as the FIDO &quot;challenge&quot;. " +
-                  "That is, <i>there is no FIDO authentication server</i> because FWP builds on a " +
-                  "&quot;Card&nbsp;Present&quot; <i>authorization</i> concept like " +
+                  "This data is (after SHA256-digesting), used as the sole " +
+                  "FIDO &quot;challenge&quot; source." +
+                  "<div style='margin-top:0.4em'>That is, <i>there is no FIDO authentication " +
+                  "server involved</i> since FWP builds on the same " +
+                  "&quot;Card&nbsp;Present&quot; <i>authorization</i> concept as " +
                   "<a href='https://www.emvco.com/about/deployment-statistics/' " +
                   "target='_blank'>EMV&reg;</a> and " + 
-                  "<a href='https://www.apple.com/apple-pay/' target='_blank'>Apple Pay&reg;</a>." +
+                  "<a href='https://www.apple.com/apple-pay/' target='_blank'>Apple Pay&reg;</a>.</div>" +
                   "<div style='margin-top:0.4em'>The data is shown in " +
                   "<a href='https://fido-web-pay.github.io/specification/#cbor' " +
                   "target='_blank'>CBOR</a> diagnostic notation.</div>" +

@@ -84,8 +84,8 @@ public class ESADServlet extends HttpServlet {
             .append(
                   ": The authorization data has now been signed and encrypted, " +
                   "the latter using an <i>issuer-specific key</i>." +
-                  "<div style='margin-top:0.4em'>However, payment backend processing needs some data " +
-                  "in clear in order to perform its work.</div>" +
+                  "<div style='margin-top:0.4em'>However, payment backend processing needs some " +
+                  "additional data (in clear) in order to perform its work.</div>" +
                   "</div>" +
                 "</div>" +
 
@@ -96,7 +96,7 @@ public class ESADServlet extends HttpServlet {
                 
                 "<div style='display:flex;justify-content:center'>" +
                   "<div id='" + ACTIVATE_ID + "' class='stdbtn' onclick=\"doFinalize()\">" +
-                    "<i>Finalize</i> Assertion" +
+                    "<i>Finalize</i> FWP Assertion" +
                   "</div>" +
                 "</div>" +
 

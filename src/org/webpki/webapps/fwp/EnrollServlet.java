@@ -72,8 +72,9 @@ public class EnrollServlet extends HttpServlet {
     
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>" +
-                      "In a real-world setting, you would enroll cards at an <i>issuer</i> site " +
-                      "(after having logged-in using an <i>issuer-specific method</i>)." +
+                      "In a real-world setting, you would enroll payment cards at an " +
+                       "<span class='actor'>Issuer</span> site " +
+                      "(after being authenticated using an <i>issuer-specific method</i>)." +
                   "</div>" +
                 "</div>" +
     
@@ -198,19 +199,21 @@ public class EnrollServlet extends HttpServlet {
     
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                 "<div class='comment'>" +
-                "The following cards have been added to your wallet." +
-               "</div>" +
-               "</div>" +
-               "<div style='display:flex;align-items:center;flex-direction:column'>" +
+                "The following cards have been added to your FWP wallet." +
+                "</div>" +
+                "</div>" +
+                "<div style='display:flex;align-items:center;flex-direction:column'>" +
              
-               "<div style='display:flex;align-items:center;flex-direction:column'>");
+                "<div style='display:flex;align-items:center;flex-direction:column'>");
             
             for (DataBaseOperations.VirtualCard virtualCard : virtualCards) {
                 html.append("<img src='card?p1=")
                     .append(URLEncoder.encode(virtualCard.accountId, "utf-8"))
                     .append("&p2=")
                     .append(URLEncoder.encode(virtualCard.cardHolder, "utf-8"))
-                    .append("' class='card'/>");
+                    .append("' class='card' title='")
+                    .append(virtualCard.accountId.startsWith("FR") ? "SEPA Card" : "Card Network")
+                    .append("'/>");
             }
     
             html.append(

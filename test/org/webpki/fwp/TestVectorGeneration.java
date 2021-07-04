@@ -133,9 +133,9 @@ public class TestVectorGeneration {
         
         byte[] fwpAssertion = 
                 FWPCrypto.directSign(unsignedFwpAssertion,
-                		             p256.getPrivate(),
-                		             ISSUER_URL,
-                		             FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV);
+                                     p256.getPrivate(),
+                                     ISSUER_URL,
+                                     FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV);
 
         // ES256 generates different results for each round.  We try to limit that...
         fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);

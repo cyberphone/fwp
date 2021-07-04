@@ -131,14 +131,15 @@ public class IssuerServlet extends HttpServlet {
 
             StringBuilder html = new StringBuilder(
     
-                "<div class='header'>Received by the Issuer</div>" +
+                "<div class='header'>Payment Initiation</div>" +
     
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                   "<div class='comment'>")
             .append(ADServlet.sectionReference("seq-10"))
             .append(
                   ": If you have reached this far, the payment request has been verified " +
-                  "for correctness and a payment operation is being initiated." +
+                  "for correctness by the <span class='actor'>Issuer</span> and a " +
+                  "payment operation is being initiated." +
                   "<div style='margin-top:0.4em'>Thank you for testing!</div>" +
                   "</div>" +
                 "</div>" +

@@ -80,7 +80,7 @@ public class PSPServlet extends HttpServlet {
             "'/>" +
             "</form>" +
 
-            "<div class='header'>PSP Action</div>" +
+            "<div class='header'>PSP Process</div>" +
 
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div class='comment'>")

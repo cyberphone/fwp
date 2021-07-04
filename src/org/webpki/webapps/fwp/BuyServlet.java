@@ -74,7 +74,8 @@ public class BuyServlet extends HttpServlet {
               "<div class='comment'>" +
                   "Since this proof-of-concept and test application is only about " +
                   "payments, the shopping session is assumed to already have been " +
-                  "carried out.  Here you just pay &#x20ac;&#x2009;435 &#x1f60e;" +
+                  "carried out.  Here you just pay &#x20ac;&#x2009;435 using " +
+                  "demo credentials issued by a non-existing bank &#x1f60e;" +
               "</div>" +
             "</div>" +
 
@@ -93,8 +94,8 @@ public class BuyServlet extends HttpServlet {
              
             "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
               "<div style='max-width:40em'>" +
-                "Note that FIDO Web Pay follows the FIDO paradigm by being " +
-                "<i>payment system neutral</i>. " +
+                "<a href='https://fido-web-pay.github.io' target='_blank'>FIDO Web Pay</a> " +
+                "follows the FIDO paradigm by being <i>payment system neutral</i>. " +
                 "This also makes the user experience <i>identical</i> when performing a " +
                 "SEPA instant payment or using an international card network like VISA." +
               "</div>" +
