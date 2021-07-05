@@ -282,9 +282,8 @@ public class FWPCrypto {
         CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
         CBORMap copyOfAuthorization = copyOfAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
 
-        // The following elements do not participate in the signature generation
-        // and must therefore be removed from the assertion (after first having
-        // been fetched).
+        // The following elements do not participate in the FWP assertion data
+        // and must therefore be removed from the assertion.
         copyOfAuthorization.removeObject(AS_AUTHENTICATOR_DATA)
                            .removeObject(AS_CLIENT_DATA_JSON)
                            .removeObject(AS_SIGNATURE);
