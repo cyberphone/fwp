@@ -117,10 +117,11 @@ public class FWPCrypto {
                 cborFwpAssertion, clientDataJSON, authenticatorData, signature);
     }
 
-    public static byte[] directSign(byte[] unsignedFwpAssertion, 
-                                    PrivateKey privateKey, 
-                                    String origin,
-                                    int flags)
+    // For test purposes only.
+    static byte[] directSign(byte[] unsignedFwpAssertion, 
+                             PrivateKey privateKey, 
+                             String origin,
+                             int flags)
             throws IOException, GeneralSecurityException {
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
         int coseAlgorithm = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
@@ -128,7 +129,8 @@ public class FWPCrypto {
         byte[] challenge = HashAlgorithms.SHA256.digest(unsignedFwpAssertion);
 
         // Now we have the data needed for creating the FIDO ClientDataJSON object.
-        byte[] clientDataJSON = new JSONObjectWriter().setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
+        byte[] clientDataJSON = new JSONObjectWriter()
+                .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
                 .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
                 .serializeToBytes(JSONOutputFormats.NORMALIZED);
 
