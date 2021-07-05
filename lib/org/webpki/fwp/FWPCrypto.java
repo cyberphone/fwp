@@ -292,8 +292,6 @@ public class FWPCrypto {
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
         // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
-        // The test below can probably safely be removed but we keep it for now; it is
-        // at least not incorrect...
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
                                JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
