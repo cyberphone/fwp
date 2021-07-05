@@ -178,6 +178,7 @@ public class FWPCrypto {
         if (publicKey instanceof ECKey) {
             return -7;
         }
+        // Waiting for an answer for how to deal with Ed448...
         return -8;
     }
 
@@ -197,6 +198,7 @@ public class FWPCrypto {
                 return AsymSignatureAlgorithms.ECDSA_SHA256;
             
             case -8:
+            	// Well, this is not really COSE but who cares?
                 return AsymSignatureAlgorithms.ED25519;
     
             default:
@@ -238,25 +240,34 @@ public class FWPCrypto {
             throw new GeneralSecurityException("Signature validation failed");
         }       
     }
+    
+    private static byte[] readAndRemove(CBORMap authorization, int cborLabel) throws IOException {
+    	byte[] data = authorization.getObject(cborLabel).getByteString();
+    	authorization.removeObject(cborLabel);
+    	return data;
+    }
 
     /**
      * Validate FWP assertion with respect to crypto.
-     * 
+     *
+     * Exclusively called by FWPAssertionDecoder
      * @param fwpAssertion FWP assertion
      * @return Public key in COSE format
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public static byte[] validateFwpSignature(CBORMap fwpAssertion,
-                                              HashSet<UserValidation> userValidationFlags)
+    static byte[] validateFwpSignature(CBORMap fwpAssertion,
+                                       HashSet<UserValidation> userValidationFlags)
             throws IOException, GeneralSecurityException {
         // Retrieve the authorization object.
         CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
         
-        // Fetch the core FIDO assertion elements.
-        byte[] signature = authorization.getObject(AS_SIGNATURE).getByteString();
-        byte[] clientDataJSON = authorization.getObject(AS_CLIENT_DATA_JSON).getByteString();
-        byte[] authenticatorData = authorization.getObject(AS_AUTHENTICATOR_DATA).getByteString();
+        // Fetch the core FIDO assertion elements. Remove them
+        // from the FWP assertion as well since they are not a
+        // part of the FIDO "challenge" data.
+        byte[] signature = readAndRemove(authorization, AS_SIGNATURE);
+        byte[] clientDataJSON = readAndRemove(authorization, AS_CLIENT_DATA_JSON);
+        byte[] authenticatorData = readAndRemove(authorization, AS_AUTHENTICATOR_DATA);
         
         // Collect authenticator data that may be useful in disputes.
         if ((authenticatorData[32] & FLAG_UP) != 0) {
@@ -278,18 +289,10 @@ public class FWPCrypto {
         // Does the algorithm match the public key?
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
-        // Be nice - Do not destroy the original assertion.
-        CBORMap copyOfAssertion = CBORObject.decode(fwpAssertion.encode()).getMap();
-        CBORMap copyOfAuthorization = copyOfAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
-
-        // The following elements do not participate in the FWP assertion data
-        // and must therefore be removed from the assertion.
-        copyOfAuthorization.removeObject(AS_AUTHENTICATOR_DATA)
-                           .removeObject(AS_CLIENT_DATA_JSON)
-                           .removeObject(AS_SIGNATURE);
-        
         // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
-        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(copyOfAssertion.encode()),
+        // The test below can probably safely be removed but we keep it for now; it is
+        // at least not incorrect...
+        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
                                JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }

@@ -31,6 +31,8 @@ import org.webpki.cbor.CBORObject;
  */
 public class FWPAssertionDecoder {
     
+    private CBORMap fwpAssertion;
+    
     public class PlatformNameVersion {
         String name;
         String version;
@@ -51,53 +53,51 @@ public class FWPAssertionDecoder {
         }
     }
     
-    PlatformNameVersion operatingSystem;
+    private PlatformNameVersion operatingSystem;
     public PlatformNameVersion getOperatingSystem() {
         return operatingSystem;
     }
     
-    PlatformNameVersion userAgent;
+    private PlatformNameVersion userAgent;
     public PlatformNameVersion getUserAgent() {
         return userAgent;
     }
 
-    GregorianCalendar timeStamp;
+    private GregorianCalendar timeStamp;
     public GregorianCalendar getTimeStamp() {
         return timeStamp;
     }
     
-    CBORObject networkData;
+    private CBORObject networkData;
     public CBORObject getNetworkData() {
         return networkData;
     }
     
-    FWPPaymentRequest paymentRequest;
+    private FWPPaymentRequest paymentRequest;
     public FWPPaymentRequest getPaymentRequest() {
         return paymentRequest;
     }
     
-    String payeeHost;
+    private String payeeHost;
     public String getPayeeHost() {
         return payeeHost;
     }
     
-    String accountId;
+    private String accountId;
     public String getAccountId() {
         return accountId;
     }
 
-    String serialNumber;
+    private String serialNumber;
     public String getSerialNumber() {
         return serialNumber;
     }
 
-    String paymentMethod;
+    private String paymentMethod;
     public String getPaymentMethod() {
         return paymentMethod;
     } 
 
-    CBORMap fwpAssertion;
-  
     public void verifyClaimedPaymentRequest(FWPPaymentRequest claimedPaymentRequest) 
             throws IOException {
         if (!paymentRequest.equals(claimedPaymentRequest)) {
@@ -106,20 +106,16 @@ public class FWPAssertionDecoder {
         }
     }
     
-    String getString(FWPElements name) throws IOException {
+    private String getString(FWPElements name) throws IOException {
         return fwpAssertion.getObject(name.cborLabel).getTextString();
     }
     
-    public CBORMap getDecoded() {
-        return fwpAssertion;
-    }
-    
-    byte[] publicKey;
+    private byte[] publicKey;
     public byte[] getPublicKey() {
         return publicKey;
     }
     
-    HashSet<FWPCrypto.UserValidation> userValidation = new HashSet<>();
+    private HashSet<FWPCrypto.UserValidation> userValidation = new HashSet<>();
     public HashSet<FWPCrypto.UserValidation> getUserValidation() {
         return userValidation;
     }
@@ -157,10 +153,10 @@ public class FWPAssertionDecoder {
         userAgent = new PlatformNameVersion(
                 platformData.getObject(FWPElements.CBOR_PD_USER_AGENT));
 
-        // Date Time
+        // Time Stamp
         timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
 
-        // Host information from the browser
+        // Payee Host information from the browser
         payeeHost = getString(FWPElements.PAYEE_HOST);
 
         // Optional Network Data.
@@ -168,11 +164,12 @@ public class FWPAssertionDecoder {
             // There is such data, get it!  It can be any CBOR data
             // that has a 1-2-1 translation to JSON.
             networkData = fwpAssertion.getObject(FWPElements.NETWORK_DATA.cborLabel);
-            // We mark it as "read" to not get a problem with checkObjectForUnread().
+            // We mark it as "read" to not get a problem with checkForUnread().
             networkData.scan();
         }
         
         // Finally, the authorization signature.
+        // Note: must be the last since it modifies the fwpAssertion.
         publicKey = FWPCrypto.validateFwpSignature(fwpAssertion, userValidation);
 
         // Check that we didn't forgot anything or that there is "other" data.

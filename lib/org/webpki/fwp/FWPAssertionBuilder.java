@@ -115,15 +115,13 @@ public class FWPAssertionBuilder {
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
             setOptionalTimeStamp(new GregorianCalendar());
         }
+        setElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
         for (FWPElements name : FWPElements.values()) {
             // Only NETWORK_DATA is optional.
-            if (!elementList.contains(name) &&
-                name != FWPElements.NETWORK_DATA &&
-                name != FWPElements.AUTHORIZATION) {
+            if (!elementList.contains(name) && name != FWPElements.NETWORK_DATA) {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
-        setElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
         return fwpAssertion.encode();
     }
 }

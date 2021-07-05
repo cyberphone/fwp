@@ -193,6 +193,9 @@ public class FIDOTest {
     
     @Test
     public void CreateAssertions() throws Exception {
+        KeyPair keyPair = readKey("p256");
+        fwpPreSigner = new FWPCrypto.FWPPreSigner(
+             CBORPublicKey.encode(keyPair.getPublic()).encode());
         try {
             new FWPAssertionBuilder()
                 .setPaymentRequest(getPaymentRequest(true))
