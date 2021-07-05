@@ -198,7 +198,7 @@ public class FWPCrypto {
                 return AsymSignatureAlgorithms.ECDSA_SHA256;
             
             case -8:
-            	// Well, this is not really COSE but who cares?
+                // Well, this is not really COSE but who cares?
                 return AsymSignatureAlgorithms.ED25519;
     
             default:
@@ -242,9 +242,9 @@ public class FWPCrypto {
     }
     
     private static byte[] readAndRemove(CBORMap authorization, int cborLabel) throws IOException {
-    	byte[] data = authorization.getObject(cborLabel).getByteString();
-    	authorization.removeObject(cborLabel);
-    	return data;
+        byte[] data = authorization.getObject(cborLabel).getByteString();
+        authorization.removeObject(cborLabel);
+        return data;
     }
 
     /**
