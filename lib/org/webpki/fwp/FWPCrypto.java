@@ -86,8 +86,12 @@ public class FWPCrypto {
     static final int AS_CLIENT_DATA_JSON   = 4;
     static final int AS_SIGNATURE          = 5;
     
-    // For attestation objects
+    // For attestation public key objects
     static final int COSE_ALGORITHM_LABEL  = 3;
+    
+    // authData
+    static final int FLAG_OFFSET                 = 32;
+    static final int CREDENTIAL_ID_LENGTH_OFFSET = FLAG_OFFSET + 1 + 4 + 16;
     
     static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
     
@@ -272,10 +276,10 @@ public class FWPCrypto {
         byte[] authenticatorData = readAndRemove(authorization, AS_AUTHENTICATOR_DATA);
         
         // Collect authenticator data that may be useful in disputes.
-        if ((authenticatorData[32] & FLAG_UP) != 0) {
+        if ((authenticatorData[FLAG_OFFSET] & FLAG_UP) != 0) {
             userValidationFlags.add(UserValidation.PRESENT);
         }
-        if ((authenticatorData[32] & FLAG_UV) != 0) {
+        if ((authenticatorData[FLAG_OFFSET] & FLAG_UV) != 0) {
             userValidationFlags.add(UserValidation.VERIFIED);
         }        
 
@@ -322,13 +326,13 @@ public class FWPCrypto {
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
                 .getMap().getObject(AUTH_DATA_CBOR).getByteString();
-        if ((authData[32] & FLAG_AT) == 0) {
+        if ((authData[FLAG_OFFSET] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[32] & 0xff));
         }
-        int i = 32 + 1 + 4 + 16;
-        int credentialIdLength = (authData[i++] << 8) + (authData[i++] & 0xff);
-        int offset = i + credentialIdLength;
+        int credentialIdLength = (authData[CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
+                                 (authData[CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);
+        int offset = CREDENTIAL_ID_LENGTH_OFFSET + 2 + credentialIdLength;
         byte[] rawPublicKeyAndOptionalExtensionData = new byte[authData.length - offset];
         System.arraycopy(authData,
                          offset, 
