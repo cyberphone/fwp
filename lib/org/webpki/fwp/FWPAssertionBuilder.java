@@ -39,31 +39,34 @@ import org.webpki.util.ISODateTime;
 public class FWPAssertionBuilder {
     
     CBORMap fwpAssertion = new CBORMap();
-    
+
     HashSet<FWPElements> elementList = new HashSet<>();
-    
-    public FWPAssertionBuilder() throws IOException {
-        setStringElement(FWPElements.FWP_VERSION, FWPElements.CURRENT_VERSION);
-    }
-    
-    private FWPAssertionBuilder setElement(FWPElements name,
+
+    private FWPAssertionBuilder setElement(FWPElements name, 
                                            CBORObject value) throws IOException {
-        if (elementList.contains(FWPElements.AUTHORIZATION)) {
-            throw new IOException("Nothing can be added after: " + 
-                                  FWPElements.AUTHORIZATION.toString());
-        }
         if (!elementList.add(name)) {
             throw new IOException("Duplicate: " + name.toString());
         }
         fwpAssertion.setObject(name.cborLabel, value);
         return this;
     }
-    
+
     private FWPAssertionBuilder setStringElement(FWPElements element,
                                                  String string) throws IOException {
         return setElement(element, new CBORTextString(string));
     }
-    
+
+    private CBORMap nameVersion(String name, String version) throws IOException {
+        return new CBORMap().setObject(FWPElements.CBOR_PDSUB_NAME,
+                                       new CBORTextString(name))
+                            .setObject(FWPElements.CBOR_PDSUB_VERSION,
+                                       new CBORTextString(version));
+    }
+
+    public FWPAssertionBuilder() throws IOException {
+        setStringElement(FWPElements.FWP_VERSION, FWPElements.CURRENT_VERSION);
+    }
+
     public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
             throws IOException {
         return setElement(FWPElements.PAYMENT_REQUEST, jsonPaymentRequest.serializeAsCBOR());
@@ -71,13 +74,6 @@ public class FWPAssertionBuilder {
     
     public FWPAssertionBuilder setPayeeHost(String payeeHost) throws IOException {
         return setStringElement(FWPElements.PAYEE_HOST, payeeHost);
-    }
-    
-    private CBORMap nameVersion(String name, String version) throws IOException {
-        return new CBORMap().setObject(FWPElements.CBOR_PDSUB_NAME,
-                                       new CBORTextString(name))
-                            .setObject(FWPElements.CBOR_PDSUB_VERSION,
-                                       new CBORTextString(version));
     }
     
     public FWPAssertionBuilder setPlatformData(String osName,
@@ -99,12 +95,12 @@ public class FWPAssertionBuilder {
         setStringElement(FWPElements.PAYMENT_METHOD, paymentMethod);
         return this;
     }
-    
+
     public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) throws IOException {
         return setElement(FWPElements.TIME_STAMP,
                           new CBORDateTime(timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS));
     }
-    
+
     public FWPAssertionBuilder setOptionalNetworkData(String jsonStringOrNull) throws IOException {
         return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_DATA,
                                                             JSONReader.convert(jsonStringOrNull));
@@ -122,6 +118,8 @@ public class FWPAssertionBuilder {
                 throw new IOException("Missing element: " + name.toString());
             }
         }
+        // Attempts rebuilding will return NPE.
+        elementList = null;
         return fwpAssertion.encode();
     }
 }
