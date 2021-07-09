@@ -150,9 +150,9 @@ public class FWPCrypto {
                 .update(HashAlgorithms.SHA256.digest(clientDataJSON))
                 .sign();
         return addRemainingElements(cborFwpAssertion, 
-        		                    clientDataJSON,
-        		                    authenticatorData, 
-        		                    signature);
+                                    clientDataJSON,
+                                    authenticatorData, 
+                                    signature);
     }
 
     public static class FWPPreSigner {
