@@ -121,7 +121,7 @@ public class FWPCrypto {
                 cborFwpAssertion, clientDataJSON, authenticatorData, signature);
     }
 
-    // For test purposes only.
+    // For testing purposes only.
     static byte[] directSign(byte[] unsignedFwpAssertion, 
                              PrivateKey privateKey, 
                              String origin,
@@ -132,7 +132,7 @@ public class FWPCrypto {
                 .getObject(AS_ALGORITHM).getInt();
         byte[] challenge = HashAlgorithms.SHA256.digest(unsignedFwpAssertion);
 
-        // Now we have the data needed for creating the FIDO ClientDataJSON object.
+        // Now we have the data needed for creating a FIDO ClientDataJSON object.
         byte[] clientDataJSON = new JSONObjectWriter()
                 .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
                 .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
@@ -145,9 +145,14 @@ public class FWPCrypto {
 
         // Create a FIDO compatible signature.
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
-                .setEcdsaSignatureEncoding(true).update(authenticatorData)
-                .update(HashAlgorithms.SHA256.digest(clientDataJSON)).sign();
-        return addRemainingElements(cborFwpAssertion, clientDataJSON, authenticatorData, signature);
+                .setEcdsaSignatureEncoding(true)
+                .update(authenticatorData)
+                .update(HashAlgorithms.SHA256.digest(clientDataJSON))
+                .sign();
+        return addRemainingElements(cborFwpAssertion, 
+        		                    clientDataJSON,
+        		                    authenticatorData, 
+        		                    signature);
     }
 
     public static class FWPPreSigner {
@@ -295,7 +300,8 @@ public class FWPCrypto {
         // Does the algorithm match the public key?
         algorithmComplianceTest(publicKey, coseAlgorithm);
         
-        // This is not WebAuthn, this is FIDO Web Pay.  "challenge" = hash of FWP data.
+        // This is not WebAuthn, this is FIDO Web Pay: 
+        // FIDO "challenge" = hash of locally created FWP assertion data.
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
                                JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
