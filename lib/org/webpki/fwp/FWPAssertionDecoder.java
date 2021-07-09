@@ -169,7 +169,7 @@ public class FWPAssertionDecoder {
         }
         
         // Finally, the authorization signature.
-        // Note: must be the last since it modifies the fwpAssertion.
+        // Note: this must be the last step since it modifies the fwpAssertion.
         publicKey = FWPCrypto.validateFwpSignature(fwpAssertion, userValidation);
 
         // Check that we didn't forgot anything or that there is "other" data.
