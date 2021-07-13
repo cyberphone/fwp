@@ -281,6 +281,7 @@ public class FWPCrypto {
         byte[] authenticatorData = readAndRemove(authorization, AS_AUTHENTICATOR_DATA);
         
         // Collect authenticator data that may be useful in disputes.
+        // Note that possible extension data (ED) is ignored.
         if ((authenticatorData[FLAG_OFFSET] & FLAG_UP) != 0) {
             userValidationFlags.add(UserValidation.PRESENT);
         }

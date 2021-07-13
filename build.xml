@@ -3,12 +3,13 @@
   <!-- set properties for this build -->
   <property file="fwp.properties"/>
   <property name="openkeystore.dir" location="${openkeystore}"/>
+  <property name="fido-web-pay.dir" location="${fido-web-pay}"/>
+  <property name="current.dir" location="."/>
   <property name="src.dir" value="src"/>
   <property name="test.dir" value="test"/>
   <property name="lib.dir" value="lib"/>
   <property name="temp.dir" value=".tmp"/>
   <property name="dist.dir" value="dist"/>
-  <property name="svg.dir" location="svg"/>
   <property name="testdata.dir" location="testdata"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
 
@@ -44,7 +45,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat testfido cryptosvg vectors"/>
+      <echo message="build tomcat testfido cryptosvg cryptodoc vectors"/>
   </target>
 
   <target name="tomcat">
@@ -53,7 +54,7 @@
     <copy file="${dist.dir}/${application}" todir="${catalina.home}/webapps" overwrite="true" preservelastmodified="true"/>
   </target>
 
-  <target name="build">
+  <target name="_compile">
     <antcall target="_jdktest"/>
     <mkdir dir="${dist.dir}"/>
     <delete dir="${temp.dir}"/>
@@ -63,8 +64,7 @@
        tablength="4"
        eol="lf"
        eof="remove"
-       includes="**/*.java, **/*.css, **/*.svg, **/*.xml"/>
-    <copy file="web.xml" todir="${temp.dir}"/>
+       includes="**/*.java, **/*.css, **/*.svg, **/*.xml, **/*.html"/>
     <javac debug="${debug}"
            srcdir="${src.dir};${lib.dir}:${test.dir}"
            destdir="${temp.dir}"
@@ -78,6 +78,10 @@
               </fileset>
         </classpath>
     </javac>
+    </target>
+    
+  <target name="build" depends="_compile">
+    <copy file="web.xml" todir="${temp.dir}"/>
     <replace file="${temp.dir}/web.xml">
       <replacefilter token="@logging@" value="${logging}"/>
     </replace>
@@ -85,7 +89,7 @@
       <classes dir="${temp.dir}">
          <exclude name="web.xml"/>
       </classes>
-      <metainf dir=".">
+        <metainf dir=".">
         <include name="context.xml"/>
       </metainf>
       <lib dir="${zip.webpki.lib.dir}">
@@ -102,23 +106,8 @@
     </war>
   </target>
     
-  <target name="testfido">
-    <delete dir="${temp.dir}"/>
-    <mkdir dir="${temp.dir}"/>
-    <javac debug="${debug}"
-           srcdir="${src.dir}:${test.dir}:${lib.dir}"
-           destdir="${temp.dir}"
-           includeAntRuntime="false">
-        <classpath>
-              <fileset dir="${webpki.lib.dir}">
-                <include name="*.jar"/>
-             </fileset>
-             <fileset dir="${third.party.lib.dir}">
-                <include name="*.jar"/>
-              </fileset>
-        </classpath>
-    </javac>
-    <property name="testvectors" location="fido2testvectors.json"/>
+  <target name="testfido" depends="_compile">
+    <property name="testvectors" location="${testdata.dir}/fido2testvectors.json"/>
     <junit fork="no" haltonfailure="yes">
        <test name="org.webpki.fwp.FIDOTest"/>
        <formatter type="plain" usefile="false"/>
@@ -134,25 +123,9 @@
             </fileset>
       </classpath>
     </junit>
-
   </target>
 
-  <target name="cryptosvg">
-    <delete dir="${temp.dir}"/>
-    <mkdir dir="${temp.dir}"/>
-    <javac debug="${debug}"
-           srcdir="${test.dir}:${lib.dir}"
-           destdir="${temp.dir}"
-           includeAntRuntime="false">
-        <classpath>
-              <fileset dir="${webpki.lib.dir}">
-                <include name="*.jar"/>
-             </fileset>
-             <fileset dir="${third.party.lib.dir}">
-                <include name="*.jar"/>
-              </fileset>
-        </classpath>
-    </javac>
+  <target name="cryptosvg" depends="_compile">
     <java fork="yes"
           classname="org.webpki.fwp.CryptoImages"
           failonerror="true">
@@ -165,26 +138,28 @@
             <include name="*.jar"/>
           </fileset>
        </classpath>
-       <arg line="${svg.dir}"/>
+       <arg line="${current.dir}"/>
      </java>
   </target>
 
-  <target name="vectors">
-    <delete dir="${temp.dir}"/>
-    <mkdir dir="${temp.dir}"/>
-    <javac debug="${debug}"
-           srcdir="${test.dir}:${lib.dir}"
-           destdir="${temp.dir}"
-           includeAntRuntime="false">
-        <classpath>
-              <fileset dir="${webpki.lib.dir}">
-                <include name="*.jar"/>
-             </fileset>
-             <fileset dir="${third.party.lib.dir}">
-                <include name="*.jar"/>
-              </fileset>
-        </classpath>
-    </javac>
+  <target name="cryptodoc" depends="_compile">
+    <java fork="yes"
+          classname="org.webpki.fwp.CryptoDocument"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${current.dir} ${openkeystore.dir}/testdata/keys ${fido-web-pay.dir}/specification/crypto.html"/>
+     </java>
+  </target>
+    
+    <target name="vectors" depends="_compile">
     <java fork="yes"
           classname="org.webpki.fwp.TestVectorGeneration"
           failonerror="true">

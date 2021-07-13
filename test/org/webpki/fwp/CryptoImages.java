@@ -132,14 +132,14 @@ public class CryptoImages {
 
         headers("(Content Encryption)", "Main Map");
 
-        label("Algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
-        label("KeyEncryption", CBOREncrypter.KEY_ENCRYPTION_LABEL, !cborFull);
+        label("algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
+        label("keyEncryption", CBOREncrypter.KEY_ENCRYPTION_LABEL, !cborFull);
         if (cborFull) {
-            label("KeyId", CBOREncrypter.KEY_ID_LABEL, false);
+            label("keyId", CBOREncrypter.KEY_ID_LABEL, false);
         }        
-        label("Tag", CBOREncrypter.TAG_LABEL, true);
-        label("IV", CBOREncrypter.IV_LABEL, true);
-        label("CipherText", CBOREncrypter.CIPHER_TEXT_LABEL, true);
+        label("tag", CBOREncrypter.TAG_LABEL, true);
+        label("iv", CBOREncrypter.IV_LABEL, true);
+        label("cipherText", CBOREncrypter.CIPHER_TEXT_LABEL, true);
         
         top = HEADER_HEIGHT;
         left += width + IMAGE_WIDTH + 2 * MARGIN;
@@ -147,11 +147,11 @@ public class CryptoImages {
 
         headers("(Key Encryption)", cborFull ? "Optional Sub Map" : "Sub Map");
 
-        label("Algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
-        label("KeyId", CBOREncrypter.KEY_ID_LABEL, false);
-        label("PublicKey", CBOREncrypter.PUBLIC_KEY_LABEL, false);
-        label("EphemeralKey", CBOREncrypter.EPHEMERAL_KEY_LABEL, !cborFull);
-        label("CipherText", CBOREncrypter.CIPHER_TEXT_LABEL, false);
+        label("algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
+        label("keyId", CBOREncrypter.KEY_ID_LABEL, false);
+        label("publicKey", CBOREncrypter.PUBLIC_KEY_LABEL, false);
+        label("ephemeralKey", CBOREncrypter.EPHEMERAL_KEY_LABEL, !cborFull);
+        label("cipherText", CBOREncrypter.CIPHER_TEXT_LABEL, false);
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")
@@ -166,10 +166,11 @@ public class CryptoImages {
         ArrayUtil.writeFile(fileName, svg.append("</svg>\n").toString().getBytes("utf-8"));
     }
     
-    public CryptoImages(String svgDirectory) throws Exception {
-        svgDirectory += File.separatorChar;
-        execute(svgDirectory + "fwp-crypto.svg", false);
-        execute(svgDirectory + "cbor-crypto.svg", true);
+    public CryptoImages(String buildDirectory) throws Exception {
+        String directory = buildDirectory + File.separatorChar + 
+                           CryptoDocument.DOC_GEN_DIRECTORY + File.separatorChar;
+        execute(directory + "fwp-crypto.svg", false);
+        execute(directory + "cbor-crypto.svg", true);
     }
 
     public static void main(String[] args) {
@@ -180,5 +181,4 @@ public class CryptoImages {
         }
         
     }
-
 }
