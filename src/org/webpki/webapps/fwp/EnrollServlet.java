@@ -126,13 +126,13 @@ public class EnrollServlet extends HttpServlet {
                 "      },\n" +
                 "      pubKeyCredParams: [{\n" +
                 "        type: 'public-key',\n" +
-                "        alg: -7\n" +
+                "        alg: " + FWPCrypto.FIDO_KEYALG_ES256  + "\n" +
                 "      },{\n" +
                 "        type: 'public-key',\n" +
-                "        alg: -8\n" +
+                "        alg: " + FWPCrypto.FIDO_KEYALG_ED25519  + "\n" +
                 "      },{\n" +
                 "        type: 'public-key',\n" +
-                "        alg: -257\n" +
+                "        alg: " + FWPCrypto.FIDO_KEYALG_RS256  + "\n" +
                 "      }],\n" +
                 "      timeout: 360000,\n" +
                 "      excludeCredentials: [],\n" +
@@ -225,7 +225,7 @@ public class EnrollServlet extends HttpServlet {
                       "Buy Something..." +
                   "</div>" +
                 "</div>");
-            HTML.standardPage(response, Actors.ISSUER, null, html);
+            HTML.standardPage(response, Actors.WALLET, null, html);
         } catch (Exception e) {
             HTML.errorPage(response, e);
         }

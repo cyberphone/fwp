@@ -79,6 +79,11 @@ public class FWPCrypto {
     public static final String CDJ_CREATE_ARGUMENT      = "webauthn.create";
     public static final String CDJ_GET_ARGUMENT         = "webauthn.get";
     
+    // FIDO/COSE key algorithm Ids
+    public static final int FIDO_KEYALG_ES256           = -7;
+    public static final int FIDO_KEYALG_ED25519         = -8;    // Not really COSE...
+    public static final int FIDO_KEYALG_RS256           = -257;
+    
     // Authorization Signature (AS) container
     static final int AS_ALGORITHM          = 1;
     static final int AS_PUBLIC_KEY         = 2;
@@ -184,13 +189,13 @@ public class FWPCrypto {
      */
     public static int publicKey2CoseSignatureAlgorithm(PublicKey publicKey) {
         if (publicKey instanceof RSAKey) {
-            return -257;
+            return FIDO_KEYALG_RS256;
         }
         if (publicKey instanceof ECKey) {
-            return -7;
+            return FIDO_KEYALG_ES256;
         }
         // Waiting for an answer for how to deal with Ed448...
-        return -8;
+        return FIDO_KEYALG_ED25519;
     }
 
     /**
@@ -202,13 +207,13 @@ public class FWPCrypto {
     public static AsymSignatureAlgorithms getWebPkiAlgorithm(int coseAlgorithm) 
             throws GeneralSecurityException {
         switch (coseAlgorithm) {
-            case -257:
+            case FIDO_KEYALG_RS256:
                 return AsymSignatureAlgorithms.RSA_SHA256;
     
-            case  -7:
+            case  FIDO_KEYALG_ES256:
                 return AsymSignatureAlgorithms.ECDSA_SHA256;
             
-            case -8:
+            case FIDO_KEYALG_ED25519:
                 // Well, this is not really COSE but who cares?
                 return AsymSignatureAlgorithms.ED25519;
     
