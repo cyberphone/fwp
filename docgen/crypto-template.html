@@ -3,6 +3,7 @@
 <link rel="icon" href="images/favicon.png" sizes="192x192">
 <title>FIDO Web Pay - Crypto</title><style type="text/css">
 .header {font-size:1.6em;margin:1em 0 0.8em 0}
+.subheader {font-size:1.2em;margin-top:1em;margin-bottom:0.6em}
 .step {font-size:1.2em;margin-top:1.5em;margin-bottom:0.6em}
 .para {margin-top: 0.8em}
 .gutter {margin-top: 0.3em}
@@ -28,88 +29,175 @@
 .tftable th {font-weight: normal;padding: 0.4em 0.5em;background-color: #f8f8f8;text-align: center;border-width: 1px;border-style: solid; border-color: black}
 .json {word-break:break-all;background-color:#f8f8f8;padding:1em;border-width:1px;border-style:solid;border-color:#a9a9a9;box-shadow:0.3em 0.3em 0.3em #d0d0d0}
 body {margin:1em;font-size:10pt;font-family:Roboto,sans-serif;background-color:white}
-code {font-family:"Noto Mono",monospace;color:maroon;font-weight:bolder}
-kbd {font-family: "Noto Mono",monospace;font-weight:bolder}
+code {font-family:"Noto Mono",monospace;color:maroon}
+kbd {font-family: "Noto Mono",monospace}
 pre {font-family:"Noto Mono",monospace;margin: 0.8em 0 1em 0;padding:0.6em 1em;background-color: #f8f8f8}
 ul {margin: 0;padding-left:2em}
 li {margin-top:0.3em}
 a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
+.toc {padding:0 0 0.3em 1em}
 </style>
 </head>
 <body>
   <img style="max-width:30%" src="images/fwp.svg" alt="logo" title="FWP logotype"/>
   <img style="max-width:30%;position:absolute;right:1em;top:1em" src="images/ipr.svg" alt="IPR declaration" title="IPR declaration"/>
-  <div id="introduction" class="header">FIDO Web Pay - Crypto</div>
+  <div style="text-align:center" class="header">FIDO Web Pay - Crypto</div>
+  <div id="toc" class="header">Table of Contents</div>
+   @table-of-contents@
+  @Introduction@
   <div>
-    This document covers the cryptographic constructs used in FWP Assertions.
+    This document covers the cryptographic constructs used in FIDO Web Pay (FWP) Assertions.
+  </div>
+ @Relationship to Existing Standards@
+  <div>
     Since the inner part of FWP Assertions are based on CBOR
     [<a href="https://tools.ietf.org/html/rfc8949"
-          title="RFC8949">RFC8949<img src="images/xtl.svg" alt="link"></a>],
+        title="RFC8949">RFC8949<img src="images/xtl.svg" alt="link"></a>],
     one might assume that the cryptography would be based on
     COSE [<a href="https://tools.ietf.org/html/rfc8152"
-          title="RFC8152">RFC8152<img src="images/xtl.svg" alt="link"></a>].  
-    However, this is only partially true because FIDO signatures are
+             title="RFC8152">RFC8152<img src="images/xtl.svg" alt="link"></a>].
+    However, this is only partially true because FIDO signatures (@webauthn@) are
     not compatible with COSE. In similarity to FIDO, the cryptographic
     solutions used by FWP build on the CTAP2 canonicalization scheme
     which COSE does not use.
   </div>
   <div class="para">
     Note that the CTAP2 canonicalization scheme is compatible with
-    the deterministic mode of CBOR with floating point data as
-    only exception.
+    the deterministic mode of CBOR as featured in existing FIDO
+    compliant products.
   </div>
+ @Terminology@
   <div>
-    However, to guide implementers, this document outlines
-    a sample infrastructure at a &quot;conceptual&quot; level.
-    Note though that regardless of the backend design, FWP assertions
-    must (due to the EMV <i>end-to-end security model</i>),
-    always be routed back to the designated issuer &quot;verbatim&quot;
-    (together with other required data) in order to initiate a payment transaction.
+    Throughout this document the CBOR types <kbd>unsigned&nbsp;integer</kbd> and
+    <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
+    That is, it is the value which governs the actual type. 
   </div>
-  <div class="para">
-    It is assumed that <i>at this stage in time</i>,
-    backend infrastructures will be <i>independently defined</i> by each payment network
-    rather than becoming a unified standard.  See also <a href="#integration">Integration</a>.
+@Authorization Signatures@
+  <div>
+    Unlike @webauthn@, FWP builds on an <i>authorization</i> concept derived
+    from EMV&reg;.  That is, there is no FIDO server involved when the user authorizes a
+    payment.  This following sections describe the steps required.
   </div>
+@Create Authorization Data (AD)@
+  <div>Before requesting the user to authorize (&quot;sign&quot;),
+    the FWP client creates data to related to the
+    payment request (aka &quot;dynamic linking&quot;) like in the sample from the
+    main document:
+  </div>
+  <div id="ad" style='overflow-x:auto;padding-right:0.2em'>
+    <div class="staticbox">
+      @txt/AD.txt@
+    </div>
+   </div>
+   <div>
+    This object is referred to as Authorization Data (AD).
+  </div>
+   <div class="para">
+     Since this document is about cryptographic constructs, this section is focused on the
+     <code>authorization</code> element (label <kbd>10</kbd>).
+   </div>
+   <div class="para">
+   Definition:
+</div>
+<div style='overflow-x:auto;padding-right:0.2em'>
+  <table class="tftable">
+  <tr><th>Label</th><th>Type</th><th>Name</th><th style="min-width:25em">Description</th></tr>
+  <tr>
+    <td style='text-align:center'><kbd>1</kbd></td>
+    <td><kbd>integer</kbd></td>
+    <td><code>signatureAlgorithm</code></td>
+    <td>
+      FIDO <code>signatureAlgorithm</code> associated with the selected 
+      <a href='index.html#credentialdatabase'>payment credential<img src="images/xtl.svg" alt="link"></a>.
+      This item MUST be COSE compliant.
+    </td>
+  </tr>
+  <tr>
+    <td style='text-align:center'><kbd>2</kbd></td>
+    <td><kbd>map</kbd></td>
+    <td><code>publicKey</code></td>
+    <td>
+      FIDO <code>publicKey</code> descriptor associated with the selected 
+      <a href='index.html#credentialdatabase'>payment credential<img src="images/xtl.svg" alt="link"></a>.
+      The key descriptor MUST only contain the core public key data.
+      This item MUST be COSE compliant.
+    </td>
+  </tr>
+  <tr>
+    <td style='text-align:center'><kbd>3</kbd></td>
+    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><code>authenticatorData</code></td>
+    <td>
+      FIDO assertion data element.
+      See also @webauthn@.
+    </td>
+  </tr>
+  <tr>
+    <td style='text-align:center'><kbd>4</kbd></td>
+    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><code>clientDataJSON</code></td>
+    <td>
+      FIDO assertion data element.
+      See also @webauthn@.
+    </td>
+  </tr>
+    <tr>
+    <td style='text-align:center'><kbd>5</kbd></td>
+    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><code>signature</code></td>
+    <td>
+      FIDO assertion signature.
+      See also @webauthn@.
+    </td>
+  </tr>
+  </table>
+  </div>
+   <div>
+As can be seen in the listing, only the two first elements are featured in the <a href="#ad">AD</a> <kbd>map</kbd>.
+This is because they are static and can thus without disadvantages be included in the assertion.
+</div>
+@Hash Authorization Data (AD)@
+   <div>
+     Since FIDO signatures are limited to signing 32 bytes of (&quot;challenge&quot;) data, the
+     next step is creating an SHA-256 hash of the AD binary.  The sample AD reads as follows
+     when expressed in hexadecimal encoding:
+   </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @hex/ad.cbor@
       </div>
     </div>
+<div class="para">
+    It is assumed that <i>at this stage in time</i>,
+    backend infrastructures will be <i>independently defined</i> by each payment network
+    rather than becoming a unified standard.  See also <a href="#integration">Integration</a>.
   </div>
-     <div style='overflow-x:auto;padding-right:0.2em'>
-      <div class="staticbox">
-      @txt/AD.txt@
-      </div>
-    </div>
-  </div>
-     <div style='overflow-x:auto;padding-right:0.2em'>
+
+    <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @hex/sad.cbor@
       </div>
     </div>
-  </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @txt/SAD.txt@
       </div>
     </div>
-  </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @hex/esad.cbor@
       </div>
     </div>
-  </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
-      <div class="staticbox">
+      <div class="staticbox" style='min-width:50em'>
       @txt/ESAD.txt@
       </div>
     </div>
-              <div id="terminology" class="header">
-    Terminology
-  </div>
-  <div>
+    <div style="overflow-x:auto;padding:8pt 0">
+      @fwp-crypto.svg@
+    </div>
+
+    <div>
     Throughout the rest of this document, actor names are
     written as <span class="actor">Name</span>.
     The <span class="actor">Browser</span> actor is in this specification

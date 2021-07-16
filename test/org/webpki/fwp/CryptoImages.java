@@ -47,16 +47,17 @@ public class CryptoImages {
     boolean cborFull;
     StringBuilder svg;
     StringBuilder textLabels;
+    StringBuilder headerTexts;
     int left;
     int top;
     int width;
     
     int mainMapWidth() {
-        return cborFull ? 528 : 360;
+        return 464;
     }
     
     int subMapWidth() {
-        return cborFull ? 528 : 464;
+        return 464;
     }
     
     int totalHeight() {
@@ -84,10 +85,8 @@ public class CryptoImages {
                   .append("' y='")
                   .append(top + TEXT_Y_OFFSET)
                   .append("'>")
-                  .append(mandatory ?  
-                          "<tspan>" : "<tspan font-style='italic'>Optional</tspan><tspan>: ")
                   .append(labelText)
-                  .append(" (")
+                  .append("<tspan fill='black'> (")
                   .append(cborLabel.getInt())
                   .append(")</tspan></text>\n");
         
@@ -95,25 +94,26 @@ public class CryptoImages {
     }
     
     void headers(String subHeaderText, String mainHeaderText) {
-        textLabels.append("<text x='")
-                  .append(left + width / 2)
-                  .append("' y='")
-                  .append(HEADER_Y_OFFSET)
-                  .append("' font-size='" + HEADER_FONT_SIZE + "' text-anchor='middle'>")
-                  .append(mainHeaderText)
-                  .append("</text>\n<text x='")
-                  .append(left + width / 2)
-                  .append("' y='")
-                  .append(SUB_HEADER_Y_OFFSET)
-                  .append("' text-anchor='middle'>")
-                  .append(subHeaderText)
-                  .append("</text>\n");     
+        headerTexts.append("<text x='")
+                   .append(left + width / 2)
+                   .append("' y='")
+                   .append(HEADER_Y_OFFSET)
+                   .append("' font-size='" + HEADER_FONT_SIZE + "' text-anchor='middle'>")
+                   .append(mainHeaderText)
+                   .append("</text>\n<text x='")
+                   .append(left + width / 2)
+                   .append("' y='")
+                   .append(SUB_HEADER_Y_OFFSET)
+                   .append("' text-anchor='middle'>")
+                   .append(subHeaderText)
+                   .append("</text>\n");     
 
     }
         
     void execute(String fileName, boolean cborFull) throws Exception {
         this.cborFull = cborFull;
         textLabels = new StringBuilder();
+        headerTexts = new StringBuilder();
         svg = new StringBuilder(
                 "<?xml version='1.0' encoding='utf-8'?>\n" +
                 "<svg viewBox='0 0 ")
@@ -155,9 +155,13 @@ public class CryptoImages {
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")
+           .append(headerTexts)
+           .append("</g>\n" +
+                   "<g font-size='" + TEXT_FONT_SIZE + 
+                               "' font-family='Noto Mono,monospace' fill='maroon'>\n")
            .append(textLabels)
            .append("</g>\n" +
-                   "<path fill='none' stroke='#aa0000' stroke-width='3' stroke-linecap='round' d='M")
+                   "<path fill='none' stroke='#4366bf' stroke-width='3' stroke-linecap='round' d='M")
            .append(left - IMAGE_WIDTH - MARGIN)
            .append("," + HEADER_HEIGHT)
            .append("  m " + IMAGE_WIDTH + ",0 c -33,0 -35,68 -35,68 0,30 -18,68 "+

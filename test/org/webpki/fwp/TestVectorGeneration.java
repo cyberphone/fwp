@@ -73,6 +73,7 @@ public class TestVectorGeneration {
     static final String FILE_UNSIGNED_CBOR   = "AD.cbor";
     static final String FILE_SIGNED_CBOR     = "SAD.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
+    static final String FILE_CHALLENGE_B64U  = "challenge.txt";
     static final String FILE_FWP_ASSERTION_JSON  = "FWP-assertion.json";
     static final String FILE_PSP_REQUEST_JSON  = "PSP-request.json";
     static final String FILE_ISSUER_REQUEST_JSON  = "ISSUER-request.json";
@@ -149,11 +150,15 @@ public class TestVectorGeneration {
               .append(") contains the COSE signature algorithm (ES256) and " +
                       "the FIDO public key (EC/P256) which is " +
                       "also is part of the data to be signed.\n");
+        String challengeB64U = Base64UrlEncoder.encodeToString(
+                HashAlgorithms.SHA256.digest(unsignedFwpAssertion));
+
+        conditionalRewrite(testDataDir + FILE_CHALLENGE_B64U, 
+                challengeB64U.getBytes("utf-8"));
 
         result.append("\n\nThe unsigned FWP assertion (binary) " +
                       "converted into a SHA256 hash, here in Base64Url notation:\n")
-              .append(Base64UrlEncoder.encodeToString(
-                      HashAlgorithms.SHA256.digest(unsignedFwpAssertion)))
+              .append(challengeB64U)
               .append("\nThis is subsequently used as FIDO 'challenge'.\n\n\n" +
                       "****************************************\n" +
                       "* FIDO/WebAuthn assertion happens here *\n" +

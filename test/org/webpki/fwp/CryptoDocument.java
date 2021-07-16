@@ -11,6 +11,12 @@ import org.webpki.util.DebugFormatter;
 public class CryptoDocument  {
     
     static final String DOC_GEN_DIRECTORY = "docgen";
+    
+    static final String FWP_CRYPTO_SVG    = "fwp-crypto.svg";
+
+    static final String WEB_AUTHN         = "webauthn";
+
+    static final String TOC               = "table-of-contents";
 
     String buildDirectory;
     
@@ -45,6 +51,54 @@ public class CryptoDocument  {
             entry.add(new Decorator(mapEntry, text));
             return this;
         }
+    }
+    
+    static class Toc {
+        
+        int level;
+        int subLevel;
+        String line;
+
+        public Toc(int level, int subLevel, String line) {
+            this.level = level;
+            this.subLevel = subLevel;
+            this.line = line;
+        }
+        
+    }
+
+    static ArrayList<Toc> tocs = new ArrayList<>();
+    
+    static class TocBuilder {
+        int level;
+        int subLevel;
+        
+        private void addInternal(String line) {
+            tocs.add(new Toc(level, subLevel, line));
+        }
+        
+        TocBuilder add(String tocLine) {
+            subLevel = 0;
+            level++;
+            addInternal(tocLine);
+            return this;
+        }
+        
+        TocBuilder addSub(String subLine) {
+            subLevel++;
+            addInternal(subLine);
+            return this;
+        }
+    }
+    
+    static {
+        new TocBuilder()
+            .add("Introduction")
+            .add("Relationship to Existing Standards")
+            .add("Terminology")
+            .add("Authorization Signatures")
+            .addSub("Create Authorization Data (AD)")
+            .addSub("Hash Authorization Data (AD)");
     }
 
     static DecoratorBuilder addList(String fileName) {
@@ -168,6 +222,28 @@ public class CryptoDocument  {
         }
         return string;
     }
+
+    String generateToc() {
+        StringBuilder toc = new StringBuilder();
+        for (Toc tocEntry : tocs) {
+            String nr = String.valueOf(tocEntry.level) + 
+                        (tocEntry.subLevel == 0 ? "" : "." + tocEntry.subLevel);
+            toc.append("<div class='toc'>")
+               .append(tocEntry.subLevel == 0 ? "" : "&nbsp;&nbsp;&nbsp;&nbsp;")
+               .append("<a href='#")
+               .append(nr)
+               .append("'>")
+               .append(nr)
+               .append(" ")
+               .append(tocEntry.line)
+               .append("</a></div>");
+            replace(tocEntry.line, "<div id='" + nr + 
+                    (tocEntry.subLevel == 0 ? "' class='header'>" : "' class='subheader'>") + 
+                    nr + ". " + tocEntry.line + "</div>");
+        }
+        return toc.toString();
+    }
+    
     
     void process(String[] tagAndFiles) throws Exception {
         for (String tagAndFile : tagAndFiles) {
@@ -191,8 +267,18 @@ public class CryptoDocument  {
                              "hex/sad.cbor", "txt/SAD.txt",
                              "hex/esad.cbor", "txt/ESAD.txt"});
 
+        String svg =  readStringFile(DOC_GEN_DIRECTORY + File.separator + FWP_CRYPTO_SVG);
+        svg = "<svg style='display:block;width:27.5em;padding:1em' class='box' " + 
+                          svg.substring(svg.indexOf("<svg ") + 5);
+        replace(FWP_CRYPTO_SVG, svg);
+        replace(WEB_AUTHN, "<a href='https://www.w3.org/TR/webauthn-2/' " +
+                            "title='Web Authentication'>" +
+                            "Web&nbsp;Authentication<img src='images/xtl.svg' alt='link'></a>");
+        
+        replace(TOC, generateToc());
+
         ArrayUtil.writeFile(resultFile, template.getBytes("utf-8"));
-     }
+    }
 
     public static void main(String[] argc) {
         try {
