@@ -250,8 +250,8 @@ public class FWPCrypto {
                                                                       GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
                 .setEcdsaSignatureEncoding(true)
-                .update(ArrayUtil.add(authenticatorData,
-                                      HashAlgorithms.SHA256.digest(clientDataJSON)))
+                .update(authenticatorData)
+                .update(HashAlgorithms.SHA256.digest(clientDataJSON))
                 .verify(signature)) {
             throw new GeneralSecurityException("Signature validation failed");
         }       

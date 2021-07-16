@@ -48,7 +48,11 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <div>
     This document covers the cryptographic constructs used in FIDO Web Pay (FWP) Assertions.
   </div>
- @Relationship to Existing Standards@
+  <div class="para">To make the descriptions more accessible,
+  the sample in the main document is used for illustrating the different steps required.
+  The sample depends on the keys provided in the <a href="#4">Test&nbsp;Vectors</a> section.
+</div> 
+@Relationship to Existing Standards@
   <div>
     Since the inner part of FWP Assertions are based on CBOR
     [<a href="https://tools.ietf.org/html/rfc8949"
@@ -72,11 +76,12 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
     That is, it is the value which governs the actual type. 
   </div>
-@Authorization Signatures@
+@Authorization Signature@
   <div>
     Unlike @webauthn@, FWP builds on an <i>authorization</i> concept derived
     from EMV&reg;.  That is, there is no FIDO server involved when the user authorizes a
-    payment.  This following sections describe the steps required.
+    payment.  The following sections describe the steps required
+    for creating an authorization signature.
   </div>
 @Create Authorization Data (AD)@
   <div>Before requesting the user to authorize (&quot;sign&quot;),
@@ -94,12 +99,12 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </div>
    <div class="para">
      Since this document is about cryptographic constructs, this section is focused on the
-     <code>authorization</code> element (label <kbd>10</kbd>).
+     <code>authorization</code> <kbd>map</kbd> (label <kbd>10</kbd>).
    </div>
    <div class="para">
    Definition:
 </div>
-<div style='overflow-x:auto;padding-right:0.2em'>
+<div id="authorization" style='overflow-x:auto;padding-right:0.2em'>
   <table class="tftable">
   <tr><th>Label</th><th>Type</th><th>Name</th><th style="min-width:25em">Description</th></tr>
   <tr>
@@ -107,8 +112,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     <td><kbd>integer</kbd></td>
     <td><code>signatureAlgorithm</code></td>
     <td>
-      FIDO <code>signatureAlgorithm</code> associated with the selected 
-      <a href='index.html#credentialdatabase'>payment credential<img src="images/xtl.svg" alt="link"></a>.
+      FIDO <code>signatureAlgorithm</code> associated with the selected @paymentcred@.
       This item MUST be COSE compliant.
     </td>
   </tr>
@@ -117,8 +121,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     <td><kbd>map</kbd></td>
     <td><code>publicKey</code></td>
     <td>
-      FIDO <code>publicKey</code> descriptor associated with the selected 
-      <a href='index.html#credentialdatabase'>payment credential<img src="images/xtl.svg" alt="link"></a>.
+      FIDO <code>publicKey</code> descriptor associated with the selected @paymentcred@.
       The key descriptor MUST only contain the core public key data.
       This item MUST be COSE compliant.
     </td>
@@ -153,13 +156,15 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </table>
   </div>
    <div>
-As can be seen in the listing, only the two first elements are featured in the <a href="#ad">AD</a> <kbd>map</kbd>.
-This is because they are static and can thus without disadvantages be included in the assertion.
+As can be seen in the listing, only the two first elements are featured in the <a href="#ad">AD</a> 
+<code>authorization</code> <kbd>map</kbd>.
+This is because they are static and can thus be included in the data
+to be signed, potentially making the signature scheme more resistant to tampering.
 </div>
 @Hash Authorization Data (AD)@
    <div>
-     Since FIDO signatures are limited to signing 32 bytes of (&quot;challenge&quot;) data, the
-     next step is creating an SHA-256 hash of the AD binary.  The sample AD reads as follows
+     Since FIDO signatures are limited to signing 32 bytes of <kbd>&quot;challenge&quot;</kbd> data, the
+     next step is creating an <kbd>SHA256</kbd> hash of the AD binary.  The sample AD reads as follows
      when expressed in hexadecimal encoding:
    </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
@@ -167,22 +172,81 @@ This is because they are static and can thus without disadvantages be included i
       @hex/ad.cbor@
       </div>
     </div>
+    <div>Applied to the sample the hashed AD encoded as base64url reads as follows:</div>
+     <div style='overflow-x:auto;padding-right:0.2em'>
+      <div class="staticbox">
+      @challenge.txt@
+      </div>
+    </div>
+@Create Signed Authorization Data (SAD)@
+    <div>Using the result of the previous step (but
+    using binary encoding), as the sole FIDO <kbd>&quot;challenge&quot;</kbd>,
+    the user should at this stage be requested to authorize using the key (authenticator)
+    pointed out by the <code>credentialId</code> of the selected @paymentcred@.
+    If successful, this operation should return the FIDO items <code>authenticatorData</code>,
+    <code>clientDataJSON</code>, and <code>signature</code>.
+   </div>
+   <div class="para">
+    After adding the FIDO items above to the <a href="#authorization">authorization</a>
+   <kbd>map</kbd> of AD, the resulting sample should read as follows:
+</div>
+    <div style='overflow-x:auto;padding-right:0.2em'>
+      <div class="staticbox">
+      @txt/SAD.txt@
+      </div>
+    </div>
+<div>This object is subsequently referred to as Signed Authorization Data (SAD).</div>
 <div class="para">
-    It is assumed that <i>at this stage in time</i>,
-    backend infrastructures will be <i>independently defined</i> by each payment network
-    rather than becoming a unified standard.  See also <a href="#integration">Integration</a>.
+    The sample SAD object reads as follows if encoded in hexadecimal:
   </div>
-
     <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @hex/sad.cbor@
       </div>
     </div>
+@Signature Verification@
+<div>The steps described in the following sections, are used to verify that
+an authorization signature is <i>technically</i> correct.
+The main document describes other checks that MUST be performed
+before a payment operation can be initiated.</div>
+@Decode Signed Authorization Data (SAD)@
+<div>Decode the SAD binary using a suitable CBOR parser.</div>
+<div class="para">Read and remove the FIDO items <code>authenticatorData</code>,
+<code>clientDataJSON</code>, and <code>signature</code> from the decoded object
+which now effectively is an Authorization Data (AD) object.
+Applied to the sample, the resulting object should after <kbd>SHA256</kbd> hashing and
+base64url-encoding return:
+</div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
-      @txt/SAD.txt@
+      @challenge.txt@
       </div>
     </div>
+<div>That is, the same <kbd>&quot;challenge&quot;</kbd> as used during authorization.</div>
+<div class="para">This data MUST be <i>identical</i> to the corresponding
+attribute in the received <code>clientDataJSON</code> object:</div>
+      <div style='overflow-x:auto;padding-right:0.2em'>
+      <div class="staticbox">
+      @clientDataJSON.json@
+      </div>
+    </div>
+@Validate FIDO Signature@
+      <div>
+The signature is validated by applying items received in the 
+<a href="#authorization">authorization</a> <kbd>map</kbd> to
+the hypothetical method:
+</div><div class="para" style="padding-left:1em">
+        <kbd>
+          Validate(<code>signature</code>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>publicKey</code>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>signatureAlgorithm</code>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>authenticatorData</code> || SHA256(<code>clientDataJSON</code>))
+        </kbd>
+</div>
+<div class="comment box">
+Note that although FIDO signatures are pretty unique, they can be validated by
+any cryptographic API supporting the signature algorithm in question.
+</div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @hex/esad.cbor@
@@ -218,6 +282,7 @@ This is because they are static and can thus without disadvantages be included i
     FWP credentials are stored in a local database in the client device, where each entry is
     supposed to contain the following attributes:
 </div>
+@Test Vectors@
 <div style='overflow-x:auto;padding-right:0.2em'>
   <table class="tftable">
     <tr>

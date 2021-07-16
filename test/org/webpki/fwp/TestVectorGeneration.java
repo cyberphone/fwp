@@ -74,6 +74,7 @@ public class TestVectorGeneration {
     static final String FILE_SIGNED_CBOR     = "SAD.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
     static final String FILE_CHALLENGE_B64U  = "challenge.txt";
+    static final String FILE_CLIENT_DATA_JSON  = "clientDataJSON.json";
     static final String FILE_FWP_ASSERTION_JSON  = "FWP-assertion.json";
     static final String FILE_PSP_REQUEST_JSON  = "PSP-request.json";
     static final String FILE_ISSUER_REQUEST_JSON  = "ISSUER-request.json";
@@ -163,9 +164,14 @@ public class TestVectorGeneration {
                       "****************************************\n" +
                       "* FIDO/WebAuthn assertion happens here *\n" +
                       "****************************************");
+        
+        byte[] clientDataJSONbin = authContainer.getObject(
+                FWPCrypto.AS_CLIENT_DATA_JSON).getByteString();
   
-        JSONObjectReader clientDataJSON = JSONParser.parse(authContainer.getObject(
-                FWPCrypto.AS_CLIENT_DATA_JSON).getByteString());
+        conditionalRewrite(testDataDir + FILE_CLIENT_DATA_JSON, 
+                clientDataJSONbin);
+
+        JSONObjectReader clientDataJSON = JSONParser.parse(clientDataJSONbin);
 
         result.append("\n\nReturned FIDO '" + FWPCrypto.CLIENT_DATA_JSON_JSON + 
                       "', here shown in clear:\n")

@@ -10,13 +10,21 @@ import org.webpki.util.DebugFormatter;
 
 public class CryptoDocument  {
     
-    static final String DOC_GEN_DIRECTORY = "docgen";
+    static final String DOC_GEN_DIRECTORY   = "docgen";
     
-    static final String FWP_CRYPTO_SVG    = "fwp-crypto.svg";
+    static final String TEST_DATA_DIRECTORY = "testdata";
 
-    static final String WEB_AUTHN         = "webauthn";
+    static final String FWP_CRYPTO_SVG      = "fwp-crypto.svg";
 
-    static final String TOC               = "table-of-contents";
+    static final String WEB_AUTHN           = "webauthn";
+
+    static final String TOC                 = "table-of-contents";
+    
+    static final String CHALLENGE           = "challenge.txt";
+
+    static final String CLIENT_DATA_JSON    = "clientDataJSON.json";
+
+    static final String PAYMENT_CRED        = "paymentcred";
 
     String buildDirectory;
     
@@ -96,9 +104,14 @@ public class CryptoDocument  {
             .add("Introduction")
             .add("Relationship to Existing Standards")
             .add("Terminology")
-            .add("Authorization Signatures")
+            .add("Authorization Signature")
             .addSub("Create Authorization Data (AD)")
-            .addSub("Hash Authorization Data (AD)");
+            .addSub("Hash Authorization Data (AD)")
+            .addSub("Create Signed Authorization Data (SAD)")
+            .add("Signature Verification")
+            .addSub("Decode Signed Authorization Data (SAD)")
+            .addSub("Validate FIDO Signature")
+            .add("Test Vectors");
     }
 
     static DecoratorBuilder addList(String fileName) {
@@ -182,12 +195,13 @@ public class CryptoDocument  {
     int getTag(String tagAndFile) {
         int i = template.indexOf(pattern(tagAndFile));
         if (i < 0) {
-            throw new RuntimeException("Tag missing");
+            throw new RuntimeException("Tag missing: " +tagAndFile);
         }
         return i;
     }
     
     void replace(String tagAndFile, String string) {
+        getTag(tagAndFile);
         template = template.replace(pattern(tagAndFile), string);
     }
     
@@ -251,7 +265,7 @@ public class CryptoDocument  {
             String fileName = tagAndFile.substring(4);
             if (tagAndFile.startsWith("hex/")) {
                 replace(tagAndFile, DebugFormatter.getHexString(
-                        readBinaryFile("testdata" + File.separator + fileName)));
+                        readBinaryFile(TEST_DATA_DIRECTORY + File.separator + fileName)));
             } else if (tagAndFile.startsWith("txt/")) {
                 replace(tagAndFile, decorate("testdata", fileName));
             } else {
@@ -274,8 +288,15 @@ public class CryptoDocument  {
         replace(WEB_AUTHN, "<a href='https://www.w3.org/TR/webauthn-2/' " +
                             "title='Web Authentication'>" +
                             "Web&nbsp;Authentication<img src='images/xtl.svg' alt='link'></a>");
+        replace(PAYMENT_CRED, "<a href='index.html#credentialdatabase'>" +
+                              "payment credential<img src='images/xtl.svg' alt='link'></a>");
         
         replace(TOC, generateToc());
+        
+        replace(CHALLENGE, readStringFile(TEST_DATA_DIRECTORY + File.separator + CHALLENGE));
+
+        replace(CLIENT_DATA_JSON, processCodeTxt(readStringFile(
+                        TEST_DATA_DIRECTORY + File.separator + CLIENT_DATA_JSON)));
 
         ArrayUtil.writeFile(resultFile, template.getBytes("utf-8"));
     }
