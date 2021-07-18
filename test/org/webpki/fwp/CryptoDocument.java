@@ -1,7 +1,7 @@
 package org.webpki.fwp;
 
 import java.io.File;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -110,6 +110,7 @@ public class CryptoDocument  {
             .addSub("Create Signed Authorization Data (SAD)")
             .add("Encrypted Authorization")
             .addSub("Encryption Object")
+            .addSub("Encryption Process")
             .add("Signature Verification")
             .addSub("Decode Signed Authorization Data (SAD)")
             .addSub("Validate FIDO Signature")

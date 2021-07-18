@@ -261,11 +261,11 @@ selected algorithm and encryption key reference method.</div>
     <td><code>algorithm</code></td>
     <td>
       Symmetric key algorithm used for encrypting the actual content.
-      FWP currently mandates the following COSE compliant algorithms:
+      FWP currently mandates support for the following COSE compliant algorithms:
       <ul>
-        <li><kbd>ES256&nbsp;&nbsp;&nbsp;(-7)</kbd></li>
-        <li><kbd>ED25519&nbsp;(-8)</kbd></li>
-        <li><kbd>RS256&nbsp;&nbsp;&nbsp;(-257)</kbd></li>
+        <li><kbd>A128GCM&nbsp;(1)</kbd></li>
+        <li><kbd>A192GCM&nbsp;(2)</kbd></li>
+        <li><kbd>A256GCM&nbsp;(3)</kbd></li>
       </ul>
       <div class="para">The item in paranthesis denotes the <kbd>integer</kbd> value to use.</div>
     </td>
@@ -316,13 +316,16 @@ selected algorithm and encryption key reference method.</div>
       <td><code>algorithm</code></td>
       <td>
         Key encryption algorithm.
-        FWP currently mandates the following COSE compliant algorithms:
+        A compliant FWP implementation MUST as a
+        minimum support the following COSE compliant algorithms:
         <ul>
-          <li><kbd>ES256&nbsp;&nbsp;&nbsp;(-7)</kbd></li>
-          <li><kbd>ED25519&nbsp;(-8)</kbd></li>
-          <li><kbd>RS256&nbsp;&nbsp;&nbsp;(-257)</kbd></li>
+          <li><kbd>ECDH-ES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-25)</kbd></li>
+          <li><kbd>ECDH-ES+A128KW&nbsp;(-29)</kbd> *</li>
+          <li><kbd>ECDH-ES+A192KW&nbsp;(-30)</kbd> *</li>
+          <li><kbd>ECDH-ES+A256KW&nbsp;(-31)</kbd> *</li>
         </ul>
         <div class="para">The item in paranthesis denotes the <kbd>integer</kbd> value to use.</div>
+        <div class="para">* These algorithms depend on an <code>cipherText</code> item.</div>
       </td>
     </tr>
     <tr>
@@ -330,11 +333,11 @@ selected algorithm and encryption key reference method.</div>
       <td><kbd>text&nbsp;string</kbd></td>
       <td><code>keyId</code></td>
       <td>
-        <i>Optional</i>: To facilitate a smooth decryption process, 
-the encryption container MUST include a reference to the
+        <i>Optional</i>: To facilitate a streamlined decryption process, 
+the encryption object MUST include a reference to the
 encryption key.  This reference is either provided through a <code>keyId</code> string
 or through the <code>publicKey</code> itself. That is, both elements MUST NOT
-be present in an FWP complient encryption container.
+be present in an FWP complient encryption object.
 <div class="para">Note that the this specification does not define a <code>keyId</code> syntax;
 any for the purpose suitable UTF-8 string will do.</div>
       </td>
@@ -371,6 +374,78 @@ core public key data.</div>
     </tr>
   </table>
 </div>
+<div>
+A compliant FWP implementation MUST as a
+minimum support <kbd>P-256</kbd> and <kbd>X25519</kbd> keys.
+</div>
+<div class="para">
+  Note that the ECDH algorithms MUST use a Key Derivation Function (KDF) according to HKDF
+  [<a href="https://tools.ietf.org/html/rfc5869"
+      title="RFC5869">RFC5869<img src="images/xtl.svg" alt="link"></a>],
+  profiled as follows:
+</div>
+<ul>
+  <li><kbd>hmac</kbd>: The HKDF implementation MUST use HMAC with SHA256</li>
+  <li><kbd>salt</kbd>: N/A. The default extract mode handling MUST be implemented.</li>
+  <li><kbd>info</kbd>: This parameter MUST consist of the actual COSE key
+encryption algorithm, expressed as a 32-bit (4 byte) signed big-endian integer.</li>
+</ul>
+@Encryption Process@
+The process to encrypt <a href="#sad">SAD</a> includes the following steps:
+<ol>
+<li>Create an empty CBOR <kbd>map</kbd> &quot;sub&quot; object.</li>
+  <li>
+    Assign the <code>keyEncryptionAlgorithm</code> of the selected @paymentcred@
+    to the <code>algorithm</code> label.
+  </li>
+  <li>
+    If <code>encryptionKeyId</code> of the selected @paymentcred@
+    is defined, copy the value to the <code>keyId</code> label,
+    else copy the <code>encryptionKey</code> to the <code>publicKey</code> label.
+</li>
+<li>Perform ECDH by:
+<ul>
+<li>
+Generate a key-pair compatible with the <code>encryptionKey</code> of the selected @paymentcred@.
+</li>
+<li>Assign the public key of the generated key-pair to the <code>ephemeralKey</code> label.</li>
+<li>
+  Perform the core ECDH operation including KDF, using the private key of the generated key-pair and
+  the <code>encryptionKey</code> of the selected @paymentcred@.
+</li>
+<li>
+  Set a varible <kbd>contentEncryptionKey</kbd> equal
+  to the result of the ECDH operation.  For all ECDH variants but
+<kbd>ECDH-ES</kbd>, perform the following steps:
+  <ul>
+    <li>Generate a random <kbd>keyEncryptionKey</kbd>.</li>
+    <li>
+      Encrypt the <kbd>keyEncryptionKey</kbd> with the key wrapping method
+      associated with the ECDH algorithm using 
+     the <kbd>contentEncryptionKey</kbd> variable as encryption key.
+    </li>
+    <li>Assign the result of the previous operation to the <code>cipherText</code> label.</li>
+    <li>Set <kbd>contentEncryptionKey</kbd> equal to <kbd>keyEncryptionKey</kbd>.</li>
+  </ul>
+  <div class="para">
+    Note that the <kbd>contentEncryptionKey</kbd> MUST match the length requirement
+    of the <code>contentEncryptionAlgorithm</code> of the selected @paymentcred@.
+  </div>
+</li>
+</ul>
+</li>
+<li>Create an empty CBOR <kbd>map</kbd> &quot;main&quot; object.</li>
+  <li>
+    Assign the <code>contentEncryptionAlgorithm</code> of the selected @paymentcred@
+    to the <code>algorithm</code> label.
+  </li>
+<li>Assign the previously created CBOR &quot;sub&quot; object to
+the <code>keyEncryption</code> label.</li>
+<li>Serialize the &quot;main&quot; object and assign the result
+to an AAD (Additional Authentication Data) variable.</li>
+<li>Generate an IV (Initialization Vector) complient with the
+<code>contentEncryptionAlgorithm</code>.</li>
+</ol>
 @Signature Verification@
 <div>The steps described in the following sections are only intended
 for verifying that an authorization signature is <i>technically</i> correct.
