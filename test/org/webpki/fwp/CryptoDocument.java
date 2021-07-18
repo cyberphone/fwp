@@ -108,6 +108,8 @@ public class CryptoDocument  {
             .addSub("Create Authorization Data (AD)")
             .addSub("Hash Authorization Data (AD)")
             .addSub("Create Signed Authorization Data (SAD)")
+            .add("Encrypted Authorization")
+            .addSub("Encryption Object")
             .add("Signature Verification")
             .addSub("Decode Signed Authorization Data (SAD)")
             .addSub("Validate FIDO Signature")
@@ -282,7 +284,7 @@ public class CryptoDocument  {
                              "hex/esad.cbor", "txt/ESAD.txt"});
 
         String svg =  readStringFile(DOC_GEN_DIRECTORY + File.separator + FWP_CRYPTO_SVG);
-        svg = "<svg style='display:block;width:27.5em;padding:1em' class='box' " + 
+        svg = "<svg style='display:block;width:27em;padding:1em' class='box' " + 
                           svg.substring(svg.indexOf("<svg ") + 5);
         replace(FWP_CRYPTO_SVG, svg);
         replace(WEB_AUTHN, "<a href='https://www.w3.org/TR/webauthn-2/' " +
