@@ -26,6 +26,8 @@ public class CryptoDocument  {
 
     static final String PAYMENT_CRED        = "paymentcred";
 
+    static final String FWP_ASSERTIONS      = "fwpassertions";
+
     String buildDirectory;
     
     String template;
@@ -112,14 +114,14 @@ public class CryptoDocument  {
             .add("Introduction")
             .add("Relationship to Existing Standards")
             .add("Terminology")
-            .add("Authorization Signature")
+            .add("User Authorization")
             .addSub("Create Authorization Data (AD)")
             .addSub("Hash Authorization Data (AD)")
             .addSub("Create Signed Authorization Data (SAD)")
-            .add("Encrypted Authorization")
+            .add("Encrypted User Authorization (ESAD)")
             .addSub("Encryption Object")
             .addSub("Encryption Process")
-            .add("Authorization Decoding and Verification")
+            .add("User Authorization Decoding and Verification")
             .addSub("Decrypt Authorization (ESAD)")
             .addSub("Decode Signed Authorization Data (SAD)")
             .addSub("Validate FIDO Signature")
@@ -311,7 +313,9 @@ public class CryptoDocument  {
                             "title='Web Authentication'>" +
                             "Web&nbsp;Authentication<img src='images/xtl.svg' alt='link'></a>");
         replace(PAYMENT_CRED, "<a href='index.html#credentialdatabase'>" +
-                              "payment credential<img src='images/xtl.svg' alt='link'></a>");
+                              "Payment Credential<img src='images/xtl.svg' alt='link'></a>");
+        replace(FWP_ASSERTIONS, "<a href='index.html#seq-4.5'>" +
+                "FWP Assertions<img src='images/xtl.svg' alt='link'></a>");
         
         replace(TOC, generateToc());
         

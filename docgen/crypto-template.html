@@ -55,7 +55,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
 </div> 
 @Relationship to Existing Standards@
   <div>
-    Since the inner part of FWP Assertions are based on CBOR
+    Since the user authorization component of @fwpassertions@ is based on CBOR
     [<a href="https://tools.ietf.org/html/rfc8949"
         title="RFC8949">RFC8949<img src="images/xtl.svg" alt="link"></a>],
     one might assume that the cryptography would be based on
@@ -77,12 +77,12 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
     That is, it is the value which governs the actual type. 
   </div>
-@Authorization Signature@
+@User Authorization@
   <div>
     Unlike @webauthn@, FWP builds on an <i>authorization</i> concept derived
     from EMV&reg;.  That is, there is no FIDO server involved when the user authorizes a
     payment.  The following sections describe the steps required
-    for creating an authorization signature.
+    for creating the user authorization component of @fwpassertions@.
   </div>
 @Create Authorization Data (AD)@
   <div>Before requesting the user to authorize (&quot;sign&quot;),
@@ -222,14 +222,17 @@ to be signed, potentially making the signature scheme more resistant to tamperin
   </div>
   <div>After the Signed Authorization Data (SAD) has been created,
 it MUST be encrypted as described in the next section.</div>
-@Encrypted Authorization@
-  <div>FWP assertions MUST for privacy and security reasons be encrypted.</div>
-<div id="esad" class="para">The listing below shows how the sample <a href="#sad">SAD</a> object could be encrypted:</div>
-     <div style='overflow-x:auto;padding-right:0.2em'>
-      <div class="staticbox" style='min-width:50em'>
-      @txt/ESAD.txt@
-      </div>
-    </div>
+@Encrypted User Authorization (ESAD)@
+<div id="esad">
+  For privacy and security reasons the user authorization component of @fwpassertions@
+  MUST be encrypted.
+</div>
+<div class="para">The listing below shows how the sample <a href="#sad">SAD</a> object could be encrypted:</div>
+<div style='overflow-x:auto;padding-right:0.2em'>
+  <div class="staticbox" style='min-width:50em'>
+  @txt/ESAD.txt@
+  </div>
+</div>
 <div>The resulting object is referred to as Encrypted Signed Authorization Data (ESAD).</div>
 <div class="para">
   The sample ESAD object should read as follows if encoded in hexadecimal:
@@ -476,9 +479,10 @@ respectively.
 </ol>
 <div class="para">The resulting CBOR <a href="#mainmap">Main map</a>
 object represents an <a href="#esad">ESAD</a> object according to this specification.</div>
-@Authorization Decoding and Verification@
+@User Authorization Decoding and Verification@
 <div>
-  The following sections describe the steps needed for decoding of an FWP assertion, as well as
+  The following sections describe the steps needed for decoding
+  the user authorization part (ESAD) of @fwpassertions@, as well as
   verifying that it is technically correct from a <i>cryptographic</i> point of view.
   As outlined in the core document, several other checks MUST also be performed
   before an associated payment request can be considered as trusted.
