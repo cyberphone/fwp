@@ -66,6 +66,7 @@ public class CryptoDocument  {
         int level;
         int subLevel;
         String line;
+        String id;
 
         public Toc(int level, int subLevel, String line) {
             this.level = level;
@@ -97,6 +98,13 @@ public class CryptoDocument  {
             addInternal(subLine);
             return this;
         }
+
+        TocBuilder add(String id, String line) {
+            Toc toc = new Toc(0, 0, line);
+            toc.id = id;
+            tocs.add(toc);
+            return this;
+        }
     }
     
     static {
@@ -111,10 +119,14 @@ public class CryptoDocument  {
             .add("Encrypted Authorization")
             .addSub("Encryption Object")
             .addSub("Encryption Process")
-            .add("Signature Verification")
+            .add("Authorization Decoding and Verification")
+            .addSub("Decrypt Authorization (ESAD)")
             .addSub("Decode Signed Authorization Data (SAD)")
             .addSub("Validate FIDO Signature")
-            .add("Test Vectors");
+            .add("testvectors","Test Vectors")
+            .add("documenthistory", "Document History")
+            .add("authors", "Authors")
+            .add("trademarks", "Trademarks");
     }
 
     static DecoratorBuilder addList(String fileName) {
@@ -245,18 +257,25 @@ public class CryptoDocument  {
         for (Toc tocEntry : tocs) {
             String nr = String.valueOf(tocEntry.level) + 
                         (tocEntry.subLevel == 0 ? "" : "." + tocEntry.subLevel);
+            String id = tocEntry.id;
+            String tocIndex = "";
+            String entryIndex = "";
+            if (id == null) {
+                id = nr;
+                tocIndex = nr + " ";
+                entryIndex = nr + ". ";
+            }
             toc.append("<div class='toc'>")
                .append(tocEntry.subLevel == 0 ? "" : "&nbsp;&nbsp;&nbsp;&nbsp;")
                .append("<a href='#")
-               .append(nr)
+               .append(id)
                .append("'>")
-               .append(nr)
-               .append(" ")
+               .append(tocIndex)
                .append(tocEntry.line)
                .append("</a></div>");
-            replace(tocEntry.line, "<div id='" + nr + 
+            replace(tocEntry.line, "<div id='" + id + 
                     (tocEntry.subLevel == 0 ? "' class='header'>" : "' class='subheader'>") + 
-                    nr + ". " + tocEntry.line + "</div>");
+                    entryIndex + tocEntry.line + "</div>");
         }
         return toc.toString();
     }
