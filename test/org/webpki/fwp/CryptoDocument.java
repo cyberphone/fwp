@@ -32,6 +32,8 @@ public class CryptoDocument  {
     
     String template;
     
+    static char delimiter = '@';
+    
     static class Decorator {
         int[] mapEntry;
         String text;
@@ -68,16 +70,28 @@ public class CryptoDocument  {
         int level;
         int subLevel;
         String line;
-        String id;
+        String extId;
 
-        public Toc(int level, int subLevel, String line) {
+        Toc(int level, int subLevel, String line) {
             this.level = level;
             this.subLevel = subLevel;
             this.line = line;
         }
         
+        String coreId() {
+            return String.valueOf(level) + (subLevel == 0 ? "" : "." + subLevel);
+        }
+        
     }
 
+    static class TocRef {
+        String name;
+        Toc toc;
+        
+    }
+
+    static ArrayList<TocRef> links = new ArrayList<>();
+    
     static ArrayList<Toc> tocs = new ArrayList<>();
     
     static class TocBuilder {
@@ -103,8 +117,16 @@ public class CryptoDocument  {
 
         TocBuilder add(String id, String line) {
             Toc toc = new Toc(0, 0, line);
-            toc.id = id;
+            toc.extId = id;
             tocs.add(toc);
+            return this;
+        }
+        
+        TocBuilder reference(String name) {
+            TocRef tocRef = new TocRef();
+            tocRef.toc = tocs.get(tocs.size() - 1);
+            tocRef.name = name;
+            links.add(tocRef);
             return this;
         }
     }
@@ -116,11 +138,24 @@ public class CryptoDocument  {
             .add("Terminology")
             .add("User Authorization")
             .addSub("Create Authorization Data (AD)")
+            .reference("AD")
             .addSub("Hash Authorization Data (AD)")
             .addSub("Create Signed Authorization Data (SAD)")
+            .reference("SAD")
+            .addSub("Signature Algorithms")
+            .reference("Signature Algorithms")
             .add("Encrypted User Authorization (ESAD)")
+            .reference("Encrypted User Authorization (ESAD)")
+            .reference("ESAD")
             .addSub("Encryption Object")
             .addSub("Encryption Process")
+            .addSub("Content Encryption Algorithms")
+            .reference("Content Encryption Algorithms")
+            .addSub("Key Algorithms")
+            .addSub("Key Encryption Algorithms")
+            .reference("Key Encryption Algorithms")
+            .addSub("Key Derivation Function")
+            .reference("KDF")
             .add("User Authorization Decoding and Verification")
             .addSub("Decrypt Authorization (ESAD)")
             .addSub("Decode Signed Authorization Data (SAD)")
@@ -206,13 +241,13 @@ public class CryptoDocument  {
     }
     
     String pattern(String tagAndFile) {
-        return "@" + tagAndFile + "@";
+        return delimiter + tagAndFile + delimiter;
     }
     
     int getTag(String tagAndFile) {
         int i = template.indexOf(pattern(tagAndFile));
         if (i < 0) {
-            throw new RuntimeException("Tag missing: " +tagAndFile);
+            throw new RuntimeException("Tag missing: " + pattern(tagAndFile));
         }
         return i;
     }
@@ -257,9 +292,8 @@ public class CryptoDocument  {
     String generateToc() {
         StringBuilder toc = new StringBuilder();
         for (Toc tocEntry : tocs) {
-            String nr = String.valueOf(tocEntry.level) + 
-                        (tocEntry.subLevel == 0 ? "" : "." + tocEntry.subLevel);
-            String id = tocEntry.id;
+            String nr = tocEntry.coreId();
+            String id = tocEntry.extId;
             String tocIndex = "";
             String entryIndex = "";
             if (id == null) {
@@ -282,6 +316,12 @@ public class CryptoDocument  {
         return toc.toString();
     }
     
+    void generateLinks() {
+        for (TocRef tocRef : links) {
+            replace(tocRef.name, "<a href='#" + tocRef.toc.coreId()+ "'>" + tocRef.name + "</a>");
+        }
+        
+    }
     
     void process(String[] tagAndFiles) throws Exception {
         for (String tagAndFile : tagAndFiles) {
@@ -324,6 +364,10 @@ public class CryptoDocument  {
         replace(CLIENT_DATA_JSON, processCodeTxt(readStringFile(
                         TEST_DATA_DIRECTORY + File.separator + CLIENT_DATA_JSON)));
 
+        delimiter = '#';
+
+        generateLinks();
+        
         ArrayUtil.writeFile(resultFile, template.getBytes("utf-8"));
     }
 
