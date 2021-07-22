@@ -23,6 +23,10 @@ public class CryptoDocument  {
     static final String CHALLENGE           = "challenge.txt";
 
     static final String CLIENT_DATA_JSON    = "clientDataJSON.json";
+    
+    static final String SIGNATURE_JWK       = "signature.jwk";
+
+    static final String ENCRYPTION_JWK      = "encryption.jwk";
 
     static final String PAYMENT_CRED        = "paymentcred";
 
@@ -337,13 +341,21 @@ public class CryptoDocument  {
             }
         }
     }
+    
+    void textFile(String name) throws Exception {
+        replace(name, processCodeTxt(readStringFile(
+                TEST_DATA_DIRECTORY + File.separator + name)));
+    }
 
-    CryptoDocument (String buildDirectory, String keyDirectory, String resultFile) throws Exception {
+    CryptoDocument (String buildDirectory, String resultFile) throws Exception {
         this.buildDirectory = buildDirectory;
         this.template =  readStringFile(DOC_GEN_DIRECTORY + File.separator + "crypto-template.html");
-        process(new String[]{"hex/ad.cbor", "txt/AD.txt",
-                             "hex/sad.cbor", "txt/SAD.txt",
-                             "hex/esad.cbor", "txt/ESAD.txt"});
+        process(new String[]{"hex/ad.cbor", 
+                             "txt/AD.txt",
+                             "hex/sad.cbor", 
+                             "txt/SAD.txt",
+                             "hex/esad.cbor",
+                             "txt/ESAD.txt"});
 
         String svg =  readStringFile(DOC_GEN_DIRECTORY + File.separator + FWP_CRYPTO_SVG);
         svg = "<svg style='display:block;width:27em;padding:1em' class='box' " + 
@@ -361,8 +373,9 @@ public class CryptoDocument  {
         
         replace(CHALLENGE, readStringFile(TEST_DATA_DIRECTORY + File.separator + CHALLENGE));
 
-        replace(CLIENT_DATA_JSON, processCodeTxt(readStringFile(
-                        TEST_DATA_DIRECTORY + File.separator + CLIENT_DATA_JSON)));
+        textFile(CLIENT_DATA_JSON);
+        textFile(SIGNATURE_JWK);
+        textFile(ENCRYPTION_JWK);
 
         delimiter = '#';
 
@@ -373,7 +386,7 @@ public class CryptoDocument  {
 
     public static void main(String[] argc) {
         try {
-            new CryptoDocument(argc[0], argc[1], argc[2]);
+            new CryptoDocument(argc[0], argc[1]);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

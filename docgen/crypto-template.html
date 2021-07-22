@@ -44,7 +44,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <img style="max-width:30%;position:absolute;right:1em;top:1em" src="images/ipr.svg" alt="IPR declaration" title="IPR declaration"/>
   <div style="text-align:center" class="header">FIDO Web Pay - Crypto</div>
   <div id="toc" class="header">Table of Contents</div>
-   @table-of-contents@
+  @table-of-contents@
   @Introduction@
   <div>
     This document describes the cryptographic constructs used in 
@@ -283,7 +283,7 @@ key encryption algorithm and encryption key reference method.</div>
     <td>
       Symmetric key algorithm used for encrypting the actual content.
       The value to use is the &quot;Identifier&quot; specified in the
-      <a href="#contentencryption">Content Encryption Algorithms</a> table.
+     #Content Encryption Algorithms# table.
     </td>
   </tr>
   <tr>
@@ -575,6 +575,55 @@ encryption algorithm, expressed as a 32-bit (4 byte) signed big-endian integer.<
   process to terminate with an appropriate error indication.
 </div>
 @Decrypt Authorization (ESAD)@
+<div>Decode the #ESAD# binary using a suitable CBOR parser.</div>
+<div class="para">
+Perform the following steps to decrypt the ESAD object:
+</div>
+<ol>
+  <li>
+    Retrieve the private encryption key through the <code>encryptionKeyId</code> or
+    the <code>publicKey</code> elements in the <a href="#submap">Sub map</a>, depending on
+    which of them that are defined (which in most cases be known in advance
+    since the issuer and relying party usually is the same entity).
+  </li>
+<li>
+Fetch the ECDH algorithm to use from <code>algorithm</code> element in the <a href="#submap">Sub map</a>.
+</li>
+  <li>
+  Perform an ECDH key agreement operation including #KDF# with the retrieved private key
+  and the <code>ephemeralKey</code> element in the <a href="#submap">Sub map</a>. 
+</li>
+<li>
+For key wrapping ECDH algorithms, use the result of the ECDH operation
+to unwrap a <kbd>contentEncryptionAlgorithm</kbd> (specified by
+the <code>cipherText</code> element in the <a href="#submap">Sub map</a>), while <kbd>ECDH-ES</kbd>
+returns the <kbd>contentEncryptionAlgorithm</kbd> directly.  See #Key Encryption Algorithms#.
+</li>
+<li>
+  Fetch the <kbd>contentEncryptionAlgorithm</kbd> specified by the <code>algorithm</code>
+  element in the <a href="#mainmap">Main map</a>.  See #Content Encryption Algorithms#.
+</li>
+<li>Fetch and remove the <code>tag</code>, <code>iv</code>, and <code>cipherText</code>
+elements in the <a href="#mainmap">Main map</a>.</li>
+<li>Serialize the remaining CBOR object and assign the result to an
+<kbd>AAD</kbd> (Additional Authentication Data) variable.</li>
+<li>
+  Decrypt the ESAD object as follows
+  <div class="formula">
+    <kbd>
+      plainText = decrypt(<code>contentEncryptionAlgorithm</code>,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contentEncryptionKey,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AAD,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>iv</code>,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>tag</code>,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>cipherText</code>)
+    </kbd>
+  </div>
+  here using an hypothetical decryption method.
+</li>
+</ol>
+<div class="para">If all steps succeed, the resulting plain text
+is assumed to be a #SAD# object.</div>
 @Decode Signed Authorization Data (SAD)@
 <div>Decode the #SAD# binary using a suitable CBOR parser.</div>
 <div class="para">Read and remove the FIDO items <code>authenticatorData</code>,
@@ -617,7 +666,31 @@ Although the FIDO signature scheme is unique, signatures can be validated by
 any cryptographic API supporting the signature algorithm in question.
 </div>
  @Test Vectors@
-
+<div>
+  The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
+                               title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
+  format was used for the signature part of the #SAD# sample:
+</div>
+   <div style='overflow-x:auto;padding-right:0.2em'>
+    <div class="staticbox">
+      @signature.jwk@
+    </div>
+   </div>
+<div>Note that ES256 signatures usually depend on a random factor as well, making
+each signature unique.  Verification should work as expected regardless of
+the signature value, as long as the signature key and data to be signed are
+identical.
+</div>
+<div class="para">
+  The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
+                                   title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
+  format was used for the encryption part of the #ESAD# sample:
+</div>
+  <div style='overflow-x:auto;padding-right:0.2em'>
+    <div class="staticbox">
+      @encryption.jwk@
+    </div>
+   </div>
 @Document History@
       <div style='overflow-x:auto;padding-right:0.2em'>
         <table class="tftable">

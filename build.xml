@@ -155,7 +155,7 @@
             <include name="*.jar"/>
           </fileset>
        </classpath>
-       <arg line="${current.dir} ${openkeystore.dir}/testdata/keys ${fido-web-pay.dir}/specification/crypto.html"/>
+       <arg line="${current.dir} ${fido-web-pay.dir}/specification/crypto.html"/>
      </java>
   </target>
     

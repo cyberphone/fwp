@@ -70,6 +70,8 @@ public class TestVectorGeneration {
     
     static final String FILE_TESTVECTOR_TEXT = "vectors.txt";
     
+    static final String FILE_SIGNATURE_JWK   = "signature.jwk";
+    static final String FILE_ENCRYPTION_JWK  = "encryption.jwk";
     static final String FILE_UNSIGNED_CBOR   = "AD.cbor";
     static final String FILE_SIGNED_CBOR     = "SAD.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
@@ -107,7 +109,10 @@ public class TestVectorGeneration {
         KeyPair p256 = readKey("p256");
         result.append("\n\nUser FIDO key in JWK format:\n")
               .append(currPrivateKey);
-        
+
+        conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
+                currPrivateKey.getBytes("utf-8"));
+
         GregorianCalendar time = ISODateTime.parseDateTime("2021-07-02T12:34:07+02:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
@@ -215,6 +220,9 @@ public class TestVectorGeneration {
                       "\n\nIssuer encryption key in JWK format:\n")
               .append(currPrivateKey);
 
+        conditionalRewrite(testDataDir + FILE_ENCRYPTION_JWK, 
+                currPrivateKey.getBytes("utf-8"));
+        
         byte[] encryptedAssertion = 
                 new CBORAsymKeyEncrypter(x25519.getPublic(),
                                          ISSUER_KEY_ENCRYPTION_ALGORITHM,
