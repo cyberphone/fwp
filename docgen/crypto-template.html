@@ -52,7 +52,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </div>
   <div class="para">To make the descriptions more accessible,
   the sample in the core document is used for illustrating the different steps required.
-  The sample depends on the keys provided in the <a href="#testvectors">Test&nbsp;Vectors</a> section.
+  The sample depends on the keys provided in the #Sample Keys# section.
 </div> 
 @Relationship to Existing Standards@
   <div>
@@ -76,7 +76,10 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <div>
     Throughout this document the CBOR types <kbd>unsigned&nbsp;integer</kbd> and
     <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
-    That is, it is the value which governs the actual type. 
+    That is, it is the value which governs the actual type.
+  </div>
+  <div class="para">
+    Items in <code>red</code> refer to elements associated with the selected @paymentcred@.
   </div>
 @User Authorization@
   <div>
@@ -91,8 +94,8 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     payment request (aka &quot;dynamic linking&quot;) like in the sample from the
     main document:
   </div>
-  <div id="ad" style='overflow-x:auto;padding-right:0.2em'>
-    <div class="staticbox">
+  <div style='overflow-x:auto;padding-right:0.2em'>
+    <div class="staticbox" style='min-width:50em'>
       @txt/AD.txt@
     </div>
    </div>
@@ -188,7 +191,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
        the user should at this stage be requested to authorize using the key (authenticator)
        pointed out by the <code>credentialId</code> of the selected @paymentcred@.
        In a Web context this involves calling <kbd>navigator.credentials.get()</kbd>.
-       If the call is successful, the FIDO items <code>authenticatorData</code>,
+       If the call is successful, the FIDO elements <code>authenticatorData</code>,
        <code>clientDataJSON</code>, and <code>signature</code> should be returned.
      </div>
 
@@ -197,11 +200,11 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     turn to @webauthn@ (FWP is 100% compatible at the API level).
 </div>
    <div class="para">
-    After adding the received FIDO items above to the <a href="#authorization">authorization</a>
+    After adding the received FIDO elements above to the <a href="#authorization">authorization</a>
    <kbd>map</kbd> of AD, the resulting sample should read as follows:
 </div>
     <div style='overflow-x:auto;padding-right:0.2em'>
-      <div class="staticbox">
+      <div class="staticbox" style='min-width:50em'>
       @txt/SAD.txt@
       </div>
     </div>
@@ -269,7 +272,7 @@ packaged as follows:</div>
     </div>
 <div>Numbers in parentheses represent the CBOR <kbd>map</kbd> key
 (label) associated with the symbolic name.
-The items in dashed boxes are <i>optional</i>, depending on
+The elements in the dashed boxes are <i>optional</i>, depending on
 key encryption algorithm and encryption key reference method.</div>
 <div id="mainmap" class="para">Main map definition:</div>
 
@@ -452,7 +455,7 @@ Generate a key pair compatible with the <code>encryptionKey</code>.
   to the <code>algorithm</code> label.
 </li>
 <li>Serialize the current <a href="#mainmap">Main map</a> object and assign the result
-to an AAD (Additional Authentication Data) variable.</li>
+to an AAD (Additional Authenticated Data) variable.</li>
 <li>
   Generate an IV (Initialization Vector) compliant with the
   <code>contentEncryptionAlgorithm</code>. See #Content Encryption Algorithms#.
@@ -571,7 +574,7 @@ encryption algorithm, expressed as a 32-bit (4 byte) signed big-endian integer.<
   before an associated payment request can be considered as trusted.
 </div>
 <div class="para">
-  Missing, erroneous, or extraneous data MUST cause the the verification
+  Missing, erroneous, or extraneous data MUST cause the verification
   process to terminate with an appropriate error indication.
 </div>
 @Decrypt Authorization (ESAD)@
@@ -581,13 +584,13 @@ Perform the following steps to decrypt the ESAD object:
 </div>
 <ol>
   <li>
-    Retrieve the private encryption key through the <code>encryptionKeyId</code> or
-    the <code>publicKey</code> elements in the <a href="#submap">Sub map</a>, depending on
-    which of them that are defined (which in most cases be known in advance
+    Retrieve the private encryption key associated with the <code>encryptionKeyId</code> or
+    the <code>publicKey</code> in the <a href="#submap">Sub map</a>, depending on
+    which of the elements that are defined (which in most cases is known in advance
     since the issuer and relying party usually is the same entity).
   </li>
 <li>
-Fetch the ECDH algorithm to use from <code>algorithm</code> element in the <a href="#submap">Sub map</a>.
+Fetch the ECDH algorithm to use from the <code>algorithm</code> element in the <a href="#submap">Sub map</a>.
 </li>
   <li>
   Perform an ECDH key agreement operation including #KDF# with the retrieved private key
@@ -606,7 +609,7 @@ returns the <kbd>contentEncryptionAlgorithm</kbd> directly.  See #Key Encryption
 <li>Fetch and remove the <code>tag</code>, <code>iv</code>, and <code>cipherText</code>
 elements in the <a href="#mainmap">Main map</a>.</li>
 <li>Serialize the remaining CBOR object and assign the result to an
-<kbd>AAD</kbd> (Additional Authentication Data) variable.</li>
+<kbd>AAD</kbd> (Additional Authenticated Data) variable.</li>
 <li>
   Decrypt the ESAD object as follows
   <div class="formula">
@@ -626,7 +629,7 @@ elements in the <a href="#mainmap">Main map</a>.</li>
 is assumed to be a #SAD# object.</div>
 @Decode Signed Authorization Data (SAD)@
 <div>Decode the #SAD# binary using a suitable CBOR parser.</div>
-<div class="para">Read and remove the FIDO items <code>authenticatorData</code>,
+<div class="para">Fetch and remove the FIDO elements <code>authenticatorData</code>,
 <code>clientDataJSON</code>, and <code>signature</code> from the decoded object
 which now effectively is an #AD# object.
 Applied to the sample, the resulting object should after <kbd>SHA256</kbd> hashing and
@@ -647,7 +650,7 @@ attribute in the received <code>clientDataJSON</code> object:</div>
     </div>
 @Validate FIDO Signature@
 <div>
-The signature is validated by applying the items received in the 
+The signature is validated by applying the elements received in the 
 <a href="#authorization">authorization</a> <kbd>map</kbd> to
 a suitable signature validation API like:
 </div>
@@ -665,14 +668,15 @@ validate(<code>signatureAlgorithm</code>,<br>
 Although the FIDO signature scheme is unique, signatures can be validated by
 any cryptographic API supporting the signature algorithm in question.
 </div>
- @Test Vectors@
+@Sample Keys@
+@Signature Key@
 <div>
   The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
                                title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
   format was used for the signature part of the #SAD# sample:
 </div>
    <div style='overflow-x:auto;padding-right:0.2em'>
-    <div class="staticbox">
+    <div class="staticbox" style='min-width:35em'>
       @signature.jwk@
     </div>
    </div>
@@ -681,16 +685,20 @@ each signature unique.  Verification should work as expected regardless of
 the signature value, as long as the signature key and data to be signed are
 identical.
 </div>
-<div class="para">
+@Encryption Key@
+<div>
   The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
                                    title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
   format was used for the encryption part of the #ESAD# sample:
 </div>
   <div style='overflow-x:auto;padding-right:0.2em'>
-    <div class="staticbox">
+    <div class="staticbox" style='min-width:35em'>
       @encryption.jwk@
     </div>
    </div>
+<div>
+Note that the ESAD sample uses a <code>keyId</code> for identifying the encryption key.
+</div>
 @Document History@
       <div style='overflow-x:auto;padding-right:0.2em'>
         <table class="tftable">

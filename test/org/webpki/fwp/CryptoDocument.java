@@ -83,7 +83,10 @@ public class CryptoDocument  {
         }
         
         String coreId() {
-            return String.valueOf(level) + (subLevel == 0 ? "" : "." + subLevel);
+            return extId == null ? 
+                    String.valueOf(level) + (subLevel == 0 ? "" : "." + subLevel)
+                                 :
+                   extId;
         }
         
     }
@@ -164,7 +167,10 @@ public class CryptoDocument  {
             .addSub("Decrypt Authorization (ESAD)")
             .addSub("Decode Signed Authorization Data (SAD)")
             .addSub("Validate FIDO Signature")
-            .add("testvectors","Test Vectors")
+            .add("Sample Keys")
+            .reference("Sample Keys")
+            .addSub("Signature Key")
+            .addSub("Encryption Key")
             .add("documenthistory", "Document History")
             .add("authors", "Authors")
             .add("trademarks", "Trademarks");
