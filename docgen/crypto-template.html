@@ -48,11 +48,12 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   @Introduction@
   <div>
     This document describes the cryptographic constructs used in 
-<a href="index.html">FIDO Web Pay</a> (FWP) Assertions.
+    <a href="index.html"
+       title="FIDO Web Pay">FIDO Web Pay<img src="images/xtl.svg" alt="link"></a> (FWP) Assertions.
   </div>
   <div class="para">To make the descriptions more accessible,
-  the sample in the core document is used for illustrating the different steps required.
-  The sample depends on the keys provided in the #Sample Keys# section.
+  the samples in the core document are used for illustrating the different processing steps.
+  The samples depend on the keys provided in the #Sample Keys# section.
 </div> 
 @Relationship to Existing Standards@
   <div>
@@ -67,11 +68,6 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     solutions used by FWP build on the CTAP2 canonicalization scheme
     which COSE does not use.
   </div>
-  <div class="para">
-    Note that the CTAP2 canonicalization scheme is compatible with
-    the deterministic mode of CBOR as featured in existing FIDO
-    compliant products.
-  </div>
  @Terminology@
   <div>
     Throughout this document the CBOR types <kbd>unsigned&nbsp;integer</kbd> and
@@ -85,7 +81,10 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <div>
     Unlike @webauthn@, FWP builds on an <i>authorization</i> concept derived
     from EMV&reg;.  That is, user authorizations are created entirely locally in the FWP client.
-    The following sections describe the steps required
+    Compatible FIDO authenticators MUST therefore be &quot;client side&quot; only.
+  </div>
+  <div class="para">
+    The following subsections describe the steps required
     for creating the user authorization component of @fwpassertions@.
   </div>
 @Create Authorization Data (AD)@
@@ -103,8 +102,9 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     This object is referred to as Authorization Data (AD).
   </div>
    <div id="authorization" class="para">
-     Since this document is about cryptographic constructs, this section is focused on the
-     <code>authorization</code> <kbd>map</kbd> (label <kbd>10</kbd>).
+     Since this section is about cryptographic constructs, only the data in the
+     <code>authorization</code> <kbd>map</kbd> (label <kbd>10</kbd>) is
+     elaborated on here.
    </div>
    <div class="para">
    Definition:
@@ -162,15 +162,15 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </table>
   </div>
    <div>
-As can be seen in the listing, only the two first elements are featured in the #AD# 
+As can be seen in the listing, only the two first elements are featured in the 
 <code>authorization</code> <kbd>map</kbd>.
 This is because they are static and can thus be included in the data
 to be signed, potentially making the signature scheme more resistant to tampering.
 </div>
 @Hash Authorization Data (AD)@
    <div>
-     Since FIDO signatures are limited to signing 32 bytes of <kbd>&quot;challenge&quot;</kbd> data, the
-     next step is creating an <kbd>SHA256</kbd> hash of the AD binary.  The sample AD reads as follows
+     Since FIDO (in the default mode) is limited to signing 32 bytes of <kbd>&quot;challenge&quot;</kbd> data, the
+     next step is creating an <kbd>SHA256</kbd> hash of the AD binary.  The sample AD should read as follows
      when expressed in hexadecimal encoding:
    </div>
      <div style='overflow-x:auto;padding-right:0.2em'>
@@ -178,7 +178,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
       @hex/ad.cbor@
       </div>
     </div>
-    <div>Applied to the sample the hashed AD encoded as base64url should read as follows:</div>
+    <div>Applied to the sample, the hashed AD encoded as base64url should read as follows:</div>
      <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox">
       @challenge.txt@
@@ -188,7 +188,8 @@ to be signed, potentially making the signature scheme more resistant to tamperin
      <div>
        Using the result of the previous step (but
        using binary encoding), as the sole FIDO <kbd>&quot;challenge&quot;</kbd>,
-       the user should at this stage be requested to authorize using the key (authenticator)
+       the user should at this stage be asked to authorize a payment request
+       using the key (authenticator)
        pointed out by the <code>credentialId</code> of the selected @paymentcred@.
        In a Web context this involves calling <kbd>navigator.credentials.get()</kbd>.
        If the call is successful, the FIDO elements <code>authenticatorData</code>,
@@ -223,7 +224,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
   </div>
 
 @Signature Algorithms@
-<div class="para">FIDO currently supports the following COSE * signature algorithms:</div>
+<div class="para">FIDO currently supports the following COSE signature algorithms:</div>
 <div style='overflow-x:auto;padding-right:0.2em'>
   <table class="tftable">
     <tr><th>Name</th><th>Identifier</th></tr>
@@ -232,7 +233,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
       <td style='text-align:center'><kbd>-7</kbd></td>
     </tr>
     <tr>
-      <td style='white-space:nowrap'><kbd>ED25519</kbd></td>
+      <td style='white-space:nowrap'><kbd>ED25519</kbd> *</td>
       <td style='text-align:center'><kbd>-8</kbd></td>
     </tr>
     <tr>
@@ -241,7 +242,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     </tr>
   </table>
 </div>
- <div>* <kbd>ED25519</kbd> is strictly put not COSE compliant.</div>
+ <div>* The <kbd>ED25519</kbd> identifier is strictly put not COSE compliant.</div>
 
 @Encrypted User Authorization (ESAD)@
 <div id="esad">
@@ -263,10 +264,14 @@ to be signed, potentially making the signature scheme more resistant to tamperin
 @hex/esad.cbor@
 </div>
 </div>
-<div class="para">The following sections describe the encryption scheme in detail.</div>
+<div class="para">The following subsections describe the encryption scheme in detail.</div>
 @Encryption Object@
-  <div class="para">Encryption is accomplished by an ECDH-based scheme
-packaged as follows:</div>
+<div class="para">
+  The encryption scheme is based on an ECDH profile derived from
+<a href="https://cyberphone.github.io/javaapi/org/webpki/cbor/package-summary.html#cef">
+CBOR Encryption Format (CEF)<img src="images/xtl.svg" alt="link">
+</a>.  ESAD objects are packaged as follows:
+</div>
     <div style="overflow-x:auto;padding:8pt 0">
       @fwp-crypto.svg@
     </div>
@@ -294,7 +299,7 @@ key encryption algorithm and encryption key reference method.</div>
     <td style='text-align:center'><kbd>2</kbd></td>
     <td><kbd>map</kbd></td>
     <td>
-      See <a href="#submap">Sub map</a>.
+      Holds the <a href="#submap">Sub map</a>.
     </td>
   </tr>
   <tr>
@@ -384,7 +389,7 @@ key encryption algorithm and encryption key reference method.</div>
       <td style='text-align:center'><kbd>9</kbd></td>
       <td><kbd>byte&nbsp;string</kbd></td>
       <td>
-        <i>Optional</i>: Encrypted key for ECDH algorithms using key-wrapping.
+        <i>Optional</i>: Encrypted key for key-wrapping ECDH algorithms.
       </td>
     </tr>
   </table>
@@ -418,7 +423,7 @@ Generate a key pair compatible with the <code>encryptionKey</code>.
 <li>Copy the public key of the generated key pair to the <code>ephemeralKey</code> label.</li>
 <li>
   Perform the core ECDH operation (key agreement) including the #KDF#,
-  using the private key of the generated key-pair and
+  using the private key of the generated key pair and
   the <code>encryptionKey</code>.
   Note that the requested length of the shared secret generated by the KDF,
   is defined by the <code>keyEncryptionAlgorithm</code>. See #Key Encryption Algorithms#.
@@ -573,7 +578,7 @@ encryption algorithm, expressed as a 32-bit (4 byte) signed big-endian integer.<
   As outlined in the core document, several other checks MUST also be performed
   before an associated payment request can be considered as trusted.
 </div>
-<div class="para">
+<div class="comment box">
   Missing, erroneous, or extraneous data MUST cause the verification
   process to terminate with an appropriate error indication.
 </div>
@@ -648,7 +653,7 @@ attribute in the received <code>clientDataJSON</code> object:</div>
       @clientDataJSON.json@
       </div>
     </div>
-@Validate FIDO Signature@
+@Validate Signature@
 <div>
 The signature is validated by applying the elements received in the 
 <a href="#authorization">authorization</a> <kbd>map</kbd> to
@@ -671,9 +676,9 @@ any cryptographic API supporting the signature algorithm in question.
 @Sample Keys@
 @Signature Key@
 <div>
-  The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
-                               title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
-  format was used for the signature part of the #SAD# sample:
+  The following key (here expressed as a JWK [<a href="https://tools.ietf.org/html/rfc7517"
+                               title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]),
+was used for the signature part of the #SAD# sample:
 </div>
    <div style='overflow-x:auto;padding-right:0.2em'>
     <div class="staticbox" style='min-width:35em'>
@@ -681,15 +686,14 @@ any cryptographic API supporting the signature algorithm in question.
     </div>
    </div>
 <div>Note that ES256 signatures usually depend on a random factor as well, making
-each signature unique.  Verification should work as expected regardless of
-the signature value, as long as the signature key and data to be signed are
-identical.
+each signature unique.  Verification should still work
+as long as the signature key and data to be signed remain constant.
 </div>
 @Encryption Key@
 <div>
-  The following key in the JWK [<a href="https://tools.ietf.org/html/rfc7517"
-                                   title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]
-  format was used for the encryption part of the #ESAD# sample:
+  The following key (here expressed as a JWK [<a href="https://tools.ietf.org/html/rfc7517"
+                                   title="RFC7517">RFC7517<img src="images/xtl.svg" alt="link"></a>]),
+was used for the encryption part of the #ESAD# sample:
 </div>
   <div style='overflow-x:auto;padding-right:0.2em'>
     <div class="staticbox" style='min-width:35em'>
@@ -700,12 +704,15 @@ identical.
 Note that the ESAD sample uses a <code>keyId</code> for identifying the encryption key.
 </div>
 @Document History@
-      <div style='overflow-x:auto;padding-right:0.2em'>
-        <table class="tftable">
-          <tr><th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Version</th><th style="min-width:30em">Comment</th></tr>
-          <tr><td style="text-align:center">2021-07-19</td><td style="text-align:center">0.1</td><td>Initial publishing.</td></tr>
-         </table>
-      </div>
+<div style='overflow-x:auto;padding-right:0.2em'>
+<table class="tftable">
+<tr><th>Date</th><th>Version</th><th style="min-width:30em">Comment</th></tr>
+<tr>
+<td style="text-align:center;white-space:nowrap">2021-07-26</td>
+<td style="text-align:center">0.1</td><td>Initial publishing.</td>
+</tr>
+</table>
+</div>
  @Authors@
        <div>
         The FWP specification is currently authored by Anders Rundgren

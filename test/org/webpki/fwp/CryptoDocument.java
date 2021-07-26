@@ -166,7 +166,7 @@ public class CryptoDocument  {
             .add("User Authorization Decoding and Verification")
             .addSub("Decrypt Authorization (ESAD)")
             .addSub("Decode Signed Authorization Data (SAD)")
-            .addSub("Validate FIDO Signature")
+            .addSub("Validate Signature")
             .add("Sample Keys")
             .reference("Sample Keys")
             .addSub("Signature Key")
