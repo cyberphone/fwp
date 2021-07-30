@@ -111,17 +111,19 @@ public class EnrollServlet extends HttpServlet {
                 "  try {\n" +
                 "    document.getElementById('" + USER_IFC_ID + "').style.display = 'none';\n" +
                 "    document.getElementById('" + WAITING_ID + "').style.display = 'block';\n" +
-                "    const initPhase = await exchangeJSON({},'" + WalletCore.INIT_PHASE + "');\n" +
+                "    const initPhase = await exchangeJSON({" +
+                         WalletCore.CARD_HOLDER + ":" +
+                         "document.getElementById('" + CARD_HOLDER_NAME + 
+                         "').value},'" + WalletCore.INIT_PHASE + "');\n" +
      
-                "    let userId = initPhase." + FWPCrypto.USER_ID + ";\n" +
                 "    let publicKey = {\n" +
                 "      challenge: b64urlToU8arr(initPhase." + FWPCrypto.CHALLENGE + "),\n" +
                 "      rp: {\n" +
                 "        name: 'FIDO Web Pay'\n" +
                 "      },\n" +
                 "      user: {\n" +
-                "        id: new TextEncoder().encode(userId),\n" +
-                "        name: userId,\n" +
+                "        id: new TextEncoder().encode(initPhase." + FWPCrypto.USER_ID + "),\n" +
+                "        name: initPhase." + WalletCore.CARD_HOLDER + ",\n" +
                 "        displayName: 'FWP User'\n" +
                 "      },\n" +
                 "      pubKeyCredParams: [{\n" +
@@ -150,9 +152,6 @@ public class EnrollServlet extends HttpServlet {
                 "    const result = await navigator.credentials.create({publicKey});\n" +
 //                "    console.log(result);\n" +
                 "    const finalizePhase = await exchangeJSON({" + 
-
-                         WalletCore.CARD_HOLDER + ":" +
-                         "document.getElementById('" + CARD_HOLDER_NAME + "').value," +
 
                          // Core FIDO return data
                          FWPCrypto.CREDENTIAL_ID + ":result.id," +

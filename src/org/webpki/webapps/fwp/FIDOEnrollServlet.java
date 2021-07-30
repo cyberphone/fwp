@@ -76,6 +76,9 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // Firing up! We may have an old session but we don't really care.
                 HttpSession session = request.getSession(true);
                 
+                // Get the card holder
+                String cardHolder = requestJson.getString(WalletCore.CARD_HOLDER);
+                
                 // Due to limitations in FIDO credential management we
                 // reuse an existing user ID if there is one.
                 String userId = WalletCore.getWalletCookie(request);
@@ -90,6 +93,9 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // We use a UUID as the sole entry in the database and tie payment
                 // credentials and (a single) FIDO authenticator to that.
                 resultJson.setString(FWPCrypto.USER_ID, userId);
+                
+                // And the card holder.  Also displayed by WebAuthn
+                resultJson.setString(WalletCore.CARD_HOLDER, cardHolder);
                 
                 // We must also keep a copy of emitted data in a server session.
                 // The client can only partially be trusted!
@@ -121,7 +127,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 String userId = registerData.getString(FWPCrypto.USER_ID);
 
                 // Get card holder name.
-                String cardHolder = requestJson.getString(WalletCore.CARD_HOLDER);
+                String cardHolder = registerData.getString(WalletCore.CARD_HOLDER);
                 
                 // Get credintialId.  To simplify things a bit we keep it in B64U notation.
                 String credentialId = requestJson.getString(FWPCrypto.CREDENTIAL_ID);
