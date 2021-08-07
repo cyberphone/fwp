@@ -109,6 +109,11 @@
         <servlet-class>org.webpki.webapps.fwp.admin.RegistrationListServlet</servlet-class>
     </servlet>
     
+    <servlet>
+        <servlet-name>X_BuyServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.X_BuyServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -202,6 +207,11 @@
     <servlet-mapping>
         <servlet-name>RegistrationListServlet</servlet-name>
         <url-pattern>/admin/reglist</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>X_BuyServlet</servlet-name>
+        <url-pattern>/x-buy</url-pattern>
     </servlet-mapping>
 
     <security-constraint>
