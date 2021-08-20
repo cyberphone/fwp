@@ -603,9 +603,9 @@ Fetch the ECDH algorithm to use from the <code>algorithm</code> element in the <
 </li>
 <li>
 For key wrapping ECDH algorithms, use the result of the ECDH operation
-to unwrap a <kbd>contentEncryptionAlgorithm</kbd> (specified by
+to unwrap a <kbd>contentEncryptionKey</kbd> (specified by
 the <code>cipherText</code> element in the <a href="#submap">Sub map</a>), while <kbd>ECDH-ES</kbd>
-returns the <kbd>contentEncryptionAlgorithm</kbd> directly.  See #Key Encryption Algorithms#.
+returns the <kbd>contentEncryptionKey</kbd> directly.  See #Key Encryption Algorithms#.
 </li>
 <li>
   Fetch the <kbd>contentEncryptionAlgorithm</kbd> specified by the <code>algorithm</code>
@@ -619,7 +619,7 @@ elements in the <a href="#mainmap">Main map</a>.</li>
   Decrypt the ESAD object as follows
   <div class="formula">
     <kbd>
-      plainText = decrypt(<code>contentEncryptionAlgorithm</code>,<br>
+      plainText = decrypt(contentEncryptionAlgorithm,<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contentEncryptionKey,<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AAD,<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>iv</code>,<br>
