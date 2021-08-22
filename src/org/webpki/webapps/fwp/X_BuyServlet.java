@@ -140,9 +140,14 @@ public class X_BuyServlet extends HttpServlet {
         String error = request.getParameter(OPTIONAL_ERROR);
         StringBuilder html = new StringBuilder(
             error.isEmpty() ? 
-            "<div class='header' style='margin-top:5em'>Merchant Response</div>" +
+            "<div style='display:flex;justify-content:center;margin-top:4em'>" +
+              "<img src='images/spaceshop-logo.svg' alt='logo' " +
+                "onclick=\"document.location.href='x-buy'\" " +
+                "style='max-width:90%;cursor:pointer' " +
+                "title='click to test again'>" +
+            "</div>" +
             
-            "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+            "<div style='display:flex;justify-content:center;margin-top:2em'>" +
               "<div class='comment'>" +
               "Thank you for your order and welcome back!" +
               "</div>" +
@@ -155,13 +160,7 @@ public class X_BuyServlet extends HttpServlet {
        .append(HTML.encode(error, false))
        .append(
             "</div>" +
-            "</div>")
-       .append(
-           "<div style='display:flex;align-items:center;flex-direction:column;margin-top:1.5em'>" +
-             "<div class='stdbtn' onclick=\"document.location.href='x-buy'\">" +
-               "Test again..." +
-             "</div>" +
-           "</div>");
+            "</div>");
 
         HTML.standardPage(response, Actors.MERCHANT, WalletCore.GO_HOME_JAVASCRIPT, html); 
     }
