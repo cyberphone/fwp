@@ -162,8 +162,8 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </table>
   </div>
    <div>
-As can be seen in the listing, only the two first elements are featured in the 
-<code>authorization</code> <kbd>map</kbd>.
+As can be seen in the listing, the <code>signatureAlgorithm</code> and 
+<code>publicKey</code> elements are already featured in the <code>authorization</code> <kbd>map</kbd>.
 This is because they are static and can thus be included in the data
 to be signed, potentially making the signature scheme more resistant to tampering.
 </div>
@@ -351,7 +351,7 @@ key encryption algorithm and encryption key reference method.</div>
     <tr>
       <td><code>keyId</code></td>
       <td style='text-align:center'><kbd>3</kbd></td>
-      <td><kbd>integer</kbd></td>
+      <td><kbd>text string</kbd></td>
       <td>
         <i>Optional</i>: To facilitate a streamlined decryption process,
         the encryption object MUST include a reference to the
