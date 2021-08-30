@@ -15,11 +15,11 @@
   </defs>
   <circle cx='34' cy='34' r='34' fill='url(#browserWorld)'/>
   <g fill='none' stroke='white' stroke-width='2'>
-    <circle cx='34' cy='34' r='30'/>
-    <ellipse cx='34' cy='34' rx='13' ry='30'/>
+    <circle cx='34' cy='34' r='31'/>
+    <ellipse cx='34' cy='34' rx='13' ry='31'/>
     <line x1='34' y1='4' x2='34' y2='64'/>
   </g>
-  <circle cx='34' cy='34' r='30' fill='white' clip-path='url(#cardClip)'/>
+  <circle cx='34' cy='34' r='31' fill='white' clip-path='url(#cardClip)'/>
 </svg>
 <svg xmlns="http://www.w3.org/2000/svg"
    viewBox='0 0 146 54'
