@@ -7,7 +7,6 @@
 .step {font-size:1.2em;margin-top:1.5em;margin-bottom:0.6em}
 .para {margin-top: 0.8em}
 .gutter {margin-top: 0.3em}
-.actor {color:darkgreen;font-weight:500}
 .msg {font-weight:500}
 .formula {overflow-x:auto;padding:0.5em 0 0.5em 1em;white-space:nowrap}
   .staticbox {
@@ -200,9 +199,13 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     For a detailed description of how FIDO signatures are created,
     turn to @webauthn@ (FWP is 100% compatible at the API level).
 </div>
-   <div style="border-width:1pt;border-style:solid;border-color:red;display:inline-block;padding:0.5em 1em;margin-top:0.7em">
+   <div id="ctap2api" style="border-width:1pt;border-style:solid;border-color:red;display:inline-block;padding:0.5em 1em;margin-top:0.7em">
     An even better solution would be to use the &quot;raw&quot; CTAP2 API
-    because <code>clientDataJSON</code> is not really needed by FWP.
+    by feeding the hashed AD into <kbd>clientDataHash</kbd>.  This would eliminate <code>clientDataJSON</code> 
+    (the <i>applicable</i> signature meta data is already featured in AD) as well as a redundant layer of SHA256 hashing.
+    The associated FIDO authenticators would still be fully compatible with @webauthn@,
+    making it technically possible reusing them for login, only constrained by local policies.
+     
 </div>
    <div class="para">
     After adding the received FIDO elements above to the <a href="#authorization">authorization</a>
