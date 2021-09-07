@@ -128,6 +128,9 @@ public class IssuerServlet extends HttpServlet {
                                                               fwpAssertion.getPublicKey(),
                                                               connection);
             }
+            
+            // Apparently this is a valid request.
+            logger.info("Issuer verified: " + authorizedInfo.userId);
 
             StringBuilder html = new StringBuilder(
     
