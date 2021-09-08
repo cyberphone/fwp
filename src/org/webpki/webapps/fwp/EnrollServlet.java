@@ -128,10 +128,10 @@ public class EnrollServlet extends HttpServlet {
                 "      },\n" +
                 "      pubKeyCredParams: [{\n" +
                 "        type: 'public-key',\n" +
-                "        alg: " + FWPCrypto.FIDO_KEYALG_ES256  + "\n" +
+                "        alg: " + FWPCrypto.FIDO_KEYALG_ED25519  + "\n" +
                 "      },{\n" +
                 "        type: 'public-key',\n" +
-                "        alg: " + FWPCrypto.FIDO_KEYALG_ED25519  + "\n" +
+                "        alg: " + FWPCrypto.FIDO_KEYALG_ES256  + "\n" +
                 "      },{\n" +
                 "        type: 'public-key',\n" +
                 "        alg: " + FWPCrypto.FIDO_KEYALG_RS256  + "\n" +
