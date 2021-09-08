@@ -34,7 +34,7 @@ import org.webpki.fwp.FWPCrypto.FWPPreSigner;
 import org.webpki.util.ISODateTime;
 
 /**
- * FWP client side assertion support.
+ * FWP client side assertion (AD) support.
  */
 public class FWPAssertionBuilder {
     

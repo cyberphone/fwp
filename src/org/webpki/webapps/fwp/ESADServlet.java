@@ -56,18 +56,18 @@ public class ESADServlet extends HttpServlet {
                 WalletCore.failed("Missing wallet data");
                 return;
             }            
-            CBORMap encrypted = 
+            CBORMap encryptedAssertion = 
                     new CBORAsymKeyEncrypter(WalletService.issuerEncryptionKey.getPublic(),
                                              WalletService.issuerKeyEncryptionAlgorithm,
                                              WalletService.issuerContentEncryptionAlgorithm)
-                .setKeyId(WalletService.issuerKeyId).encrypt(
+                .setKeyId(WalletService.issuerEncryptionKeyId).encrypt(
                         WalletCore.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='finalizeassertion'>" +
                 "<input type='hidden' name='" + WalletCore.FWP_ESAD + 
                 "' value='")
-            .append(WalletCore.base64UrlEncode(encrypted.encode()))
+            .append(WalletCore.base64UrlEncode(encryptedAssertion.encode()))
             .append(
                 "'/>" +
                 "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")
@@ -101,7 +101,7 @@ public class ESADServlet extends HttpServlet {
                 "</div>" +
 
                 "<div class='staticbox'>")
-            .append(HTML.encode(encrypted.toString(), true))
+            .append(HTML.encode(encryptedAssertion.toString(), true))
             .append(
                 "</div>");
  

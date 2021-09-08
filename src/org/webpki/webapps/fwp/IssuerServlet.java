@@ -100,7 +100,7 @@ public class IssuerServlet extends HttpServlet {
                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
-                    if (!WalletService.issuerKeyId.equals(keyId)) {
+                    if (!WalletService.issuerEncryptionKeyId.equals(keyId)) {
                         throw new GeneralSecurityException("Unknown keyId: " + keyId);
                     }
                     return WalletService.issuerEncryptionKey.getPrivate();

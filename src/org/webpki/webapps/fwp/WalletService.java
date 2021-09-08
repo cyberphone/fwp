@@ -53,7 +53,7 @@ public class WalletService extends InitPropertyReader implements ServletContextL
     
     static KeyPair issuerEncryptionKey;
     
-    static String issuerKeyId = "x25519:2021:01";
+    static String issuerEncryptionKeyId = "x25519:2021:01";
     
     static String issuerId = "https://mybank.fr/payment";
     
@@ -95,7 +95,7 @@ public class WalletService extends InitPropertyReader implements ServletContextL
             logging = getPropertyBoolean("logging");
             
             /////////////////////////////////////////////////////////////////////////////////////////////
-            // Issuer data
+            // Hard coded issuer data
             /////////////////////////////////////////////////////////////////////////////////////////////
             issuerEncryptionKey = JSONParser.parse(getEmbeddedResource("x25519privatekey.jwk"))
                    .removeProperty(JOSEKeyWords.KID_JSON).getKeyPair();

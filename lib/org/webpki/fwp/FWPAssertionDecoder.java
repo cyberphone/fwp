@@ -27,7 +27,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
 /**
- * FWP relying party side assertion support.
+ * FWP relying party side assertion (SAD) support.
  */
 public class FWPAssertionDecoder {
     
