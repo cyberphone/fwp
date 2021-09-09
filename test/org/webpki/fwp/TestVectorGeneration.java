@@ -178,18 +178,18 @@ public class TestVectorGeneration {
 
         JSONObjectReader clientDataJSON = JSONParser.parse(clientDataJSONbin);
 
-        result.append("\n\nReturned FIDO '" + FWPCrypto.CLIENT_DATA_JSON_JSON + 
+        result.append("\n\nReturned FIDO '" + FWPCrypto.CLIENT_DATA_JSON + 
                       "', here shown in clear:\n")
               .append(clientDataJSON.serializeToString(JSONOutputFormats.NORMALIZED));
         
         result.append("\nRelying party URL: " + ISSUER_URL + "\n" +
-                      "\nReturned FIDO '" + FWPCrypto.AUTHENTICATOR_DATA_JSON + 
+                      "\nReturned FIDO '" + FWPCrypto.AUTHENTICATOR_DATA + 
                       "' in hexadecimal notation:\n")
               .append(DebugFormatter.getHexString(
                       authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getByteString()))
               .append("\n(here using the UP+UV flags and a zero counter value)\n");
 
-        result.append("\nReturned FIDO '" + FWPCrypto.SIGNATURE_JSON + 
+        result.append("\nReturned FIDO '" + FWPCrypto.SIGNATURE + 
                       "' in hexadecimal notation:\n")
         .append(DebugFormatter.getHexString(
               authContainer.getObject(FWPCrypto.AS_SIGNATURE).getByteString()));
@@ -199,9 +199,9 @@ public class TestVectorGeneration {
               .append("\n\nThe added elements " + FWPCrypto.AS_AUTHENTICATOR_DATA +
                       "," + FWPCrypto.AS_CLIENT_DATA_JSON +
                       "," + FWPCrypto.AS_SIGNATURE +
-                      " represent FIDO's '" + FWPCrypto.AUTHENTICATOR_DATA_JSON +
-                      "','" +FWPCrypto.CLIENT_DATA_JSON_JSON +
-                      "' and '" +  FWPCrypto.SIGNATURE_JSON + 
+                      " represent FIDO's '" + FWPCrypto.AUTHENTICATOR_DATA +
+                      "','" +FWPCrypto.CLIENT_DATA_JSON +
+                      "' and '" +  FWPCrypto.SIGNATURE + 
                       "' respectively.\n")
               .append("\n\nThe signed FWP assertion as a hex-encoded binary: ")
               .append(DebugFormatter.getHexString(fwpAssertion));

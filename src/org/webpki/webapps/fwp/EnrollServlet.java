@@ -159,8 +159,8 @@ public class EnrollServlet extends HttpServlet {
                          FWPCrypto.ATTESTATION_OBJECT + 
                          ":arrBufToB64url(result.response." + FWPCrypto.ATTESTATION_OBJECT + ")," +
 
-                         FWPCrypto.CLIENT_DATA_JSON_JSON + 
-                         ":arrBufToB64url(result.response." + FWPCrypto.CLIENT_DATA_JSON_JSON + ")},'" +
+                         FWPCrypto.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response." + FWPCrypto.CLIENT_DATA_JSON + ")},'" +
 
                          WalletCore.FINALIZE_PHASE + "');\n" +
 

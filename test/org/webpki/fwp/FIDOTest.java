@@ -97,7 +97,7 @@ public class FIDOTest {
                           String subType,
                           String rpUrl,
                           byte[] challenge) throws Exception {
-        byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
+        byte[] clientDataJSON = response.getBinary(FWPCrypto.CLIENT_DATA_JSON);
         JSONObjectReader json = JSONParser.parse(clientDataJSON);
         assertTrue(FWPCrypto.CDJ_TYPE, json.getString(FWPCrypto.CDJ_TYPE).equals(subType));
         assertTrue(FWPCrypto.CDJ_ORIGIN, json.getString(FWPCrypto.CDJ_ORIGIN).equals(rpUrl));
@@ -143,8 +143,8 @@ public class FIDOTest {
         assertTrue("keyHandle", ArrayUtil.compare(createCredentialId, getCredentialId));
         byte[] getChallenge = get.getBinary(FWPCrypto.CHALLENGE);
         JSONObjectReader getResponse = vector.getObject("get.response");
-        byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
-        byte[] signature = getResponse.getBinary(FWPCrypto.SIGNATURE_JSON);
+        byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA);
+        byte[] signature = getResponse.getBinary(FWPCrypto.SIGNATURE);
         byte[] getClientDataJSON = clientDataJson(getResponse, 
                                                   FWPCrypto.CDJ_GET_ARGUMENT, 
                                                   rpUrl, 

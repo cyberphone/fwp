@@ -125,7 +125,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                     loginData.getBinary(FWPCrypto.CHALLENGE))) {
@@ -133,8 +133,8 @@ public class FIDOLoginServlet extends HttpServlet {
                 }
 
                 // Here we are supposed to the check the signature....
-                byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA_JSON);
-                byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE_JSON);
+                byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA);
+                byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE);
                 
                 // Now, we have all client data needed to verify the signature.
                 try (Connection connection = WalletService.jdbcDataSource.getConnection();) {

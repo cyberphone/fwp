@@ -108,4 +108,26 @@
     "signature": "MEYCIQD0k_JpKy4CkioPR3sjXMCCPGMijKkgMTHyyBZvZU7cQgIhAKt8RiooBfbVebwdeCuSAp7tDxp2rMISABa5pXXfJ9lh",
     "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiVjdOc3o1bWMyb2wwTEttZ1FuRFZYUnJsRjJFUlV5NHd2QU1IbHgxMDE5byIsIm9yaWdpbiI6Imh0dHBzOi8vbW9iaWxlcGtpLm9yZyJ9"
   }
+},{
+  "userAgent": "Chrome92/W10",
+  "authenticator": "Yubico 5C",
+  "rpUrl": "https://mobilepki.org",
+  "create": {
+    "challenge": "fic6Q4XcV3pOMZ7kq1E4c4g-doZDkiG_b1PM9sFiyPo",
+    "userId": "c7e4f57d-c70b-4f02-9628-dfcc0e3f62f8"
+  },
+  "create.response": {
+    "credentialId": "0qIE35FbWRXeCKqMqdrLA1gwoH-y4omGY6Xfph470XDLVbui2GijN1xMg8wT4xmzy9hf533qRxZmjY9pzOR3r4e-LCzxOxrOWkYqiVRHkkGUUkRNJBgeAtPG7YcGGANHl6veKRZJrRqErTG-E-AcEFCE0hzI8ecl5Qa9pTuNN7o",
+    "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjvKSqtX-Wo3JpWQpsrCGT2kSTRHZYWuoNy4MTSFTN75b3FAAAAAgAAAAAAAAAAAAAAAAAAAAAAgNKiBN-RW1kV3giqjKnaywNYMKB_suKJhmOl36YeO9Fwy1W7othoozdcTIPME-MZs8vYX-d96kcWZo2Paczkd6-Hviws8TsazlpGKolUR5JBlFJETSQYHgLTxu2HBhgDR5er3ikWSa0ahK0xvhPgHBBQhNIcyPHnJeUGvaU7jTe6pAEBAycgBiFYIPRJUih3Jjs9Lm0t9gz8DLfB2NlryjUo-V6s_9dWznezoWtjcmVkUHJvdGVjdAI",
+    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiZmljNlE0WGNWM3BPTVo3a3ExRTRjNGctZG9aRGtpR19iMVBNOXNGaXlQbyIsIm9yaWdpbiI6Imh0dHBzOi8vbW9iaWxlcGtpLm9yZyIsImNyb3NzT3JpZ2luIjpmYWxzZX0"
+  },
+  "get": {
+    "credentialId": "0qIE35FbWRXeCKqMqdrLA1gwoH-y4omGY6Xfph470XDLVbui2GijN1xMg8wT4xmzy9hf533qRxZmjY9pzOR3r4e-LCzxOxrOWkYqiVRHkkGUUkRNJBgeAtPG7YcGGANHl6veKRZJrRqErTG-E-AcEFCE0hzI8ecl5Qa9pTuNN7o",
+    "challenge": "K9B3ObznOQnWpBdovPlI2OJisaLP1lwoKxdI6vk2kyI"
+  },
+  "get.response": {
+    "authenticatorData": "KSqtX-Wo3JpWQpsrCGT2kSTRHZYWuoNy4MTSFTN75b0FAAAABg",
+    "signature": "QweOLQEkJbasK0SGhn6qM5Mt8rdpLM0r1WiJc-kQOp14Ul-rJ8M7jOdtu-2WabECJvFRKzMnktSKTbp1vzGIBw",
+    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSzlCM09iem5PUW5XcEJkb3ZQbEkyT0ppc2FMUDFsd29LeGRJNnZrMmt5SSIsIm9yaWdpbiI6Imh0dHBzOi8vbW9iaWxlcGtpLm9yZyIsImNyb3NzT3JpZ2luIjpmYWxzZX0"
+  }
 }]

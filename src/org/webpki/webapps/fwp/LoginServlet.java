@@ -111,13 +111,13 @@ public class LoginServlet extends HttpServlet {
 //            "    console.log(result);\n" +
             "    const finalizePhase = await exchangeJSON({" + 
 
-                         FWPCrypto.AUTHENTICATOR_DATA_JSON + 
+                         FWPCrypto.AUTHENTICATOR_DATA + 
                          ":arrBufToB64url(result.response.authenticatorData)," +
 
-                         FWPCrypto.SIGNATURE_JSON + 
+                         FWPCrypto.SIGNATURE + 
                          ":arrBufToB64url(result.response.signature)," +
 
-                         FWPCrypto.CLIENT_DATA_JSON_JSON + 
+                         FWPCrypto.CLIENT_DATA_JSON + 
                          ":arrBufToB64url(result.response.clientDataJSON)},'" +
 
                          WalletCore.FINALIZE_PHASE + "');\n" +

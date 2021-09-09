@@ -54,35 +54,35 @@ public class FWPCrypto {
     private FWPCrypto() {}
     
     // FIDO call data
-    public static final String USER_ID                  = "userId";
-    public static final String CHALLENGE                = "challenge";
+    public static final String USER_ID              = "userId";
+    public static final String CHALLENGE            = "challenge";
 
     // Returned FIDO data
-    public static final String CREDENTIAL_ID            = "credentialId";
-    public static final String ATTESTATION_OBJECT       = "attestationObject";
-    public static final String CLIENT_DATA_JSON_JSON    = "clientDataJSON";
-    public static final String AUTHENTICATOR_DATA_JSON  = "authenticatorData";
-    public static final String SIGNATURE_JSON           = "signature";
+    public static final String CREDENTIAL_ID        = "credentialId";
+    public static final String ATTESTATION_OBJECT   = "attestationObject";
+    public static final String CLIENT_DATA_JSON     = "clientDataJSON";
+    public static final String AUTHENTICATOR_DATA   = "authenticatorData";
+    public static final String SIGNATURE            = "signature";
     
     // For FIDO attestations only
-    public static final String AUTH_DATA_CBOR           = "authData";
+    public static final String AUTH_DATA_CBOR       = "authData";
 
     // Attestation Object flags
-    public static final int    FLAG_UP                  = 0x01;
-    public static final int    FLAG_UV                  = 0x04;
-    public static final int    FLAG_AT                  = 0x40;
-    public static final int    FLAG_ED                  = 0x80;
+    public static final int    FLAG_UP              = 0x01;
+    public static final int    FLAG_UV              = 0x04;
+    public static final int    FLAG_AT              = 0x40;
+    public static final int    FLAG_ED              = 0x80;
     
     // ClientDataJSON
-    public static final String CDJ_TYPE                 = "type";
-    public static final String CDJ_ORIGIN               = "origin";
-    public static final String CDJ_CREATE_ARGUMENT      = "webauthn.create";
-    public static final String CDJ_GET_ARGUMENT         = "webauthn.get";
+    public static final String CDJ_TYPE             = "type";
+    public static final String CDJ_ORIGIN           = "origin";
+    public static final String CDJ_CREATE_ARGUMENT  = "webauthn.create";
+    public static final String CDJ_GET_ARGUMENT     = "webauthn.get";
     
     // FIDO/COSE key algorithm Ids
-    public static final int FIDO_KEYALG_ES256           = -7;
-    public static final int FIDO_KEYALG_ED25519         = -8;    // Not really COSE...
-    public static final int FIDO_KEYALG_RS256           = -257;
+    public static final int FIDO_KEYALG_ES256       = -7;
+    public static final int FIDO_KEYALG_ED25519     = -8;    // Not really COSE...
+    public static final int FIDO_KEYALG_RS256       = -257;
     
     // Authorization Signature (AS) container
     static final int AS_ALGORITHM          = 1;

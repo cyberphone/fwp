@@ -116,7 +116,7 @@ public class FIDOEnrollServlet extends HttpServlet {
                 }
 
                 // Check that we are in "sync".
-                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON_JSON);
+                byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
                 if (!ArrayUtil.compare(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                         registerData.getBinary(FWPCrypto.CHALLENGE))) {
