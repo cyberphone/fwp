@@ -134,7 +134,10 @@ public class FIDOTest {
         CBORObject attestation = 
                 CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
-        byte[] createClientDataJSON = clientDataJson(createResponse, 
+        assertTrue("alg=" + authenticator, createResponse.getInt("keyAlgorithm") ==
+                FWPCrypto.publicKey2CoseSignatureAlgorithm(publicKey));
+        assertTrue("pk=" + authenticator, createResponse.getPublicKey().equals(publicKey));
+        byte[] createClientDataJSON = clientDataJson(createResponse,
                                                      FWPCrypto.CDJ_CREATE_ARGUMENT, 
                                                      rpUrl, 
                                                      createChallenge);
