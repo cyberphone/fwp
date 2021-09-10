@@ -57,7 +57,7 @@
   }
 },{
   "userAgent": "Chrome90/W10",
-  "authenticator": "Yubico",
+  "authenticator": "Yubico/u2f/2017",
   "rpUrl": "https://mobilepki.org",
   "create": {
     "challenge": "cHs2wCH_F0ZYrYxof3GA68vpQ3RVbik55Bl5iBAXFw4",
