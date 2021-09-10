@@ -342,7 +342,7 @@ public class FWPCrypto {
                 .getMap().getObject(AUTH_DATA_CBOR).getByteString();
         if ((authData[FLAG_OFFSET] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
-                                               String.format("%2x", authData[32] & 0xff));
+                                               String.format("%2x", authData[FLAG_OFFSET] & 0xff));
         }
         int credentialIdLength = (authData[CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
                                  (authData[CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);

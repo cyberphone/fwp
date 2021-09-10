@@ -113,10 +113,15 @@ public class FIDOTest {
         byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getByteString();
 // System.out.println(DebugFormatter.getHexDebugData(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
-        assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, 32));
-        int credentialIdLength = (authData[53] << 8) + (authData[54] & 0xff);
+        assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, FWPCrypto.FLAG_OFFSET));
+        int credentialIdLength = (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
+                                 (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);
         assertTrue("cil", credentialIdLength == credentialId.length);
-        assertTrue("ci", ArrayUtil.compare(authData, 55, credentialId, 0, credentialIdLength));
+        assertTrue("ci", ArrayUtil.compare(authData,
+                                           FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 2,
+                                           credentialId,
+                                           0,
+                                           credentialIdLength));
         return CBORPublicKey.decode(CBORObject.decode(
                 FWPCrypto.extractFidoPublicKey(attestation.encode())));
     }
@@ -275,7 +280,7 @@ public class FIDOTest {
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         baos.write(rpId);
         baos.write(FWPCrypto.FLAG_AT);
-        baos.write(new byte[] {0, 5,2,70});
+        baos.write(new byte[] {0,5,2,70});
         baos.write(new byte[] {0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,0});
         baos.write(credentialId.length >> 8);
         baos.write(credentialId.length & 0xff);
