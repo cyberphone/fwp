@@ -41,7 +41,6 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
-import org.webpki.crypto.CryptoRandom;
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 
@@ -298,8 +297,6 @@ public class FIDOTest {
                 .setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORByteString(baos.toByteArray())).encode();
         assertTrue("pubk", keyPair.getPublic().equals(
                 CBORPublicKey.decode(CBORObject.decode(FWPCrypto.extractFidoPublicKey(attestationObject)))));
-
-        byte[] challenge = CryptoRandom.generateRandom(32);
     }
     
     @Test
