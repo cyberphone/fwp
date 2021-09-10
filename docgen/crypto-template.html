@@ -234,22 +234,25 @@ to be signed, potentially making the signature scheme more resistant to tamperin
 <div class="para">FIDO currently supports the following COSE signature algorithms:</div>
 <div style='overflow-x:auto;padding-right:0.2em'>
   <table class="tftable">
-    <tr><th>Name</th><th>Identifier</th></tr>
+    <tr><th>Name</th><th>Identifier</th><th>Notes</th></tr>
     <tr>
       <td style='white-space:nowrap'><kbd>ES256</kbd></td>
       <td style='text-align:center'><kbd>-7</kbd></td>
+      <td>ECDSA signatures differs in encoding from COSE.
+      See @webauthn@.</td>
     </tr>
     <tr>
-      <td style='white-space:nowrap'><kbd>ED25519</kbd> *</td>
+      <td style='white-space:nowrap'><kbd>ED25519</kbd></td>
       <td style='text-align:center'><kbd>-8</kbd></td>
+      <td>This identifier is strictly put not COSE compliant.</td>
     </tr>
     <tr>
       <td style='white-space:nowrap'><kbd>RS256</kbd></td>
       <td style='text-align:center'><kbd>-257</kbd></td>
+     <td></td>
     </tr>
   </table>
 </div>
- <div>* The <kbd>ED25519</kbd> identifier is strictly put not COSE compliant.</div>
 
 @Encrypted User Authorization (ESAD)@
 <div id="esad">
