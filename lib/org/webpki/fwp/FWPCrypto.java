@@ -150,6 +150,7 @@ public class FWPCrypto {
 
         // Create a FIDO compatible signature.
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
+                // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
                 .setEcdsaSignatureEncoding(true)
                 .update(authenticatorData)
                 .update(HashAlgorithms.SHA256.digest(clientDataJSON))
@@ -249,6 +250,7 @@ public class FWPCrypto {
                                              byte[] signature) throws IOException,
                                                                       GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
+                // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
                 .setEcdsaSignatureEncoding(true)
                 .update(authenticatorData)
                 .update(HashAlgorithms.SHA256.digest(clientDataJSON))
