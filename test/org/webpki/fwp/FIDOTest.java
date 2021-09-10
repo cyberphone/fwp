@@ -128,7 +128,6 @@ public class FIDOTest {
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");
         byte[] createChallenge = create.getBinary(FWPCrypto.CHALLENGE);
-        String userId = create.getString(FWPCrypto.USER_ID);
         JSONObjectReader createResponse = vector.getObject("create.response");
         byte[] createCredentialId = createResponse.getBinary(FWPCrypto.CREDENTIAL_ID);
         CBORObject attestation = 

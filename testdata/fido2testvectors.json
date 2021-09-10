@@ -3,8 +3,7 @@
   "authenticator": "Windows Hello",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "5UBX2l8hj-K0LHxy_J8kSHwtiDNE-j6N4yU2pMJbWRo",
-    "userId": "6c64bd60-ae65-40ff-8a5a-58a3f7c188b2"
+    "challenge": "5UBX2l8hj-K0LHxy_J8kSHwtiDNE-j6N4yU2pMJbWRo"
   },
   "create.response": {
     "keyAlgorithm": -257,
@@ -31,8 +30,7 @@
   "authenticator": "AndroidKeystore",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "9zop8MpE_zeySq15QUr_MyOCuDygzU-3rCcui7FsJkY",
-    "userId": "8de67071-f015-41ba-9736-cfdc723837ff"
+    "challenge": "9zop8MpE_zeySq15QUr_MyOCuDygzU-3rCcui7FsJkY"
   },
   "create.response": {
     "keyAlgorithm": -7,
@@ -60,8 +58,7 @@
   "authenticator": "Yubico/u2f/2017",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "cHs2wCH_F0ZYrYxof3GA68vpQ3RVbik55Bl5iBAXFw4",
-    "userId": "6c64bd60-ae65-40ff-8a5a-58a3f7c188b2"
+    "challenge": "cHs2wCH_F0ZYrYxof3GA68vpQ3RVbik55Bl5iBAXFw4"
   },
   "create.response": {
     "keyAlgorithm": -7,
@@ -89,8 +86,7 @@
   "authenticator": "Windows Hello",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "NrDxtVXeUy5OPrhd5z2ztQX3aLw43MalyZIfqqlyX-o",
-    "userId": "5f66cc2b-98c6-4748-8d34-8d76520e12fa"
+    "challenge": "NrDxtVXeUy5OPrhd5z2ztQX3aLw43MalyZIfqqlyX-o"
   },
  "create.response": {
     "keyAlgorithm": -257,
@@ -117,8 +113,7 @@
   "authenticator": "Apple",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "1Z4m-O7Lmi762WffOu5jSXSnJfF93HHwWd52BhNhrUQ",
-    "userId": "ceacfdc5-927c-4350-a160-843fba6c8164"
+    "challenge": "1Z4m-O7Lmi762WffOu5jSXSnJfF93HHwWd52BhNhrUQ"
   },
   "create.response": {
     "keyAlgorithm": -7,
@@ -146,8 +141,7 @@
   "authenticator": "Yubico 5C",
   "rpUrl": "https://mobilepki.org",
   "create": {
-    "challenge": "fic6Q4XcV3pOMZ7kq1E4c4g-doZDkiG_b1PM9sFiyPo",
-    "userId": "c7e4f57d-c70b-4f02-9628-dfcc0e3f62f8"
+    "challenge": "fic6Q4XcV3pOMZ7kq1E4c4g-doZDkiG_b1PM9sFiyPo"
   },
   "create.response": {
     "keyAlgorithm": -8,
