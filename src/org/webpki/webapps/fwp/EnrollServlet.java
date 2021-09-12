@@ -140,7 +140,7 @@ public class EnrollServlet extends HttpServlet {
                 "      excludeCredentials: [],\n" +
                 "      authenticatorSelection: {\n" +
                 "        residentKey: 'preferred',\n" +
-                "        userVerification: 'preferred'\n" +
+                "        userVerification: 'discouraged'\n" +
                 "      },\n" +
 // Attestation on Android is very slow so we drop this for the PoC :(
 //                "      attestation: 'direct',\n" +

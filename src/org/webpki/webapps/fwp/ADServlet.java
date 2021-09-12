@@ -167,7 +167,7 @@ public class ADServlet extends HttpServlet {
                                               selectedCard.getString(WalletCore.CREDENTIAL_ID) 
                                               + "')}],\n" +
 
-                "      userVerification: 'preferred',\n" +
+                "      userVerification: 'discouraged',\n" +
 
                 "      timeout: 120000\n" +
                 "    };\n" +

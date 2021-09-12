@@ -101,7 +101,7 @@ public class LoginServlet extends HttpServlet {
             "      allowCredentials: [{type: 'public-key', " +
                        "id: b64urlToU8arr(initPhase." + FWPCrypto.CREDENTIAL_ID + ")}],\n" +
 
-            "      userVerification: 'preferred',\n" +
+            "      userVerification: 'discouraged',\n" +
 
             "      timeout: 120000\n" +
             "    };\n" +
