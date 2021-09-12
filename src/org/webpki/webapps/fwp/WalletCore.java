@@ -87,6 +87,9 @@ public class WalletCore {
 
     // Used for enrollment and in the wallet
     static final String CARD_HOLDER              = "cardHolder";
+    
+    // Default WebAuthn parameter
+    static final String USER_VERIFICATION        = "discouraged";
 
     // FWP core
     static final String FWP_AD                   = "ad";

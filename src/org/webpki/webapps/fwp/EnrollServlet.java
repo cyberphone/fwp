@@ -140,7 +140,7 @@ public class EnrollServlet extends HttpServlet {
                 "      excludeCredentials: [],\n" +
                 "      authenticatorSelection: {\n" +
                 "        residentKey: 'preferred',\n" +
-                "        userVerification: 'discouraged'\n" +
+                "        userVerification: '" + WalletCore.USER_VERIFICATION + "'\n" +
                 "      },\n" +
 // Attestation on Android is very slow so we drop this for the PoC :(
 //                "      attestation: 'direct',\n" +

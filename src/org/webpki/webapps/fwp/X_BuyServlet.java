@@ -383,7 +383,7 @@ public class X_BuyServlet extends HttpServlet {
                                "id: b64urlToU8arr(CARDS[cardIndex]. " + WalletCore.CREDENTIAL_ID +
                            ")}],\n" +
 
-                    "      userVerification: 'preferred',\n" +
+                    "      userVerification: '" + WalletCore.USER_VERIFICATION + "',\n" +
 
                     "      timeout: 120000\n" +
                     "    };\n" +
