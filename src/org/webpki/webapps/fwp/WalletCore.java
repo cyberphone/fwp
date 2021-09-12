@@ -123,13 +123,13 @@ public class WalletCore {
         "async function exchangeJSON(jsonObject, currentPhase) {\n" +
         "  jsonObject." + PHASE_JSON + " = currentPhase;\n" +
         "  const response = await fetch(serviceUrl, {\n" +
-        "         headers: {\n" +
-        "           'Content-Type': 'application/json'\n" +
-        "         },\n" +
-        "         method: 'POST',\n" +
-        "         credentials: 'same-origin',\n" +
-        "         body: JSON.stringify(jsonObject)\n" +
-        "      });\n" +
+        "    headers: {\n" +
+        "      'Content-Type': 'application/json'\n" +
+        "    },\n" +
+        "    method: 'POST',\n" +
+        "    credentials: 'same-origin',\n" +
+        "    body: JSON.stringify(jsonObject)\n" +
+        "  });\n" +
         "  if (response.ok) {\n" +
         "    const jsonResult = await response.json();\n" +
         "    if (jsonResult." + PHASE_JSON + "!= currentPhase) {\n" +
@@ -226,9 +226,9 @@ public class WalletCore {
     
     static String getStackTrace(Exception e, String message) {
         StringBuilder error = new StringBuilder()
-                .append(e.getClass().getName())
-                .append(": ")
-                .append(message);
+            .append(e.getClass().getName())
+            .append(": ")
+            .append(message);
         StackTraceElement[] st = e.getStackTrace();
         int length = st.length;
         if (length > 20) {
