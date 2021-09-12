@@ -11,7 +11,7 @@
     </context-param>
 
     <listener>
-        <listener-class>org.webpki.webapps.fwp.WalletService</listener-class>
+        <listener-class>org.webpki.webapps.fwp.ApplicationService</listener-class>
      </listener>
 
     <servlet>

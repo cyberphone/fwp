@@ -92,7 +92,7 @@ public class WalletAdminServlet extends HttpServlet {
             String userId = WalletCore.getWalletCookie(request);
             
             // This is the only database call needed for deleting payment cards (all of them...).
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 DataBaseOperations.deletePaymentCards(userId, connection);
             }
             

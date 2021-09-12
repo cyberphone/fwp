@@ -190,7 +190,7 @@ public class EnrollServlet extends HttpServlet {
             String userId = WalletCore.getWalletCookie(request);
             
             ArrayList<DataBaseOperations.VirtualCard> virtualCards;
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 virtualCards = DataBaseOperations.getVirtualCards(userId, connection);
             }
             StringBuilder html = new StringBuilder(

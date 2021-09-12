@@ -72,7 +72,7 @@ public class PaymentRequestServlet extends HttpServlet {
             
             // Lookup virtual cards in the wallet database
             ArrayList<DataBaseOperations.VirtualCard> virtualCards;
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 virtualCards = DataBaseOperations.getVirtualCards(userId, connection);
             }
             if (virtualCards.isEmpty()) {
@@ -99,7 +99,7 @@ public class PaymentRequestServlet extends HttpServlet {
                                 .setString(WalletCore.PAYMENT_METHOD, paymentMethod)
                                 .setString(WalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
                                 // Hard-coded at the moment
-                                .setString(WalletCore.ISSUER_ID, WalletService.issuerId));
+                                .setString(WalletCore.ISSUER_ID, ApplicationService.issuerId));
                     }
                 }
             }

@@ -153,7 +153,7 @@ public class LoginServlet extends HttpServlet {
             
             // Lookup in database
             DataBaseOperations.CoreClientData coreClientData;
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 // Get the anticipated public key
                 coreClientData = DataBaseOperations.getCoreClientData(userId, connection);
             }

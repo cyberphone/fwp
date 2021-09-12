@@ -57,10 +57,10 @@ public class ESADServlet extends HttpServlet {
                 return;
             }            
             CBORMap encryptedAssertion = 
-                    new CBORAsymKeyEncrypter(WalletService.issuerEncryptionKey.getPublic(),
-                                             WalletService.issuerKeyEncryptionAlgorithm,
-                                             WalletService.issuerContentEncryptionAlgorithm)
-                .setKeyId(WalletService.issuerEncryptionKeyId).encrypt(
+                    new CBORAsymKeyEncrypter(ApplicationService.issuerEncryptionKey.getPublic(),
+                                             ApplicationService.issuerKeyEncryptionAlgorithm,
+                                             ApplicationService.issuerContentEncryptionAlgorithm)
+                .setKeyId(ApplicationService.issuerEncryptionKeyId).encrypt(
                         WalletCore.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(

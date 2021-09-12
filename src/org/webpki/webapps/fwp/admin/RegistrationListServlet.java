@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.webapps.fwp.Actors;
 import org.webpki.webapps.fwp.HTML;
-import org.webpki.webapps.fwp.WalletService;
+import org.webpki.webapps.fwp.ApplicationService;
 /**
  * For listing site activity...
  *
@@ -58,7 +58,7 @@ public class RegistrationListServlet extends HttpServlet {
                 "<th style='text-align:center'>IP Address</th>" +
                 "<th style='text-align:center'>Host Name</th><tr>");
 
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 try (PreparedStatement stmt = connection.prepareStatement(
                         "SELECT MAX(Created) AS Instant, ClientIpAddress from USERS " +
                         "WHERE PublicKey IS NOT NULL " +

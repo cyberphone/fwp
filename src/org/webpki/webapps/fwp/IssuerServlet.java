@@ -100,10 +100,10 @@ public class IssuerServlet extends HttpServlet {
                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
-                    if (!WalletService.issuerEncryptionKeyId.equals(keyId)) {
+                    if (!ApplicationService.issuerEncryptionKeyId.equals(keyId)) {
                         throw new GeneralSecurityException("Unknown keyId: " + keyId);
                     }
-                    return WalletService.issuerEncryptionKey.getPrivate();
+                    return ApplicationService.issuerEncryptionKey.getPrivate();
                 }
                 
             }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
@@ -114,6 +114,11 @@ public class IssuerServlet extends HttpServlet {
                     new FWPAssertionDecoder(fwpAssertionBinary);
             // Succeeded = the data is "technically" OK, and the signature verified.
             
+            // Is the user authorization within time limits?
+            if (fwpAssertion.getTimeStamp().getTimeInMillis() < System.currentTimeMillis() - 600000) {
+                throw new IOException("Out of time");
+            }
+            
             // Check merchant claim.
             fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
 
@@ -122,7 +127,7 @@ public class IssuerServlet extends HttpServlet {
             
             // And of course, verify that this assertion belongs to a valid account!
             DataBaseOperations.AuthorizedInfo authorizedInfo;
-            try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 authorizedInfo = DataBaseOperations.authorize(fwpAssertion.getSerialNumber(),
                                                               fwpAssertion.getAccountId(),
                                                               fwpAssertion.getPublicKey(),

@@ -37,7 +37,7 @@ public class DataBaseOperations {
     static Logger logger = Logger.getLogger(DataBaseOperations.class.getCanonicalName());
     
     static void testConnection() throws SQLException {
-        try (Connection connection = WalletService.jdbcDataSource.getConnection();) { }
+        try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) { }
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////

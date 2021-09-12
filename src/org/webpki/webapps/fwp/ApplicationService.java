@@ -45,9 +45,12 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.webutil.InitPropertyReader;
 
-public class WalletService extends InitPropertyReader implements ServletContextListener {
+/**
+ * A single service for the whole application?!  Yes, this is an emulator, not a product :)
+ */
+public class ApplicationService extends InitPropertyReader implements ServletContextListener {
 
-    static Logger logger = Logger.getLogger(WalletService.class.getName());
+    static Logger logger = Logger.getLogger(ApplicationService.class.getName());
 
     public static DataSource jdbcDataSource;
     

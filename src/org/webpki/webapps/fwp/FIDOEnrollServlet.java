@@ -149,7 +149,7 @@ if (cardHolder.equals("-2")) { // Soft server error
                 // issuing the requested payment credentials.
  
                 // A single call will do the trick.
-                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+                try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                     // Store basic data.
                     DataBaseOperations.initiateUserAccount(userId, 
                                                            cardHolder,

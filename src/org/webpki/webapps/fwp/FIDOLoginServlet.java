@@ -91,7 +91,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 session.removeAttribute(WalletCore.ATTR_LOGGED_IN_USER);
 
                 // We need to specify which FIDO key to use.                 
-                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+                try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                     // Get FIDO credentialId.
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
@@ -137,7 +137,7 @@ public class FIDOLoginServlet extends HttpServlet {
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE);
                 
                 // Now, we have all client data needed to verify the signature.
-                try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+                try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                     // Get the anticipated public key
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);

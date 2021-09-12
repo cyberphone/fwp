@@ -169,7 +169,7 @@ public class WalletCore {
         if (claimedUserId == null) {
             return false;
         }
-        try (Connection connection = WalletService.jdbcDataSource.getConnection();) {
+        try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
             return !DataBaseOperations.getVirtualCards(claimedUserId, connection).isEmpty();
         }
     }
@@ -180,7 +180,7 @@ public class WalletCore {
             throw new IOException("Unexpected MIME type:" + request.getContentType());
         }
         JSONObjectReader parsedJson = JSONParser.parse(ServletUtil.getData(request));
-        if (WalletService.logging) {
+        if (ApplicationService.logging) {
             logger.info("User agent: " + request.getHeader("user-agent"));
             logger.info("Received: " + parsedJson.toString());
         }
@@ -188,7 +188,7 @@ public class WalletCore {
     }
 
     static void returnJSON(HttpServletResponse response, JSONObjectWriter json) throws IOException {
-        if (WalletService.logging) {
+        if (ApplicationService.logging) {
             logger.info("To be returned: " + json.toString());
         }
         byte[] rawData = json.serializeToBytes(JSONOutputFormats.NORMALIZED);
