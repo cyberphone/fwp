@@ -113,10 +113,11 @@ public class FWPCrypto {
         return fwpAssertionInProgress.encode();
     }
 
-    public static byte[] AddPostSignature(byte[] unsignedFwpAssertion,
-                                          byte[] clientDataJSON,
-                                          byte[] authenticatorData,
-            byte[] signature) throws IOException, GeneralSecurityException {
+    public static byte[] addSignature(byte[] unsignedFwpAssertion,
+                                      byte[] clientDataJSON,
+                                      byte[] authenticatorData,
+                                      byte[] signature) throws IOException, 
+                                                               GeneralSecurityException {
         if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
                 JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");

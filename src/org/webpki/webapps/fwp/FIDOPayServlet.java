@@ -48,23 +48,22 @@ public class FIDOPayServlet extends HttpServlet {
         try {
             // Get the input (request) data.
             JSONObjectReader requestJson = WalletCore.getJSON(request);
-            
-            // Prepare for writing a response.
-            JSONObjectWriter resultJson = new JSONObjectWriter();
                 
             // Get the Authorization Data (AD).
             byte[]unsignedAssertion = requestJson.getBinary(WalletCore.FWP_AD);
 
-            // Add the missing pieces from the associated FIDO/WebAuthn assertion.
+            // Get the associated FIDO/WebAuthn assertion elements.
             byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
             byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA);
             byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE);
-            resultJson.setBinary(WalletCore.FWP_SAD, FWPCrypto.AddPostSignature(unsignedAssertion,
-                                                                                clientDataJSON,
-                                                                                authenticatorData,
-                                                                                signature));
-
-            WalletCore.returnJSON(response, resultJson);
+            
+            // Add the assertion elements creating a complete SAD object and return it.
+            WalletCore.returnJSON(response, new JSONObjectWriter()
+                                        .setBinary(WalletCore.FWP_SAD,
+                                                   FWPCrypto.addSignature(unsignedAssertion,
+                                                                          clientDataJSON,
+                                                                          authenticatorData,
+                                                                          signature)));
 
         } catch (Exception e) {
             String message = e.getMessage();
