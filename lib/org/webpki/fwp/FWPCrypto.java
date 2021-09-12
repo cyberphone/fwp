@@ -102,16 +102,6 @@ public class FWPCrypto {
     
     public enum UserValidation {PRESENT, VERIFIED};
 
-    private static byte[] addRemainingElements(CBORMap fwpAssertionInProgress,
-                                               byte[] clientDataJSON,
-                                               byte[] authenticatorData, 
-                                               byte[] signature) throws IOException {
-        fwpAssertionInProgress.getObject(FWP_AUTHORIZATION_LABEL).getMap()
-                .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
-                .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
-                .setObject(AS_SIGNATURE, new CBORByteString(signature));
-        return fwpAssertionInProgress.encode();
-    }
 
     public static byte[] addSignature(byte[] unsignedFwpAssertion,
                                       byte[] clientDataJSON,
@@ -123,26 +113,26 @@ public class FWPCrypto {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
-        return addRemainingElements(
-                cborFwpAssertion, clientDataJSON, authenticatorData, signature);
+        cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
+            .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
+            .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
+            .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        return cborFwpAssertion.encode();
     }
 
     // For testing purposes only.
     static byte[] directSign(byte[] unsignedFwpAssertion, 
                              PrivateKey privateKey, 
                              String origin,
-                             int flags)
-            throws IOException, GeneralSecurityException {
-        CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
-        int coseAlgorithm = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
-                .getObject(AS_ALGORITHM).getInt();
+                             int flags) throws IOException, GeneralSecurityException {
+        // "challenge" is used for hashed AD
         byte[] challenge = HashAlgorithms.SHA256.digest(unsignedFwpAssertion);
 
         // Now we have the data needed for creating a FIDO ClientDataJSON object.
         byte[] clientDataJSON = new JSONObjectWriter()
-                .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
-                .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
-                .serializeToBytes(JSONOutputFormats.NORMALIZED);
+            .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
+            .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
+            .serializeToBytes(JSONOutputFormats.NORMALIZED);
 
         // Hard-coded FIDO Authenticator Data
         byte[] authenticatorData = ArrayUtil.add(
@@ -150,16 +140,18 @@ public class FWPCrypto {
                 new byte[] {(byte)flags, 0, 0, 0, 0 });
 
         // Create a FIDO compatible signature.
+        int coseAlgorithm = CBORObject.decode(unsignedFwpAssertion)
+            .getMap().getObject(FWP_AUTHORIZATION_LABEL).getMap().getObject(AS_ALGORITHM).getInt();
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
-                // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
-                .setEcdsaSignatureEncoding(true)
-                .update(authenticatorData)
-                .update(HashAlgorithms.SHA256.digest(clientDataJSON))
-                .sign();
-        return addRemainingElements(cborFwpAssertion, 
-                                    clientDataJSON,
-                                    authenticatorData, 
-                                    signature);
+            // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
+            .setEcdsaSignatureEncoding(true)
+            .update(authenticatorData)
+            .update(HashAlgorithms.SHA256.digest(clientDataJSON))
+            .sign();
+        return addSignature(unsignedFwpAssertion, 
+                            clientDataJSON,
+                            authenticatorData, 
+                            signature);
     }
 
     public static class FWPPreSigner {
@@ -225,7 +217,7 @@ public class FWPCrypto {
         }
     }
     
-    static void algorithmComplianceTest(PublicKey publicKey, int coseAlgorithm)
+    private static void algorithmComplianceTest(PublicKey publicKey, int coseAlgorithm)
             throws GeneralSecurityException {
         if (publicKey2CoseSignatureAlgorithm(publicKey) != coseAlgorithm) {
             throw new GeneralSecurityException("Algorithm ("  + coseAlgorithm + 
@@ -251,11 +243,11 @@ public class FWPCrypto {
                                              byte[] signature) throws IOException,
                                                                       GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
-                // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
-                .setEcdsaSignatureEncoding(true)
-                .update(authenticatorData)
-                .update(HashAlgorithms.SHA256.digest(clientDataJSON))
-                .verify(signature)) {
+            // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
+            .setEcdsaSignatureEncoding(true)
+            .update(authenticatorData)
+            .update(HashAlgorithms.SHA256.digest(clientDataJSON))
+            .verify(signature)) {
             throw new GeneralSecurityException("Signature validation failed");
         }       
     }
