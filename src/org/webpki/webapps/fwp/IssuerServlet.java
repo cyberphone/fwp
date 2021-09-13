@@ -124,7 +124,7 @@ public class IssuerServlet extends HttpServlet {
                 
             }).decrypt(encryptedAssertion);
 
-            // Create ESAD token.
+            // Create Hashed ESAD token.
             String hashedAuthorizationB64U = ApplicationService.base64UrlEncode(
                     HashAlgorithms.SHA256.digest(encryptedAssertion));
             // Succeeded.
@@ -139,14 +139,14 @@ public class IssuerServlet extends HttpServlet {
             if (payerTimeStampOldest < System.currentTimeMillis()) {
                 softError(response, "Authorization max age (" +
                                     (OLDEST_AUTHORIZATION_PERMITTED / 1000) + 
-                                    "s) exceeded for ESAD token: " +
+                                    "s) exceeded for Hashed ESAD: " +
                                     hashedAuthorizationB64U);
                 return;
             }
             
             // Have this user authorization already been used?
             if (ReplayCache.INSTANCE.add(hashedAuthorizationB64U, payerTimeStampOldest)) {
-                softError(response, "Replay of ESAD token: " + hashedAuthorizationB64U);
+                softError(response, "Replay of Hashed ESAD: " + hashedAuthorizationB64U);
                 return;
             }
             
@@ -269,7 +269,7 @@ public class IssuerServlet extends HttpServlet {
             .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
                                                ISODateTime.LOCAL_NO_SUBSECONDS))
             .append("</td></tr>" +
-                    "<tr><th>ESAD&nbsp;Token</th><td>")
+                    "<tr><th>Hashed&nbsp;ESAD</th><td>")
             .append(hashedAuthorizationB64U)
             .append("</td></tr>" +
                   "</table>" +

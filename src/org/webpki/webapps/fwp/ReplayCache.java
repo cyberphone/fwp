@@ -24,17 +24,24 @@ import java.util.logging.Logger;
 
 /**
  * Singleton thread dealing with a reply cache.
+ * 
+ * Replays are only checked within the time limits for
+ * authorizations, because if an authorization is too old, it
+ * will be immediately rejected anyway, and not go into the cache.
+ * 
  */
 public enum ReplayCache {
-    
+
+    // Single-element enums are according to many Java gurus the optimal
+    // way creating thread-safe singletons.
     INSTANCE;
-    
+
     static final long CYCLE_TIME = 120000;
 
     Logger logger = Logger.getLogger(ReplayCache.class.getCanonicalName());
-    
+
     final ConcurrentHashMap<String, Long> cache = new ConcurrentHashMap<>();
-    
+
     ReplayCache() {
         new Thread(new Runnable() {
 
@@ -45,16 +52,18 @@ public enum ReplayCache {
                         Thread.sleep(CYCLE_TIME);
                         long now = System.currentTimeMillis();
                         cache.forEach(new BiConsumer<String, Long>() {
-    
+
                             @Override
                             public void accept(String hashedAuthorizationB64U,
                                                Long payerTimeStampOldest) {
                                 if (payerTimeStampOldest < now) {
+                                    // This authorization is already consumed but is now
+                                    // too old to qualify, so we remove it from the cache.
                                     cache.remove(hashedAuthorizationB64U);
                                     logger.info("removed token: " + hashedAuthorizationB64U);
                                 }
                             }
-                            
+
                         });
                     } catch (InterruptedException e) {
                         e.printStackTrace();
