@@ -158,7 +158,7 @@ public class ADServlet extends HttpServlet {
 
                 "    const options = {\n" +
                 "      challenge: b64urlToU8arr('" +
-                            WalletCore.base64UrlEncode(
+                            ApplicationService.base64UrlEncode(
                                     HashAlgorithms.SHA256.digest(unsignedAssertion)) +
                        "'),\n" +
 
@@ -177,19 +177,19 @@ public class ADServlet extends HttpServlet {
 //                "    console.log(result);\n" +
                 "    const returnJson = await exchangeJSON({" + 
 
-                             FWPCrypto.AUTHENTICATOR_DATA + 
-                             ":arrBufToB64url(result.response.authenticatorData)," +
+                         FWPCrypto.AUTHENTICATOR_DATA + 
+                         ":arrBufToB64url(result.response.authenticatorData)," +
 
-                             FWPCrypto.SIGNATURE + 
-                             ":arrBufToB64url(result.response.signature)," +
+                         FWPCrypto.SIGNATURE + 
+                         ":arrBufToB64url(result.response.signature)," +
 
-                             FWPCrypto.CLIENT_DATA_JSON + 
-                             ":arrBufToB64url(result.response.clientDataJSON)," +
+                         FWPCrypto.CLIENT_DATA_JSON + 
+                         ":arrBufToB64url(result.response.clientDataJSON)," +
 
-                             WalletCore.FWP_AD + 
-                             ": '" + 
-                             WalletCore.base64UrlEncode(unsignedAssertion) +
-                             "'}, null);\n" +
+                         WalletCore.FWP_AD + 
+                         ": '" + 
+                         ApplicationService.base64UrlEncode(unsignedAssertion) +
+                         "'}, null);\n" +
 
                 "    document.getElementById('" + WalletCore.FWP_SAD + 
                     "').value = returnJson." + WalletCore.FWP_SAD + ";\n" +

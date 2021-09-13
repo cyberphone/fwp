@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 
+import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
@@ -62,8 +64,10 @@ public class IssuerServlet extends HttpServlet {
     
     public static final String ISSUER_REQUEST = "issuerRequest";
     
-    static long transactionId = 56807446412l;
+    static final long OLDEST_AUTHORIZATION_PERMITTED = 600000;
     
+    static long transactionId = 56807446412l;
+
     StringBuilder getUserValidation(HashSet<FWPCrypto.UserValidation> userValidationFlags) {
         StringBuilder userValidation = new StringBuilder();
         userValidation.append("Present=")
@@ -71,6 +75,17 @@ public class IssuerServlet extends HttpServlet {
                       .append(", Verified=")
                       .append(userValidationFlags.contains(FWPCrypto.UserValidation.VERIFIED));
         return userValidation;
+    }
+    
+    void softError(HttpServletResponse response, String error) 
+        throws IOException, ServletException {
+        StringBuilder html = new StringBuilder(
+            "<div class='header'>Soft Error</div>" +
+            "<div style='display:flex;justify-content:center;margin-top:15pt'>")
+        .append(error)
+        .append(
+            "</div>");
+        HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
     }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -90,6 +105,7 @@ public class IssuerServlet extends HttpServlet {
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
              
             // Decrypt assertion.
+            byte[] encryptedAssertion = fwpJsonAssertion.getEncryptedAuthorization();
             byte[] fwpAssertionBinary = 
                     new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
@@ -106,17 +122,32 @@ public class IssuerServlet extends HttpServlet {
                     return ApplicationService.issuerEncryptionKey.getPrivate();
                 }
                 
-            }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
+            }).decrypt(encryptedAssertion);
+
+            // Create ESAD token.
+            String hashedAuthorizationB64U = ApplicationService.base64UrlEncode(
+                    HashAlgorithms.SHA256.digest(encryptedAssertion));
             // Succeeded.
             
             // Decode assertion.
-            FWPAssertionDecoder fwpAssertion = 
-                    new FWPAssertionDecoder(fwpAssertionBinary);
+            FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
             // Succeeded = the data is "technically" OK, and the signature verified.
             
             // Is the user authorization within time limits?
-            if (fwpAssertion.getTimeStamp().getTimeInMillis() < System.currentTimeMillis() - 600000) {
-                throw new IOException("Out of time");
+            long payerTimeStampOldest = 
+                    fwpAssertion.getTimeStamp().getTimeInMillis() + OLDEST_AUTHORIZATION_PERMITTED;
+            if (payerTimeStampOldest < System.currentTimeMillis()) {
+                softError(response, "Authorization max age (" +
+                                    (OLDEST_AUTHORIZATION_PERMITTED / 1000) + 
+                                    "s) exceeded for ESAD token: " +
+                                    hashedAuthorizationB64U);
+                return;
+            }
+            
+            // Have this user authorization already been used?
+            if (ReplayCache.INSTANCE.add(hashedAuthorizationB64U, payerTimeStampOldest)) {
+                softError(response, "Replay of ESAD token: " + hashedAuthorizationB64U);
+                return;
             }
             
             // Check merchant claim.
@@ -135,10 +166,19 @@ public class IssuerServlet extends HttpServlet {
             }
             
             // Apparently this is a valid request.
-            logger.info("Issuer verified: " + authorizedInfo.userId);
+            logger.info("Issuer verified: " + authorizedInfo.userId + 
+                        ", token=" + hashedAuthorizationB64U);
 
             StringBuilder html = new StringBuilder(
     
+                "<form name='shoot' method='POST' action='issuerreq'>" +
+                "<input type='hidden' name='" + ISSUER_REQUEST +
+                "' value='")
+            .append(HTML.encode(issuerRequest, false))
+            .append(
+                "'/>" +
+                "</form>" +
+
                 "<div class='header'>Payment Initiation</div>" +
     
                 "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
@@ -229,7 +269,16 @@ public class IssuerServlet extends HttpServlet {
             .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
                                                ISODateTime.LOCAL_NO_SUBSECONDS))
             .append("</td></tr>" +
+                    "<tr><th>ESAD&nbsp;Token</th><td>")
+            .append(hashedAuthorizationB64U)
+            .append("</td></tr>" +
                   "</table>" +
+                "</div>" +
+
+                "<div style='display:flex;justify-content:center'>" +
+                  "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
+                    "&quot;Replay&quot;" +
+                  "</div>" +
                 "</div>");
             
             HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);

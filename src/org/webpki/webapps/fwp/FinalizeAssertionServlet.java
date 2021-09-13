@@ -64,7 +64,7 @@ public class FinalizeAssertionServlet extends HttpServlet {
         FWPJsonAssertion fwpAssertion =
                 new FWPJsonAssertion(selectedCard.getString(WalletCore.PAYMENT_METHOD),
                                      selectedCard.getString(WalletCore.ISSUER_ID),
-                                     WalletCore.base64UrlDecode(encryptedSignedAuthorizationB64U));
+                                     ApplicationService.base64UrlDecode(encryptedSignedAuthorizationB64U));
         StringBuilder html = new StringBuilder(
             "<form name='shoot' method='POST' action='merchant'>" +
             "<input type='hidden' name='" + WalletCore.FWP_ASSERTION +

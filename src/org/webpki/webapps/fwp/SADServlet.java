@@ -93,7 +93,7 @@ public class SADServlet extends HttpServlet {
 
             "<div class='staticbox'>")
         .append(HTML.encode(CBORObject.decode(
-                    WalletCore.base64UrlDecode(signedAuthorizationB64U)).toString(), true))
+                    ApplicationService.base64UrlDecode(signedAuthorizationB64U)).toString(), true))
         .append(
             "</div>");
         

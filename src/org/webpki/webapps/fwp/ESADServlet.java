@@ -61,13 +61,13 @@ public class ESADServlet extends HttpServlet {
                                              ApplicationService.issuerKeyEncryptionAlgorithm,
                                              ApplicationService.issuerContentEncryptionAlgorithm)
                 .setKeyId(ApplicationService.issuerEncryptionKeyId).encrypt(
-                        WalletCore.base64UrlDecode(signedAuthorizationDataB64U));
+                        ApplicationService.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='finalizeassertion'>" +
                 "<input type='hidden' name='" + WalletCore.FWP_ESAD + 
                 "' value='")
-            .append(WalletCore.base64UrlEncode(encryptedAssertion.encode()))
+            .append(ApplicationService.base64UrlEncode(encryptedAssertion.encode()))
             .append(
                 "'/>" +
                 "<input type='hidden' name='" + WalletCore.WALLET_INTERNAL + "' value='")

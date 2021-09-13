@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.security.KeyPair;
-
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,6 +69,15 @@ public class ApplicationService extends InitPropertyReader implements ServletCon
     static String samplePayeeHostname = "spaceshop.com";
 
     static boolean logging;
+
+    
+    static String base64UrlEncode(byte[] bytes) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+    
+    static byte[] base64UrlDecode(String b64u) {
+        return Base64.getUrlDecoder().decode(b64u);
+    }
 
     byte[] getEmbeddedResource(String name) throws IOException {
         InputStream is = this.getClass().getResourceAsStream(name);

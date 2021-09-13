@@ -23,8 +23,6 @@ import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import java.util.Base64;
-
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -242,13 +240,5 @@ public class WalletCore {
             }
         }
         return error.toString();
-    }
-    
-    static String base64UrlEncode(byte[] bytes) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-    
-    static byte[] base64UrlDecode(String b64u) {
-        return Base64.getUrlDecoder().decode(b64u);
     }
 }
