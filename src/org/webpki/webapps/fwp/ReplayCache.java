@@ -54,13 +54,14 @@ public enum ReplayCache {
                         cache.forEach(new BiConsumer<String, Long>() {
 
                             @Override
-                            public void accept(String hashedAuthorizationB64U,
+                            public void accept(String hashedEsadB64U,
                                                Long payerTimeStampOldest) {
                                 if (payerTimeStampOldest < now) {
-                                    // This authorization is already consumed but is now
-                                    // too old to qualify, so we remove it from the cache.
-                                    cache.remove(hashedAuthorizationB64U);
-                                    logger.info("removed token: " + hashedAuthorizationB64U);
+                                    // This authorization is already consumed but is now too 
+                                    // old to qualify, so we can safely remove it from the cache
+                                    // (in order to keep it as small and up-to-date as possible).
+                                    cache.remove(hashedEsadB64U);
+                                    logger.info("removed authorization token: " + hashedEsadB64U);
                                 }
                             }
 
@@ -75,10 +76,10 @@ public enum ReplayCache {
         }).start();
     }
     
-    public boolean add(String hashedAuthorizationB64U, long payerTimeStampOldest) {
-        boolean replay = cache.put(hashedAuthorizationB64U, payerTimeStampOldest) != null;
+    public boolean add(String hashedEsadB64U, long payerTimeStampOldest) {
+        boolean replay = cache.put(hashedEsadB64U, payerTimeStampOldest) != null;
         if (replay) {
-            logger.info("Replay of token: " + hashedAuthorizationB64U);
+            logger.info("Replay of authorization token: " + hashedEsadB64U);
         }
         return replay;
     }

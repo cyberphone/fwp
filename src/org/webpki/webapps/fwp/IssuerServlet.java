@@ -64,7 +64,7 @@ public class IssuerServlet extends HttpServlet {
     
     public static final String ISSUER_REQUEST = "issuerRequest";
     
-    static final long OLDEST_AUTHORIZATION_PERMITTED = 600000;
+    static final long AUTHORIZATION_LOWER_TIME_LIMIT = 600000;
     
     static long transactionId = 56807446412l;
 
@@ -104,8 +104,9 @@ public class IssuerServlet extends HttpServlet {
             FWPJsonAssertion fwpJsonAssertion = pspRequest.getFwpAssertion();
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
              
-            // Decrypt assertion.
-            byte[] encryptedAssertion = fwpJsonAssertion.getEncryptedAuthorization();
+            byte[] encryptedAuthorization = fwpJsonAssertion.getEncryptedAuthorization();
+
+            // Decrypt ESAD.
             byte[] fwpAssertionBinary = 
                     new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
@@ -122,38 +123,62 @@ public class IssuerServlet extends HttpServlet {
                     return ApplicationService.issuerEncryptionKey.getPrivate();
                 }
                 
-            }).decrypt(encryptedAssertion);
-
-            // Create Hashed ESAD token.
-            String hashedAuthorizationB64U = ApplicationService.base64UrlEncode(
-                    HashAlgorithms.SHA256.digest(encryptedAssertion));
+            }).decrypt(encryptedAuthorization);
             // Succeeded.
+            
+            // Create a Hashed ESAD token which is used for uniquely (but momentarily)
+            // representing a specific transaction request.
+            //
+            // The entropy needed to make this safe, depends on the following data:
+            // - The transaction (PRCD) request
+            // - The client generated time stamp
+            // - The client specific payment credential
+            // - The highly random output from the ECDH encryption scheme
+            // - The 128 bits of cryptographic strength provided by SHA256
+            //
+            // A broken client should in thus only be able to destroy its own authorizations.
+            //
+            // The use of time stamped and signed authorization data together with
+            // specific time limits on the verifier side, makes this scheme comparable
+            // to WebAuthn but considerably more flexible since such authorizations can
+            // pass any number of nodes without losing their "teeth".  Due to the fact
+            // that payment requests represent discrete events that are to be acted upon,
+            // rather than creating secure sessions with a client, there is no apparent
+            // need for dedicated authentication servers holding state.
+            //
+            // Note that supporting IDEMPOTENT operation would require additional data like
+            // - The hash of the entire request in order to verify input equivalence
+            // - The full response for the initial successful request
+            // since (then permitted, but still time limited) replays MUST NOT change anything.
+            String hashedEsadB64U = ApplicationService.base64UrlEncode(
+                    HashAlgorithms.SHA256.digest(encryptedAuthorization));
             
             // Decode assertion.
             FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
-            // Succeeded = the data is "technically" OK, and the signature verified.
+            // Succeeded => the data (SAD) is "technically" OK including the signature.
             
             // Is the user authorization within time limits?
             long payerTimeStampOldest = 
-                    fwpAssertion.getTimeStamp().getTimeInMillis() + OLDEST_AUTHORIZATION_PERMITTED;
+                    fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_LOWER_TIME_LIMIT;
             if (payerTimeStampOldest < System.currentTimeMillis()) {
                 softError(response, "Authorization max age (" +
-                                    (OLDEST_AUTHORIZATION_PERMITTED / 1000) + 
+                                    (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
                                     "s) exceeded for Hashed ESAD: " +
-                                    hashedAuthorizationB64U);
+                                    hashedEsadB64U);
                 return;
             }
             
             // Have this user authorization already been used?
-            if (ReplayCache.INSTANCE.add(hashedAuthorizationB64U, payerTimeStampOldest)) {
-                softError(response, "Replay of Hashed ESAD: " + hashedAuthorizationB64U);
+            if (ReplayCache.INSTANCE.add(hashedEsadB64U, payerTimeStampOldest)) {
+                softError(response, "Replay of Hashed ESAD: " + hashedEsadB64U);
                 return;
             }
             
-            // Check merchant claim.
+            // Check that the merchant request matches the authorization.
             fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
 
-            // Check that the user haven't been phished.
+            // Check that the user haven't been phished.  Note that this check
+            // depends on participation by the merchant's PSP.
             compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
             
             // And of course, verify that this assertion belongs to a valid account!
@@ -167,7 +192,7 @@ public class IssuerServlet extends HttpServlet {
             
             // Apparently this is a valid request.
             logger.info("Issuer verified: " + authorizedInfo.userId + 
-                        ", token=" + hashedAuthorizationB64U);
+                        ", token=" + hashedEsadB64U);
 
             StringBuilder html = new StringBuilder(
     
@@ -219,6 +244,9 @@ public class IssuerServlet extends HttpServlet {
             .append(ISODateTime.formatDateTime(new GregorianCalendar(),
                                                ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
+                    "<tr><th>Hashed&nbsp;ESAD</th><td>")
+            .append(hashedEsadB64U)
+            .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
 
@@ -268,9 +296,6 @@ public class IssuerServlet extends HttpServlet {
                     "<tr><th>Time Stamp</th><td>")
             .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
                                                ISODateTime.LOCAL_NO_SUBSECONDS))
-            .append("</td></tr>" +
-                    "<tr><th>Hashed&nbsp;ESAD</th><td>")
-            .append(hashedAuthorizationB64U)
             .append("</td></tr>" +
                   "</table>" +
                 "</div>" +
