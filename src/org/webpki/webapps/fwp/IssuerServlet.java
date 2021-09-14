@@ -136,8 +136,6 @@ public class IssuerServlet extends HttpServlet {
             // - The highly random output from the ECDH-ES encryption scheme
             // - The 128 bits of cryptographic strength provided by SHA256
             //
-            // A broken client should in thus only be able to destroy its own authorizations.
-            //
             // The use of time stamped and signed authorization data together with
             // specific time limits on the verifier side, makes this scheme comparable
             // to WebAuthn but considerably more flexible since such authorizations can
