@@ -133,7 +133,7 @@ public class IssuerServlet extends HttpServlet {
             // - The transaction (PRCD) request
             // - The client generated time stamp
             // - The client specific payment credential
-            // - The highly random output from the ECDH encryption scheme
+            // - The highly random output from the ECDH-ES encryption scheme
             // - The 128 bits of cryptographic strength provided by SHA256
             //
             // A broken client should in thus only be able to destroy its own authorizations.
@@ -144,7 +144,7 @@ public class IssuerServlet extends HttpServlet {
             // pass any number of nodes without losing their "teeth".  Due to the fact
             // that payment requests represent discrete events that are to be acted upon,
             // rather than creating secure sessions with a client, there is no apparent
-            // need for dedicated authentication servers holding state.
+            // need for dedicated authentication servers.
             //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
