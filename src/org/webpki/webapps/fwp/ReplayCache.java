@@ -54,8 +54,7 @@ public enum ReplayCache {
                         cache.forEach(new BiConsumer<String, Long>() {
 
                             @Override
-                            public void accept(String hashedEsadB64U,
-                                               Long payerTimeStampOldest) {
+                            public void accept(String hashedEsadB64U, Long payerTimeStampOldest) {
                                 if (payerTimeStampOldest < now) {
                                     // This authorization is already consumed but is now too 
                                     // old to qualify, so we can safely remove it from the cache

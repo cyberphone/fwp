@@ -129,20 +129,24 @@ public class IssuerServlet extends HttpServlet {
             // Create a Hashed ESAD token which is used for uniquely (but momentarily)
             // representing a specific transaction request.
             //
-            // The entropy needed to make this safe, depends on the following data:
+            // The entropy needed to make this safe, in FWP depends on the following data:
             // - The transaction (PRCD) request
+            // . The host name derived from the URL of the FWP invocation
             // - The client generated time stamp
             // - The client specific payment credential
             // - The highly random output from the ECDH-ES encryption scheme
-            // - The 128 bits of cryptographic strength provided by SHA256
+            // 
+            // Although hashing truncates the input data, the 128 bits of strength
+            // provided by SHA256 makes clashes "impossible" in cryptographic terms.
             //
             // The use of time stamped and signed authorization data together with
             // specific time limits on the verifier side, makes this scheme comparable
-            // to WebAuthn but considerably more flexible since such authorizations can
+            // to WebAuthn, but considerably more flexible since such authorizations can
             // pass any number of nodes without losing their "teeth".  Due to the fact
             // that payment requests represent discrete events that are to be acted upon,
             // rather than creating secure sessions with a client, there is no need for
-            // dedicated authentication servers.
+            // dedicated authentication servers.  That user authorizations are carried out
+            // entirely locally make merchant integration of this part extremely simple.
             //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
