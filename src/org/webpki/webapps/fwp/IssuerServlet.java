@@ -141,13 +141,14 @@ public class IssuerServlet extends HttpServlet {
             // to WebAuthn but considerably more flexible since such authorizations can
             // pass any number of nodes without losing their "teeth".  Due to the fact
             // that payment requests represent discrete events that are to be acted upon,
-            // rather than creating secure sessions with a client, there is no apparent
-            // need for dedicated authentication servers.
+            // rather than creating secure sessions with a client, there is no need for
+            // dedicated authentication servers.
             //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
             // - The full response for the initial successful request
-            // since (then permitted, but still time limited) replays MUST NOT change anything.
+            // since (then permitted, but still time limited) replays MUST NOT change anything
+            // on the receiver side.
             String hashedEsadB64U = ApplicationService.base64UrlEncode(
                     HashAlgorithms.SHA256.digest(encryptedAuthorization));
             
