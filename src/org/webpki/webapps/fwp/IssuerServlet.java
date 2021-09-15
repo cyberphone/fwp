@@ -151,9 +151,9 @@ public class IssuerServlet extends HttpServlet {
             // to be acted upon, rather than creating secure sessions with a client,
             // there is no need for dedicated authentication servers.
             //
-            // If the clock of a client is severely out of sync, its authorizations
-            // will be rejected.  This also makes clock manipulations useless as
-            // attack vectors.
+            // If the internal clock of an FWP client is severely out of sync, created
+            // authorizations will be rejected.  This also makes clock manipulations
+            // useless as attack vectors.
             //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
