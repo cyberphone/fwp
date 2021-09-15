@@ -140,13 +140,20 @@ public class IssuerServlet extends HttpServlet {
             // provided by SHA256 makes clashes "impossible" in cryptographic terms.
             //
             // The use of time stamped and signed authorization data together with
-            // specific time limits on the verifier side, makes this scheme comparable
-            // to WebAuthn, but considerably more flexible since such authorizations can
-            // pass any number of nodes without losing their "teeth".  Due to the fact
-            // that payment requests represent discrete events that are to be acted upon,
-            // rather than creating secure sessions with a client, there is no need for
-            // dedicated authentication servers.  That user authorizations are carried out
-            // entirely locally make merchant integration of this part extremely simple.
+            // strict time limits on the verifier side, makes this scheme comparable
+            // to WebAuthn, but considerably more flexible since such authorizations 
+            // can pass any number of nodes without losing their "teeth".
+            //
+            // That user authorizations are carried out entirely locally makes merchant
+            // integration of this part extremely simple.
+            //
+            // Due to the fact that payment requests represent discrete events that are
+            // to be acted upon, rather than creating secure sessions with a client,
+            // there is no need for dedicated authentication servers.
+            //
+            // If the clock of a client is severely out of sync, its authorizations
+            // will be rejected.  This also makes clock manipulations useless as
+            // attack vectors.
             //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
