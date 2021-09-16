@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.nio.ByteBuffer;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -36,8 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
-
-import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
@@ -104,9 +104,7 @@ public class IssuerServlet extends HttpServlet {
             FWPJsonAssertion fwpJsonAssertion = pspRequest.getFwpAssertion();
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
              
-            byte[] encryptedAuthorization = fwpJsonAssertion.getEncryptedAuthorization();
-
-            // Decrypt ESAD.
+              // Decrypt ESAD returning SAD.
             byte[] fwpAssertionBinary = 
                     new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
@@ -123,21 +121,20 @@ public class IssuerServlet extends HttpServlet {
                     return ApplicationService.issuerEncryptionKey.getPrivate();
                 }
                 
-            }).decrypt(encryptedAuthorization);
+            }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
             // Succeeded.
             
-            // Create a Hashed ESAD token which is used for uniquely (but momentarily)
+            // Create a hashable SAD token which is used for uniquely (but momentarily)
             // representing a specific transaction request.
             //
-            // The entropy needed to make this safe, in FWP depends on the following data:
+            // The data needed to make this safe (=cause no false negatives),
+            // in FWP depends on the following input
             // - The transaction (PRCD) request
             // . The host name derived from the URL of the FWP invocation
             // - The client generated time stamp
             // - The client specific payment credential
-            // - The highly random output from the ECDH-ES encryption scheme
-            // 
-            // Although hashing truncates the input data, the 128 bits of strength
-            // provided by SHA256 makes clashes "impossible" in cryptographic terms.
+            // - The signature including public key
+            // as well as that the request has been verified as genuine.
             //
             // The use of time stamped and signed authorization data together with
             // strict time limits on the verifier side, makes this scheme comparable
@@ -160,8 +157,7 @@ public class IssuerServlet extends HttpServlet {
             // - The full response for the initial successful request
             // since (then permitted, but still time limited) replays MUST NOT change anything
             // on the receiver side.
-            String hashedEsadB64U = ApplicationService.base64UrlEncode(
-                    HashAlgorithms.SHA256.digest(encryptedAuthorization));
+            ByteBuffer hashableSad = ByteBuffer.wrap(fwpAssertionBinary);
             
             // Decode assertion.
             FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
@@ -173,14 +169,8 @@ public class IssuerServlet extends HttpServlet {
             if (payerTimeStampOldest < System.currentTimeMillis()) {
                 softError(response, "Authorization max age (" +
                                     (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
-                                    "s) exceeded for Hashed ESAD: " +
-                                    hashedEsadB64U);
-                return;
-            }
-            
-            // Have this user authorization already been used?
-            if (ReplayCache.INSTANCE.add(hashedEsadB64U, payerTimeStampOldest)) {
-                softError(response, "Replay of Hashed ESAD: " + hashedEsadB64U);
+                                    "s) exceeded for Hashed SAD: " +
+                                    hashableSad.hashCode());
                 return;
             }
             
@@ -191,7 +181,7 @@ public class IssuerServlet extends HttpServlet {
             // depends on participation by the merchant's PSP.
             compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
             
-            // And of course, verify that this assertion belongs to a valid account!
+            // And of course, verify that the authorization belongs to a valid account!
             DataBaseOperations.AuthorizedInfo authorizedInfo;
             try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 authorizedInfo = DataBaseOperations.authorize(fwpAssertion.getSerialNumber(),
@@ -200,9 +190,15 @@ public class IssuerServlet extends HttpServlet {
                                                               connection);
             }
             
+            // Have this user authorization already been consumed?
+            if (ReplayCache.INSTANCE.add(hashableSad, payerTimeStampOldest)) {
+                softError(response, "Replay of Hashed SAD: " + hashableSad.hashCode());
+                return;
+            }
+
             // Apparently this is a valid request.
             logger.info("Issuer verified: " + authorizedInfo.userId + 
-                        ", token=" + hashedEsadB64U);
+                        ", token=" + hashableSad.hashCode());
 
             StringBuilder html = new StringBuilder(
     
@@ -254,8 +250,8 @@ public class IssuerServlet extends HttpServlet {
             .append(ISODateTime.formatDateTime(new GregorianCalendar(),
                                                ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
-                    "<tr><th>Hashed&nbsp;ESAD</th><td>")
-            .append(hashedEsadB64U)
+                    "<tr><th>Hashed&nbsp;SAD</th><td>")
+            .append(hashableSad.hashCode())
             .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +

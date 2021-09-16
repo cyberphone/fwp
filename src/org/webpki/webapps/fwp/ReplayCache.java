@@ -16,9 +16,9 @@
  */
 package org.webpki.webapps.fwp;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.ByteBuffer;
 
-import java.util.function.BiConsumer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.logging.Logger;
 
@@ -40,7 +40,7 @@ public enum ReplayCache {
 
     Logger logger = Logger.getLogger(ReplayCache.class.getCanonicalName());
 
-    final ConcurrentHashMap<String, Long> cache = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<ByteBuffer, Long> cache = new ConcurrentHashMap<>();
 
     ReplayCache() {
         new Thread(new Runnable() {
@@ -51,22 +51,17 @@ public enum ReplayCache {
                     try {
                         Thread.sleep(CYCLE_TIME);
                         long now = System.currentTimeMillis();
-                        cache.forEach(new BiConsumer<String, Long>() {
-
-                            @Override
-                            public void accept(String hashedEsadB64U, Long payerTimeStampOldest) {
-                                if (payerTimeStampOldest < now) {
-                                    // This authorization is already consumed but is now too 
-                                    // old to qualify, so we can safely remove it from the cache
-                                    // (in order to keep it as small and up-to-date as possible).
-                                    cache.remove(hashedEsadB64U);
-                                    logger.info("removed authorization token: " + hashedEsadB64U);
-                                }
+                        cache.forEach((hashableSad, payerTimeStampOldest) -> {
+                            if (payerTimeStampOldest < now) {
+                                // This authorization is already consumed but is now too 
+                                // old to qualify, so we can safely remove it from the cache
+                                // (in order to keep it as small and up-to-date as possible).
+                                cache.remove(hashableSad);
+                                logger.info("removed authorization token: " + 
+                                            hashableSad.hashCode());
                             }
-
                         });
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
                         return;
                     }
                 }
@@ -75,10 +70,10 @@ public enum ReplayCache {
         }).start();
     }
     
-    public boolean add(String hashedEsadB64U, long payerTimeStampOldest) {
-        boolean replay = cache.put(hashedEsadB64U, payerTimeStampOldest) != null;
+    public boolean add(ByteBuffer hashableSad, long payerTimeStampOldest) {
+        boolean replay = cache.put(hashableSad, payerTimeStampOldest) != null;
         if (replay) {
-            logger.info("Replay of authorization token: " + hashedEsadB64U);
+            logger.info("Replay of authorization token: " + hashableSad.hashCode());
         }
         return replay;
     }
