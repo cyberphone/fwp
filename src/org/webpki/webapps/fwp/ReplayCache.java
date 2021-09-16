@@ -57,7 +57,7 @@ public enum ReplayCache {
                                 // old to qualify, so we can safely remove it from the cache
                                 // (in order to keep it as small and up-to-date as possible).
                                 cache.remove(hashableSad);
-                                logger.info("removed authorization token: " + 
+                                logger.info("Removed authorization token: " + 
                                             hashableSad.hashCode());
                             }
                         });
