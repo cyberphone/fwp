@@ -257,9 +257,6 @@ public class IssuerServlet extends HttpServlet {
             .append(ISODateTime.formatDateTime(new GregorianCalendar(),
                                                ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
-                    "<tr><th>Hashed&nbsp;SAD</th><td>")
-            .append(cacheableSadObject.hashCode())
-            .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
 
