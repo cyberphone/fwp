@@ -77,12 +77,13 @@ public class IssuerServlet extends HttpServlet {
         return userValidation;
     }
     
-    void softError(HttpServletResponse response, String error) 
+    void softError(HttpServletResponse response, String error, ByteBuffer cacheableSad) 
         throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
             "<div class='header'>Soft Error</div>" +
             "<div style='display:flex;justify-content:center;margin-top:15pt'>")
         .append(error)
+        .append(cacheableSad.hashCode())
         .append(
             "</div>");
         HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
@@ -124,15 +125,16 @@ public class IssuerServlet extends HttpServlet {
             }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
             // Succeeded.
             
-            // Create a hashable SAD token which is used for uniquely (but momentarily)
+            // Create a cacheable SAD object that is uniquely (but momentarily)
             // representing a specific transaction request.
             //
-            // The data needed to make this safe (=cause no false negatives),
+            // The data needed to make this safe (=cause no cache clashes),
             // in FWP depends on the following input
             // - The transaction (PRCD) request
             // . The host name derived from the URL of the FWP invocation
             // - The client generated time stamp
-            // - The client specific payment credential
+            // - The account specific payment credentials
+            // - The FIDO signature counter
             // - The signature including public key
             // as well as that the request has been verified as genuine.
             //
@@ -157,9 +159,9 @@ public class IssuerServlet extends HttpServlet {
             // - The full response for the initial successful request
             // since (then permitted, but still time limited) replays MUST NOT change anything
             // on the receiver side.
-            ByteBuffer hashableSad = ByteBuffer.wrap(fwpAssertionBinary);
+            ByteBuffer cacheableSad = ByteBuffer.wrap(fwpAssertionBinary);
             
-            // Decode assertion.
+            // Decode signed assertion (SAD).
             FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
             // Succeeded => the data (SAD) is "technically" OK including the signature.
             
@@ -167,10 +169,11 @@ public class IssuerServlet extends HttpServlet {
             long payerTimeStampOldest = 
                     fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_LOWER_TIME_LIMIT;
             if (payerTimeStampOldest < System.currentTimeMillis()) {
-                softError(response, "Authorization max age (" +
-                                    (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
-                                    "s) exceeded for Hashed SAD: " +
-                                    hashableSad.hashCode());
+                softError(response, 
+                          "Authorization max age (" +
+                            (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
+                            "s) exceeded for SAD object: ",
+                          cacheableSad);
                 return;
             }
             
@@ -191,14 +194,18 @@ public class IssuerServlet extends HttpServlet {
             }
             
             // Have this user authorization already been consumed?
-            if (ReplayCache.INSTANCE.add(hashableSad, payerTimeStampOldest)) {
-                softError(response, "Replay of Hashed SAD: " + hashableSad.hashCode());
+            if (ReplayCache.INSTANCE.add(cacheableSad, payerTimeStampOldest)) {
+                logger.info("Replay of authorization token: " + cacheableSad.hashCode() +
+                            ", accountId=" + fwpAssertion.getAccountId());
+                softError(response,
+                          "Replay of SAD object: ",
+                          cacheableSad);
                 return;
             }
 
             // Apparently this is a valid request.
             logger.info("Issuer verified: " + authorizedInfo.userId + 
-                        ", token=" + hashableSad.hashCode());
+                        ", token=" + cacheableSad.hashCode());
 
             StringBuilder html = new StringBuilder(
     
@@ -251,7 +258,7 @@ public class IssuerServlet extends HttpServlet {
                                                ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
                     "<tr><th>Hashed&nbsp;SAD</th><td>")
-            .append(hashableSad.hashCode())
+            .append(cacheableSad.hashCode())
             .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +

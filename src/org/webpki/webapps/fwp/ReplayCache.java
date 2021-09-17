@@ -51,14 +51,14 @@ public enum ReplayCache {
                     try {
                         Thread.sleep(CYCLE_TIME);
                         long now = System.currentTimeMillis();
-                        cache.forEach((hashableSad, payerTimeStampOldest) -> {
+                        cache.forEach((cacheableSad, payerTimeStampOldest) -> {
                             if (payerTimeStampOldest < now) {
                                 // This authorization is already consumed but is now too 
                                 // old to qualify, so we can safely remove it from the cache
                                 // (in order to keep it as small and up-to-date as possible).
-                                cache.remove(hashableSad);
+                                cache.remove(cacheableSad);
                                 logger.info("Removed authorization token: " + 
-                                            hashableSad.hashCode());
+                                            cacheableSad.hashCode());
                             }
                         });
                     } catch (InterruptedException e) {
@@ -70,11 +70,7 @@ public enum ReplayCache {
         }).start();
     }
     
-    public boolean add(ByteBuffer hashableSad, long payerTimeStampOldest) {
-        boolean replay = cache.put(hashableSad, payerTimeStampOldest) != null;
-        if (replay) {
-            logger.info("Replay of authorization token: " + hashableSad.hashCode());
-        }
-        return replay;
+    public boolean add(ByteBuffer cacheableSad, long payerTimeStampOldest) {
+        return cache.put(cacheableSad, payerTimeStampOldest) != null;
     }
 }
