@@ -166,9 +166,9 @@ public class IssuerServlet extends HttpServlet {
             // Succeeded => the data (SAD) is "technically" OK including the signature.
             
             // Is the user authorization within time limits?
-            long payerTimeStampOldest = 
+            long expirationTime = 
                     fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_LOWER_TIME_LIMIT;
-            if (payerTimeStampOldest < System.currentTimeMillis()) {
+            if (expirationTime < System.currentTimeMillis()) {
                 softError(response, 
                           "Authorization max age (" +
                             (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
@@ -194,7 +194,7 @@ public class IssuerServlet extends HttpServlet {
             }
             
             // Have this user authorization already been consumed?
-            if (ReplayCache.INSTANCE.add(cacheableSad, payerTimeStampOldest)) {
+            if (ReplayCache.INSTANCE.add(cacheableSad, expirationTime)) {
                 logger.info("Replay of authorization token: " + cacheableSad.hashCode() +
                             ", accountId=" + fwpAssertion.getAccountId());
                 softError(response,

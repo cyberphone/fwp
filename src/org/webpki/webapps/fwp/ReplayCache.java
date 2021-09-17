@@ -51,8 +51,8 @@ public enum ReplayCache {
                     try {
                         Thread.sleep(CYCLE_TIME);
                         long now = System.currentTimeMillis();
-                        cache.forEach((cacheableSad, payerTimeStampOldest) -> {
-                            if (payerTimeStampOldest < now) {
+                        cache.forEach((cacheableSad, expirationTime) -> {
+                            if (expirationTime < now) {
                                 // This authorization is already consumed but is now too 
                                 // old to qualify, so we can safely remove it from the cache
                                 // (in order to keep it as small and up-to-date as possible).
@@ -70,7 +70,14 @@ public enum ReplayCache {
         }).start();
     }
     
-    public boolean add(ByteBuffer cacheableSad, long payerTimeStampOldest) {
-        return cache.put(cacheableSad, payerTimeStampOldest) != null;
+    /**
+     * Add validated SAD object to the replay cache.
+     * 
+     * @param cacheableSad The SAD object packaged to suit HashMap
+     * @param expirationTime For the SAD object
+     * @return <code>true</code> if replay, else <code>false</code>
+     */
+    public boolean add(ByteBuffer cacheableSad, long expirationTime) {
+        return cache.put(cacheableSad, expirationTime) != null;
     }
 }
