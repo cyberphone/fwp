@@ -128,7 +128,7 @@ public class IssuerServlet extends HttpServlet {
             // Create a cacheable SAD object that is uniquely (but momentarily)
             // representing a specific transaction request.
             //
-            // The data needed to make this safe (=cause no cache clashes),
+            // The data needed to make this safe (=cause no false cache collisions),
             // in FWP depends on the following input
             // - The transaction (PRCD) request
             // . The host name derived from the URL of the FWP invocation
