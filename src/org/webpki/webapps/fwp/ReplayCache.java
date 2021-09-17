@@ -51,18 +51,18 @@ public enum ReplayCache {
                     try {
                         Thread.sleep(CYCLE_TIME);
                         long now = System.currentTimeMillis();
-                        cache.forEach((cacheableSad, expirationTime) -> {
+                        cache.forEach((cacheableSadObject, expirationTime) -> {
                             if (expirationTime < now) {
                                 // This authorization is already consumed but is now too 
                                 // old to qualify, so we can safely remove it from the cache
                                 // (in order to keep it as small and up-to-date as possible).
-                                cache.remove(cacheableSad);
+                                cache.remove(cacheableSadObject);
                                 logger.info("Removed authorization token: " + 
-                                            cacheableSad.hashCode());
+                                            cacheableSadObject.hashCode());
                             }
                         });
                     } catch (InterruptedException e) {
-                        return;
+                        new RuntimeException("Unexpected interrupt", e);
                     }
                 }
             }
@@ -73,11 +73,11 @@ public enum ReplayCache {
     /**
      * Add validated SAD object to the replay cache.
      * 
-     * @param cacheableSad The SAD object packaged to suit HashMap
+     * @param cacheableSadObject The SAD object packaged to suit HashMap
      * @param expirationTime For the SAD object
      * @return <code>true</code> if replay, else <code>false</code>
      */
-    public boolean add(ByteBuffer cacheableSad, long expirationTime) {
-        return cache.putIfAbsent(cacheableSad, expirationTime) != null;
+    public boolean add(ByteBuffer cacheableSadObject, long expirationTime) {
+        return cache.putIfAbsent(cacheableSadObject, expirationTime) != null;
     }
 }

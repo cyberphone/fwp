@@ -77,13 +77,13 @@ public class IssuerServlet extends HttpServlet {
         return userValidation;
     }
     
-    void softError(HttpServletResponse response, String error, ByteBuffer cacheableSad) 
+    void softError(HttpServletResponse response, String error, ByteBuffer cacheableSadObject) 
         throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
             "<div class='header'>Soft Error</div>" +
             "<div style='display:flex;justify-content:center;margin-top:15pt'>")
         .append(error)
-        .append(cacheableSad.hashCode())
+        .append(cacheableSadObject.hashCode())
         .append(
             "</div>");
         HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
@@ -159,7 +159,7 @@ public class IssuerServlet extends HttpServlet {
             // - The full response for the initial successful request
             // since (then permitted, but still time limited) replays MUST NOT change anything
             // on the receiver side.
-            ByteBuffer cacheableSad = ByteBuffer.wrap(fwpAssertionBinary);
+            ByteBuffer cacheableSadObject = ByteBuffer.wrap(fwpAssertionBinary);
             
             // Decode signed assertion (SAD).
             FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
@@ -173,7 +173,7 @@ public class IssuerServlet extends HttpServlet {
                           "Authorization max age (" +
                             (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
                             "s) exceeded for SAD object: ",
-                          cacheableSad);
+                          cacheableSadObject);
                 return;
             }
             
@@ -194,18 +194,18 @@ public class IssuerServlet extends HttpServlet {
             }
             
             // Have this user authorization already been consumed?
-            if (ReplayCache.INSTANCE.add(cacheableSad, expirationTime)) {
-                logger.info("Replay of authorization token: " + cacheableSad.hashCode() +
+            if (ReplayCache.INSTANCE.add(cacheableSadObject, expirationTime)) {
+                logger.info("Replay of authorization token: " + cacheableSadObject.hashCode() +
                             ", accountId=" + fwpAssertion.getAccountId());
                 softError(response,
                           "Replay of SAD object: ",
-                          cacheableSad);
+                          cacheableSadObject);
                 return;
             }
 
             // Apparently this is a valid request.
             logger.info("Issuer verified: " + authorizedInfo.userId + 
-                        ", token=" + cacheableSad.hashCode());
+                        ", token=" + cacheableSadObject.hashCode());
 
             StringBuilder html = new StringBuilder(
     
@@ -258,7 +258,7 @@ public class IssuerServlet extends HttpServlet {
                                                ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
                     "<tr><th>Hashed&nbsp;SAD</th><td>")
-            .append(cacheableSad.hashCode())
+            .append(cacheableSadObject.hashCode())
             .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
