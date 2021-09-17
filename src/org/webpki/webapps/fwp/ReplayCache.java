@@ -78,6 +78,6 @@ public enum ReplayCache {
      * @return <code>true</code> if replay, else <code>false</code>
      */
     public boolean add(ByteBuffer cacheableSad, long expirationTime) {
-        return cache.put(cacheableSad, expirationTime) != null;
+        return cache.putIfAbsent(cacheableSad, expirationTime) != null;
     }
 }
