@@ -56,7 +56,7 @@ public enum ReplayCache {
                                 // The authorization has apparently expired so we can safely
                                 // remove it from the replay cache (in order to keep it as
                                 // small and up-to-date as possible).
-                            	cache.remove(cacheableSadObject);
+                                cache.remove(cacheableSadObject);
                                 logger.info("Removed authorization token: " + 
                                             cacheableSadObject.hashCode());
                             }

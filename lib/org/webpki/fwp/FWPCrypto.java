@@ -137,7 +137,7 @@ public class FWPCrypto {
         // Hard-coded FIDO Authenticator Data
         byte[] authenticatorData = ArrayUtil.add(
                 HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
-                new byte[] {(byte)flags, 0, 0, 0, 0 });
+                new byte[] {(byte)flags, 0, 0, 0, 23});
 
         // Create a FIDO compatible signature.
         int coseAlgorithm = CBORObject.decode(unsignedFwpAssertion)
