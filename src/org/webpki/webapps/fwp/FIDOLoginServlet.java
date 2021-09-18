@@ -134,6 +134,7 @@ public class FIDOLoginServlet extends HttpServlet {
 
                 // Here we are supposed to the check the signature....
                 byte[] authenticatorData = requestJson.getBinary(FWPCrypto.AUTHENTICATOR_DATA);
+                session.setAttribute(WalletCore.ATTR_LOGIN_DATA, authenticatorData);
                 byte[] signature = requestJson.getBinary(FWPCrypto.SIGNATURE);
                 
                 // Now, we have all client data needed to verify the signature.

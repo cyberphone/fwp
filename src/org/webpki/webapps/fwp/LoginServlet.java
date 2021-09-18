@@ -32,6 +32,8 @@ import javax.servlet.http.HttpSession;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
+import org.webpki.util.DebugFormatter;
+
 import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.fwp.FWPCrypto;
@@ -160,6 +162,10 @@ public class LoginServlet extends HttpServlet {
             
             HttpSession session = request.getSession(false);
             
+            if (session == null) {
+                WalletCore.failed("No seesion!");
+            }
+            
             CBORObject publicKey = CBORObject.decode(coreClientData.cosePublicKey);
             
             StringBuilder html = new StringBuilder(
@@ -168,7 +174,8 @@ public class LoginServlet extends HttpServlet {
                     "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
                       "<div class='comment'>" +
                          "This is what the login returned from the " +
-                         "<span class='actor'>Issuer</span> database." +
+                         "<span class='actor'>Issuer</span> database " +
+                         "and from the assertion." +
                       "</div>" +
                     "</div>" +
 
@@ -185,12 +192,17 @@ public class LoginServlet extends HttpServlet {
                 
                         "<div class='ctblh'>Web Session ID</div>" +
                         "<div class='ctbl'>")
-                .append(session == null ? "Missing" : session.getId())
+                .append(session.getId())
                 .append("</div>" +
                 
                         "<div class='ctblh'>FIDO Credential ID (B64U)</div>" +
                         "<div class='ctbl'>")
                 .append(coreClientData.credentialId)
+                .append("</div>" +
+
+                        "<div class='ctblh'>FIDO Authenticator Data (HEX)</div>" +
+                        "<div class='ctbl'>")
+                .append(DebugFormatter.getHexString((byte[])session.getAttribute(WalletCore.ATTR_LOGIN_DATA)))
                 .append("</div>" +
 
                         "<div class='ctblh'>FIDO ")
