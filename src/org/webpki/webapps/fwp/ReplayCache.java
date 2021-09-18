@@ -26,8 +26,8 @@ import java.util.logging.Logger;
  * Reply cache support.
  * 
  * Replays are only checked within the time limits for authorizations, because 
- * if an authorization has expired, it will be immediately rejected anyway, and 
- * not go into the cache.
+ * if a received authorization has already expired, it should be rejected,
+ * rather than being cached.
  * 
  */
 public enum ReplayCache {
