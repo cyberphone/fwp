@@ -23,17 +23,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
- * Singleton thread maintaining a reply cache.
+ * Reply cache support.
  * 
- * Replays are only checked within the time limits for
- * authorizations, because if an authorization has expired, it
- * will be immediately rejected anyway, and not go into the cache.
+ * Replays are only checked within the time limits for authorizations, because 
+ * if an authorization has expired, it will be immediately rejected anyway, and 
+ * not go into the cache.
  * 
  */
 public enum ReplayCache {
 
-    // Single-element enums are according to authoritative Java gurus the optimal
-    // way creating thread-safe singletons.
+    // According to multiple Java information resources, the "enum" type represents
+    // a viable option for creating singletons in multi-threaded applications.
     INSTANCE;
 
     static final long CYCLE_TIME = 120000;
@@ -54,8 +54,8 @@ public enum ReplayCache {
                         cache.forEach((cacheableSadObject, expirationTime) -> {
                             if (expirationTime < now) {
                                 // The authorization has apparently expired so we can safely
-                                // remove it from the replay cache (in order to keep it as
-                                // small and up-to-date as possible).
+                                // remove it from the replay cache in order to keep the cache
+                                // as small and up-to-date as possible.
                                 cache.remove(cacheableSadObject);
                                 logger.info("Removed authorization token: " + 
                                             cacheableSadObject.hashCode());
