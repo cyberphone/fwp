@@ -62,9 +62,9 @@ public class IssuerServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
-    public static final String ISSUER_REQUEST = "issuerRequest";
+    public static final String ISSUER_REQUEST  = "issuerRequest";
     
-    static final long AUTHORIZATION_LOWER_TIME_LIMIT = 600000;
+    static final long AUTHORIZATION_MAX_AGE    = 600000;
     
     static long transactionId = 56807446412l;
 
@@ -167,11 +167,11 @@ public class IssuerServlet extends HttpServlet {
             
             // Is the user authorization within time limits?
             long expirationTime = 
-                    fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_LOWER_TIME_LIMIT;
+                    fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_MAX_AGE;
             if (expirationTime < System.currentTimeMillis()) {
                 softError(response, 
                           "Authorization max age (" +
-                            (AUTHORIZATION_LOWER_TIME_LIMIT / 1000) + 
+                            (AUTHORIZATION_MAX_AGE / 1000) + 
                             "s) exceeded for SAD object: ",
                           cacheableSadObject);
                 return;
