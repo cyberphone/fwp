@@ -38,7 +38,7 @@ public enum ReplayCache {
 
     private static final long CYCLE_TIME = 120000;
 
-    private Logger logger = Logger.getLogger(ReplayCache.class.getCanonicalName());
+    private Logger logger = Logger.getLogger(ReplayCache.class.getName());
 
     private final ConcurrentHashMap<ByteBuffer, Long> cache = new ConcurrentHashMap<>();
 

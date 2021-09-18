@@ -34,7 +34,7 @@ import org.webpki.crypto.HashAlgorithms;
 
 public class DataBaseOperations {
 
-    static Logger logger = Logger.getLogger(DataBaseOperations.class.getCanonicalName());
+    static Logger logger = Logger.getLogger(DataBaseOperations.class.getName());
     
     static void testConnection() throws SQLException {
         try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) { }
