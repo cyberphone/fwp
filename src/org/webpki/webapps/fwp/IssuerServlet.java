@@ -65,6 +65,7 @@ public class IssuerServlet extends HttpServlet {
     public static final String ISSUER_REQUEST  = "issuerRequest";
     
     static final long AUTHORIZATION_MAX_AGE    = 600000;
+    static final long AUTHORIZATION_MAX_FUTURE = 120000;
     
     static long transactionId = 56807446412l;
 
@@ -166,9 +167,10 @@ public class IssuerServlet extends HttpServlet {
             // Succeeded => the data (SAD) is "technically" OK including the signature.
             
             // Is the user authorization within time limits?
-            long expirationTime = 
-                    fwpAssertion.getTimeStamp().getTimeInMillis() + AUTHORIZATION_MAX_AGE;
-            if (expirationTime < System.currentTimeMillis()) {
+            long now = System.currentTimeMillis();
+            long timeStamp = fwpAssertion.getTimeStamp().getTimeInMillis();
+            long expirationTime = timeStamp + AUTHORIZATION_MAX_AGE;
+            if (expirationTime < now) {
                 softError(response, 
                           "Authorization max age (" +
                             (AUTHORIZATION_MAX_AGE / 1000) + 
@@ -176,7 +178,14 @@ public class IssuerServlet extends HttpServlet {
                           cacheableSadObject);
                 return;
             }
-            
+            if (timeStamp - AUTHORIZATION_MAX_FUTURE > now) {
+                softError(response, 
+                          "Authorization max future (" +
+                            (AUTHORIZATION_MAX_FUTURE / 1000) + 
+                            "s) exceeded for SAD object: ",
+                          cacheableSadObject);
+                return;
+            }            
             // Check that the merchant request matches the authorization.
             fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
 
