@@ -186,6 +186,7 @@ public class IssuerServlet extends HttpServlet {
                           cacheableSadObject);
                 return;
             }            
+
             // Check that the merchant request matches the authorization.
             fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
 
