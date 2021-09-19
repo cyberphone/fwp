@@ -92,14 +92,14 @@ public class PaymentRequestServlet extends HttpServlet {
                             matching = new JSONArrayWriter();
                         }
                         matching.setObject(new JSONObjectWriter()
-                                .setString(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
-                                .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
-                                .setString(WalletCore.ACCOUNT_ID, virtualCard.accountId)
-                                .setString(WalletCore.CARD_HOLDER, virtualCard.cardHolder)
-                                .setString(WalletCore.PAYMENT_METHOD, paymentMethod)
-                                .setString(WalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
-                                // Hard-coded at the moment
-                                .setString(WalletCore.ISSUER_ID, ApplicationService.issuerId));
+                            .setString(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
+                            .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
+                            .setString(WalletCore.ACCOUNT_ID, virtualCard.accountId)
+                            .setString(WalletCore.CARD_HOLDER, virtualCard.cardHolder)
+                            .setString(WalletCore.PAYMENT_METHOD, paymentMethod)
+                            .setString(WalletCore.SERIAL_NUMBER, virtualCard.serialNumber)
+                            // Hard-coded at the moment
+                            .setString(WalletCore.ISSUER_ID, ApplicationService.issuerId));
                     }
                 }
             }
