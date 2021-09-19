@@ -81,18 +81,17 @@ public class ADServlet extends HttpServlet {
                     walletInternalJson.getObject(WalletCore.SELECTED_CARD);
             JSONObjectReader paymentRequest =
                     walletInternalJson.getObject(WalletCore.PAYMENT_REQUEST);
-             byte[] unsignedAssertion = new FWPAssertionBuilder()
-                    .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
-                    .setAccountData(selectedCard.getString(WalletCore.ACCOUNT_ID),
-                                    selectedCard.getString(WalletCore.SERIAL_NUMBER),
-                                    selectedCard.getString(WalletCore.PAYMENT_METHOD))
-                    .setPayeeHost(request.getServerName())
-                    .setPlatformData(system.operatingSystemName,
-                                     system.operatingSystemVersion,
-                                     system.browserName,
-                                     system.browserVersion)
-                    .create(new FWPCrypto.FWPPreSigner(
-                            selectedCard.getBinary(WalletCore.PUBLIC_KEY)));
+            byte[] unsignedAssertion = new FWPAssertionBuilder()
+                .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
+                .setAccountData(selectedCard.getString(WalletCore.ACCOUNT_ID),
+                                selectedCard.getString(WalletCore.SERIAL_NUMBER),
+                                selectedCard.getString(WalletCore.PAYMENT_METHOD))
+                .setPayeeHost(request.getServerName())
+                .setPlatformData(system.operatingSystemName,
+                                 system.operatingSystemVersion,
+                                 system.browserName,
+                                 system.browserVersion)
+                .create(new FWPCrypto.FWPPreSigner(selectedCard.getBinary(WalletCore.PUBLIC_KEY)));
              
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='sad'>" +
