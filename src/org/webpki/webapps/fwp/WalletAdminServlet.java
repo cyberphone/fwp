@@ -98,14 +98,14 @@ public class WalletAdminServlet extends HttpServlet {
             
             // Tell the user that it worked...
             StringBuilder html = new StringBuilder(
-                    "<div class='header'>Payment Cards Deleted</div>" +
-                    "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
-                            
-                    "<div class='comment'>" +
-                      "You have now disenrolled the <span class='actor'>Wallet</span>. " +
-                      "Thank you for testing, we hope you liked it &#x1f601;" +
-                    "</div>" +
-                    "</div>");
+                "<div class='header'>Payment Cards Deleted</div>" +
+                "<div style='display:flex;justify-content:center;margin-top:15pt'>" +
+                        
+                "<div class='comment'>" +
+                  "You have now disenrolled the <span class='actor'>Wallet</span>. " +
+                  "Thank you for testing, we hope you liked it &#x1f601;" +
+                "</div>" +
+                "</div>");
 
             // We remove the cookie as well.
             Cookie walletCookie = new Cookie(WalletCore.WALLET_COOKIE, "");
