@@ -108,15 +108,18 @@ public class FWPCrypto {
                                       byte[] authenticatorData,
                                       byte[] signature) throws IOException, 
                                                                GeneralSecurityException {
-        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
+        if (clientDataJSON != null && 
+            !ArrayUtil.compare(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
                 JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
-        cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap()
-            .setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON))
-            .setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
-            .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        CBORMap authorization = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
+        authorization.setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
+                     .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        if (clientDataJSON != null) {
+            authorization.setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON));
+        }
         return cborFwpAssertion.encode();
     }
 
@@ -124,14 +127,13 @@ public class FWPCrypto {
     static byte[] directSign(byte[] unsignedFwpAssertion, 
                              PrivateKey privateKey, 
                              String origin,
-                             int flags) throws IOException, GeneralSecurityException {
-        // "challenge" is used for hashed AD
-        byte[] challenge = HashAlgorithms.SHA256.digest(unsignedFwpAssertion);
-
+                             int flags,
+                             boolean ctap2) throws IOException, GeneralSecurityException {
         // Now we have the data needed for creating a FIDO ClientDataJSON object.
-        byte[] clientDataJSON = new JSONObjectWriter()
+        byte[] clientDataJSON = ctap2 ? null : new JSONObjectWriter()
             .setString(CDJ_TYPE, CDJ_GET_ARGUMENT)
-            .setString(CDJ_ORIGIN, origin).setBinary(CHALLENGE, challenge)
+            .setString(CDJ_ORIGIN, origin)
+            .setBinary(CHALLENGE, HashAlgorithms.SHA256.digest(unsignedFwpAssertion))
             .serializeToBytes(JSONOutputFormats.NORMALIZED);
 
         // Hard-coded FIDO Authenticator Data
@@ -146,7 +148,7 @@ public class FWPCrypto {
             // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
             .setEcdsaSignatureEncoding(true)
             .update(authenticatorData)
-            .update(HashAlgorithms.SHA256.digest(clientDataJSON))
+            .update(HashAlgorithms.SHA256.digest(ctap2 ? unsignedFwpAssertion : clientDataJSON))
             .sign();
         return addSignature(unsignedFwpAssertion, 
                             clientDataJSON,
@@ -231,7 +233,7 @@ public class FWPCrypto {
      * @param algorithm Signature algorithm in WebPKI notation
      * @param publicKey Public key in Java format
      * @param authenticatorData FIDO core data
-     * @param clientDataJSON FIDO core data
+     * @param clientData FIDO application data
      * @param signature FIDO core data
      * @throws IOException
      * @throws GeneralSecurityException
@@ -239,14 +241,15 @@ public class FWPCrypto {
     public static void validateFidoSignature(AsymSignatureAlgorithms algorithm, 
                                              PublicKey publicKey,
                                              byte[] authenticatorData,
-                                             byte[] clientDataJSON,
+                                             byte[] clientData,
                                              byte[] signature) throws IOException,
                                                                       GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
             // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
             .setEcdsaSignatureEncoding(true)
             .update(authenticatorData)
-            .update(HashAlgorithms.SHA256.digest(clientDataJSON))
+            // Creating clientDataHash
+            .update(HashAlgorithms.SHA256.digest(clientData))
             .verify(signature)) {
             throw new GeneralSecurityException("Signature validation failed");
         }       
@@ -263,6 +266,7 @@ public class FWPCrypto {
      *
      * Exclusively called by FWPAssertionDecoder
      * @param fwpAssertion FWP assertion
+     * @param ctap2 
      * @return Public key in COSE format
      * @throws IOException
      * @throws GeneralSecurityException
@@ -276,9 +280,11 @@ public class FWPCrypto {
         // Fetch the core FIDO assertion elements. Remove them
         // from the FWP assertion as well since they are not a
         // part of the FIDO "challenge" data.
-        byte[] signature = readAndRemove(authorization, AS_SIGNATURE);
-        byte[] clientDataJSON = readAndRemove(authorization, AS_CLIENT_DATA_JSON);
         byte[] authenticatorData = readAndRemove(authorization, AS_AUTHENTICATOR_DATA);
+        // Note that the ctap2 option removes "clientDataJSON" from FWP assertions.
+        boolean ctap2 = !authorization.hasKey(AS_CLIENT_DATA_JSON);
+        byte[] clientDataJSON = ctap2 ? null : readAndRemove(authorization, AS_CLIENT_DATA_JSON);
+        byte[] signature = readAndRemove(authorization, AS_SIGNATURE);
         
         // Collect authenticator data that may be useful in disputes.
         // Note that possible extension data (ED) is ignored.
@@ -303,8 +309,8 @@ public class FWPCrypto {
         
         // This is not WebAuthn, this is FIDO Web Pay: 
         // FIDO "challenge" = hash of locally created FWP assertion data.
-        if (!ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
-                               JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
+        if (!ctap2 && !ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
+                                         JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         
@@ -312,7 +318,7 @@ public class FWPCrypto {
         validateFidoSignature(getWebPkiAlgorithm(coseAlgorithm),
                               publicKey,
                               authenticatorData,
-                              clientDataJSON,
+                              ctap2 ? fwpAssertion.encode() : clientDataJSON,
                               signature);
 
         // Return the "raw" public key for looking up in an RP database.

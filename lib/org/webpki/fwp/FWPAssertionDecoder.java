@@ -142,7 +142,8 @@ public class FWPAssertionDecoder {
         // For usage with the following payment method.
         paymentMethod = getString(FWPElements.PAYMENT_METHOD);
 
-        // Serial number of payment credential. Note: this is unrelated to FIDO credential Id.
+        // Serial number of payment credential. Note: this is unrelated to the
+        // FIDO "credentialId" (which only used locally by the wallet).
         serialNumber = getString(FWPElements.SERIAL_NUMBER);
 
         // Platform Data

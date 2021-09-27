@@ -194,7 +194,8 @@ public class FIDOTest {
                                         .create(fwpPreSigner),
                                     privateKey, 
                                     "https://mybank.com",
-                                    FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV);
+                                    FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV,
+                                    false);
     }
     
     @Test
