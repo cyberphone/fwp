@@ -53,7 +53,8 @@ import org.webpki.util.ISODateTime;
  */
 public class TestVectorGeneration {
     
-
+    static final boolean ctap2 = false;
+    
     static final Base64.Encoder Base64UrlEncoder = Base64.getUrlEncoder().withoutPadding();
     
     static final String ISSUER_URL     = "https://mybank.fr";
@@ -143,7 +144,7 @@ public class TestVectorGeneration {
                                      p256.getPrivate(),
                                      ISSUER_URL,
                                      FWPCrypto.FLAG_UP + FWPCrypto.FLAG_UV,
-                                     false);
+                                     ctap2);
 
         // ES256 generates different results for each round.  We try to limit that...
         fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
@@ -171,17 +172,19 @@ public class TestVectorGeneration {
                       "* FIDO/WebAuthn assertion happens here *\n" +
                       "****************************************");
         
-        byte[] clientDataJSONbin = authContainer.getObject(
+        byte[] clientDataJSONbin = ctap2 ? null : authContainer.getObject(
                 FWPCrypto.AS_CLIENT_DATA_JSON).getByteString();
   
-        conditionalRewrite(testDataDir + FILE_CLIENT_DATA_JSON, 
-                clientDataJSONbin);
-
-        JSONObjectReader clientDataJSON = JSONParser.parse(clientDataJSONbin);
-
-        result.append("\n\nReturned FIDO '" + FWPCrypto.CLIENT_DATA_JSON + 
-                      "', here shown in clear:\n")
-              .append(clientDataJSON.serializeToString(JSONOutputFormats.NORMALIZED));
+        if (!ctap2) {
+            conditionalRewrite(testDataDir + FILE_CLIENT_DATA_JSON, 
+                    clientDataJSONbin);
+    
+            JSONObjectReader clientDataJSON = JSONParser.parse(clientDataJSONbin);
+    
+            result.append("\n\nReturned FIDO '" + FWPCrypto.CLIENT_DATA_JSON + 
+                          "', here shown in clear:\n")
+                  .append(clientDataJSON.serializeToString(JSONOutputFormats.NORMALIZED));
+        }
         
         result.append("\nRelying party URL: " + ISSUER_URL + "\n" +
                       "\nReturned FIDO '" + FWPCrypto.AUTHENTICATOR_DATA + 
@@ -200,7 +203,7 @@ public class TestVectorGeneration {
               .append("\n\nThe added elements " + FWPCrypto.AS_AUTHENTICATOR_DATA +
                       "," + FWPCrypto.AS_CLIENT_DATA_JSON +
                       "," + FWPCrypto.AS_SIGNATURE +
-                      " represent FIDO's '" + FWPCrypto.AUTHENTICATOR_DATA +
+                      (ctap2 ? "" : " represent FIDO's '" + FWPCrypto.AUTHENTICATOR_DATA) +
                       "','" +FWPCrypto.CLIENT_DATA_JSON +
                       "' and '" +  FWPCrypto.SIGNATURE + 
                       "' respectively.\n")
