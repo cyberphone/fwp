@@ -60,7 +60,7 @@ public class ESADServlet extends HttpServlet {
                     new CBORAsymKeyEncrypter(ApplicationService.issuerEncryptionKey.getPublic(),
                                              ApplicationService.issuerKeyEncryptionAlgorithm,
                                              ApplicationService.issuerContentEncryptionAlgorithm)
-                .setKeyId(ApplicationService.issuerEncryptionKeyId).encrypt(
+                .setKeyId(ApplicationService.issuerEncryptionKeyId.getBytes("utf-8")).encrypt(
                         ApplicationService.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(

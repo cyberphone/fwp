@@ -60,7 +60,12 @@ public class TestVectorGeneration {
     static final String ISSUER_URL     = "https://mybank.fr";
     static final String ISSUER_ID      = "https://mybank.fr/payment";
     static final String PAYMENT_METHOD = "https://bankdirect.com";
-    static final String ISSUER_KEY_ID  = "x25519:2021:3";
+    static byte[] ISSUER_KEY_ID;
+    static {
+        try {
+            ISSUER_KEY_ID = "x25519:2021:3".getBytes("utf-8");
+        } catch (IOException e) {}
+    }
     static final KeyEncryptionAlgorithms ISSUER_KEY_ENCRYPTION_ALGORITHM =
             KeyEncryptionAlgorithms.ECDH_ES_A256KW;
     static final ContentEncryptionAlgorithms ISSUER_CONTENT_ENCRYPTION_ALGORITHM =
@@ -264,10 +269,10 @@ public class TestVectorGeneration {
             
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
-                                     String optionalKeyId,
+                                     byte[] optionalKeyId,
                                      KeyEncryptionAlgorithms keyEncryptionAlgorithm)
                     throws IOException, GeneralSecurityException {
-                if (!ISSUER_KEY_ID.equals(optionalKeyId)) {
+                if (!ArrayUtil.compare(ISSUER_KEY_ID, optionalKeyId)) {
                     throw new GeneralSecurityException("Wrong/missing ID");
                 }
                 return x25519.getPrivate();

@@ -53,11 +53,11 @@ public class CryptoImages {
     int width;
     
     int mainMapWidth() {
-        return 464;
+        return 460;
     }
     
     int subMapWidth() {
-        return 464;
+        return 440;
     }
     
     int totalHeight() {

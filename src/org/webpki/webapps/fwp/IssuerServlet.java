@@ -49,7 +49,7 @@ import org.webpki.fwp.IssuerRequest;
 import org.webpki.fwp.PSPRequest;
 
 import org.webpki.json.JSONParser;
-
+import org.webpki.util.ArrayUtil;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -112,12 +112,13 @@ public class IssuerServlet extends HttpServlet {
 
                 @Override
                 public PrivateKey locate(PublicKey publicKey,
-                                         String keyId,
+                                         byte[] keyId,
                                          KeyEncryptionAlgorithms algorithm)
                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
-                    if (!ApplicationService.issuerEncryptionKeyId.equals(keyId)) {
+                    if (!ArrayUtil.compare(
+                            ApplicationService.issuerEncryptionKeyId.getBytes("utf-8"), keyId)) {
                         throw new GeneralSecurityException("Unknown keyId: " + keyId);
                     }
                     return ApplicationService.issuerEncryptionKey.getPrivate();
