@@ -163,8 +163,8 @@ public class ADServlet extends HttpServlet {
 
                 "      allowCredentials: [{type: 'public-key', " +
                            "id: b64urlToU8arr('" + 
-                                              selectedCard.getString(WalletCore.CREDENTIAL_ID) 
-                                              + "')}],\n" +
+                                              selectedCard.getString(WalletCore.CREDENTIAL_ID) +
+                                              "')}],\n" +
 
                 "      userVerification: '" + WalletCore.USER_VERIFICATION + "',\n" +
 
