@@ -178,35 +178,36 @@ public class CryptoDocument  {
 
     static DecoratorBuilder addList(String fileName) {
         return new DecoratorBuilder(fileName)
-            .add(new int[] {10}, "&quot;authorization&quot;")
-            .add(new int[] {10, 1}, "&quot;signatureAlgorithm&quot; = ES256")
-            .add(new int[] {10, 2}, "&quot;publicKey&quot;")
-            .add(new int[] {10, 2, 1}, "&quot;kty&quot; = EC")
-            .add(new int[] {10, 2, -1}, "&quot;crv&quot; = P-256")
-            .add(new int[] {10, 2, -2}, "&quot;x&quot;")
-            .add(new int[] {10, 2, -3}, "&quot;y&quot;");
+            .add(new int[] {10}, "authorization")
+            .add(new int[] {10, 1}, "signatureAlgorithm = ES256")
+            .add(new int[] {10, 2}, "publicKey")
+            .add(new int[] {10, 2, 1}, "kty = EC")
+            .add(new int[] {10, 2, -1}, "crv = P-256")
+            .add(new int[] {10, 2, -2}, "x")
+            .add(new int[] {10, 2, -3}, "y");
     }
     
     static {
         addList("AD.txt");
         addList("SAD.txt")
-            .add(new int[] {10, 3}, "&quot;authenticatorData&quot;")
-            .add(new int[] {10, 4}, "&quot;clientDataJSON&quot;")
-            .add(new int[] {10, 5}, "&quot;signature&quot;");
+            .add(new int[] {10, 3}, "authenticatorData")
+            .add(new int[] {10, 4}, "clientDataJSON")
+            .add(new int[] {10, 5}, "signature");
 
         new DecoratorBuilder("ESAD.txt")
-            .add(new int[] {1}, "&quot;algorithm&quot; = A256GCM")
-            .add(new int[] {2}, "&quot;keyEncryption&quot;")
-            .add(new int[] {2, 1}, "&quot;algorithm&quot; = ECDH-ES+A256KW")
-            .add(new int[] {2, 3}, "&quot;keyId&quot;")
-            .add(new int[] {2, 5}, "&quot;ephemeralKey&quot;")
-            .add(new int[] {2, 5, 1}, "&quot;kty&quot; = OKP")
-            .add(new int[] {2, 5, -1}, "&quot;crv&quot; = X25519")
-            .add(new int[] {2, 5, -2}, "&quot;x&quot;")
-            .add(new int[] {2, 9}, "&quot;cipherText&quot;")
-            .add(new int[] {7}, "&quot;tag&quot;")
-            .add(new int[] {8}, "&quot;iv&quot;")
-            .add(new int[] {9}, "&quot;cipherText&quot;");
+            .add(new int[] {1}, "algorithm = A256GCM")
+            .add(new int[] {2}, "keyEncryption")
+            .add(new int[] {2, 1}, "algorithm = ECDH-ES+A256KW")
+            .add(new int[] {2, 3}, "keyId = Binary(&quot;" +
+                    new String(TestVectorGeneration.ISSUER_KEY_ID) + "&quot;)")
+            .add(new int[] {2, 5}, "ephemeralKey")
+            .add(new int[] {2, 5, 1}, "kty = OKP")
+            .add(new int[] {2, 5, -1}, "crv = X25519")
+            .add(new int[] {2, 5, -2}, "x")
+            .add(new int[] {2, 9}, "cipherText")
+            .add(new int[] {7}, "tag")
+            .add(new int[] {8}, "iv")
+            .add(new int[] {9}, "cipherText");
     }
     
     String processCodeTxt(String string) throws Exception {

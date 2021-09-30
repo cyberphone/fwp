@@ -357,16 +357,16 @@ key encryption algorithm and encryption key reference method.</div>
     <tr>
       <td><code>keyId</code></td>
       <td style='text-align:center'><kbd>3</kbd></td>
-      <td><kbd>text string</kbd></td>
+      <td><kbd>byte string</kbd></td>
       <td>
         <i>Optional</i>: To facilitate a streamlined decryption process,
         the encryption object MUST include a reference to the
-        encryption key.  This reference is either provided through a <code>keyId</code> string
+        encryption key.  This reference is either provided through a <code>keyId</code> byte string
         or through the <code>publicKey</code> itself. That is, both elements MUST NOT
         be present in an FWP compliant encryption object.
         <div class="para">
-          Note that the this specification does not define a <code>keyId</code> syntax;
-          any for the purpose suitable UTF-8 string will do.
+          Note that the this specification does not define any specific <code>keyId</code> syntax.
+          The sample uses an embedded text string but it could equally well be a hash of the <code>publicKey</code>.
         </div>
       </td>
     </tr>
