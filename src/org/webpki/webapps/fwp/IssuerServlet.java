@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
+import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
@@ -49,6 +50,7 @@ import org.webpki.fwp.IssuerRequest;
 import org.webpki.fwp.PSPRequest;
 
 import org.webpki.json.JSONParser;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.ISODateTime;
 
@@ -78,13 +80,19 @@ public class IssuerServlet extends HttpServlet {
         return userValidation;
     }
     
-    void softError(HttpServletResponse response, String error, ByteBuffer cacheableSadObject) 
+    void softError(HttpServletResponse response, String error, byte[] fwpAssertionBinary) 
         throws IOException, ServletException {
         StringBuilder html = new StringBuilder(
             "<div class='header'>Soft Error</div>" +
             "<div style='display:flex;justify-content:center;margin-top:15pt'>")
         .append(error)
-        .append(cacheableSadObject.hashCode())
+        .append(
+            " SAD (")
+        .append(ADServlet.sectionReference("seq-4.3"))
+        .append(
+            ") object:</div>" +
+            "<div class='staticbox'>")
+        .append(HTML.encode(CBORObject.decode(fwpAssertionBinary).toString(), true))
         .append(
             "</div>");
         HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
@@ -127,6 +135,49 @@ public class IssuerServlet extends HttpServlet {
             }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
             // Succeeded.
             
+            // Decode signed assertion (SAD).
+            FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
+            // Succeeded => the data (SAD) is "technically" OK including the signature.
+            
+            // If the internal clock of an FWP client is severely out of sync, created
+            // authorizations will be rejected.  This also makes clock manipulations
+            // useless as attack vectors.
+            long now = System.currentTimeMillis();
+            long timeStamp = fwpAssertion.getTimeStamp().getTimeInMillis();
+            long expirationTime = timeStamp + AUTHORIZATION_MAX_AGE;
+            if (expirationTime < now) {
+                softError(response, 
+                          "Authorization max age (" +
+                            (AUTHORIZATION_MAX_AGE / 1000) + 
+                            "s) exceeded for",
+                          fwpAssertionBinary);
+                return;
+            }
+            if (timeStamp - AUTHORIZATION_MAX_FUTURE > now) {
+                softError(response, 
+                          "Authorization max future (" +
+                            (AUTHORIZATION_MAX_FUTURE / 1000) + 
+                            "s) exceeded for",
+                          fwpAssertionBinary);
+                return;
+            }            
+
+            // Check that the merchant request matches the authorization.
+            fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
+
+            // Check that the user haven't been phished.  Note that this check
+            // depends on participation by the merchant's PSP.
+            compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
+            
+            // And of course, verify that the authorization belongs to a valid account!
+            DataBaseOperations.AuthorizedInfo authorizedInfo;
+            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
+                authorizedInfo = DataBaseOperations.authorize(fwpAssertion.getSerialNumber(),
+                                                              fwpAssertion.getAccountId(),
+                                                              fwpAssertion.getPublicKey(),
+                                                              connection);
+            }
+
             // Create a cacheable SAD object that is uniquely (but momentarily)
             // representing a specific transaction request.
             //
@@ -152,10 +203,6 @@ public class IssuerServlet extends HttpServlet {
             // to be acted upon, rather than creating secure sessions with a client,
             // there is no need for dedicated authentication servers.
             //
-            // If the internal clock of an FWP client is severely out of sync, created
-            // authorizations will be rejected.  This also makes clock manipulations
-            // useless as attack vectors.
-            //
             // Note that supporting IDEMPOTENT operation would require additional data like
             // - The hash of the entire request in order to verify input equivalence
             // - The full response for the initial successful request
@@ -163,54 +210,13 @@ public class IssuerServlet extends HttpServlet {
             // on the receiver side.
             ByteBuffer cacheableSadObject = ByteBuffer.wrap(fwpAssertionBinary);
             
-            // Decode signed assertion (SAD).
-            FWPAssertionDecoder fwpAssertion = new FWPAssertionDecoder(fwpAssertionBinary);
-            // Succeeded => the data (SAD) is "technically" OK including the signature.
-            
-            // Is the user authorization within time limits?
-            long now = System.currentTimeMillis();
-            long timeStamp = fwpAssertion.getTimeStamp().getTimeInMillis();
-            long expirationTime = timeStamp + AUTHORIZATION_MAX_AGE;
-            if (expirationTime < now) {
-                softError(response, 
-                          "Authorization max age (" +
-                            (AUTHORIZATION_MAX_AGE / 1000) + 
-                            "s) exceeded for SAD object: ",
-                          cacheableSadObject);
-                return;
-            }
-            if (timeStamp - AUTHORIZATION_MAX_FUTURE > now) {
-                softError(response, 
-                          "Authorization max future (" +
-                            (AUTHORIZATION_MAX_FUTURE / 1000) + 
-                            "s) exceeded for SAD object: ",
-                          cacheableSadObject);
-                return;
-            }            
-
-            // Check that the merchant request matches the authorization.
-            fwpAssertion.verifyClaimedPaymentRequest(fwpPaymentRequest);
-
-            // Check that the user haven't been phished.  Note that this check
-            // depends on participation by the merchant's PSP.
-            compare(decodedIssuerRequest.getPayeeHost(), fwpAssertion.getPayeeHost());
-            
-            // And of course, verify that the authorization belongs to a valid account!
-            DataBaseOperations.AuthorizedInfo authorizedInfo;
-            try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
-                authorizedInfo = DataBaseOperations.authorize(fwpAssertion.getSerialNumber(),
-                                                              fwpAssertion.getAccountId(),
-                                                              fwpAssertion.getPublicKey(),
-                                                              connection);
-            }
-            
             // Have this user authorization already been consumed?
             if (ReplayCache.INSTANCE.add(cacheableSadObject, expirationTime)) {
                 logger.info("Replay of authorization token: " + cacheableSadObject.hashCode() +
                             ", accountId=" + fwpAssertion.getAccountId());
                 softError(response,
-                          "Replay of SAD object: ",
-                          cacheableSadObject);
+                          "Replay of",
+                          fwpAssertionBinary);
                 return;
             }
 
