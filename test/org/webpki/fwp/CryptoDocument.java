@@ -32,6 +32,8 @@ public class CryptoDocument  {
 
     static final String FWP_ASSERTIONS      = "fwpassertions";
 
+    static final String AUTHORIZATION_DATA  = "authorizationdata";
+    
     String buildDirectory;
     
     String template;
@@ -375,7 +377,9 @@ public class CryptoDocument  {
                               "Payment Credential<img src='images/xtl.svg' alt='link'></a>");
         replace(FWP_ASSERTIONS, "<a href='index.html#seq-4.5'>" +
                 "FWP Assertions<img src='images/xtl.svg' alt='link'></a>");
-        
+        replace(AUTHORIZATION_DATA, "<a href='index.html#seq-4.2'>" +
+                "Authorization Data (AD)<img src='images/xtl.svg' alt='link'></a>");
+
         replace(TOC, generateToc());
         
         replace(CHALLENGE, readStringFile(TEST_DATA_DIRECTORY + File.separator + CHALLENGE));

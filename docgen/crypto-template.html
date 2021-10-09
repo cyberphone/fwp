@@ -98,7 +98,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     </div>
    </div>
    <div>
-    This object is referred to as Authorization Data (AD).
+    This object is referred to as @authorizationdata@.
   </div>
    <div id="authorization" class="para">
      Since this section is about cryptographic constructs, only the data in the
@@ -201,9 +201,10 @@ to be signed, potentially making the signature scheme more resistant to tamperin
 </div>
    <div id="ctap2api" style="border-width:1pt;border-style:solid;border-color:red;display:inline-block;padding:0.5em 1em;margin-top:0.7em">
     An even better solution would be to use the &quot;raw&quot; CTAP2 API
-    by feeding the hashed AD into <kbd>clientDataHash</kbd>.  This would eliminate <code>clientDataJSON</code> 
-    (the <i>applicable</i> signature meta data is already featured in AD) as well as a redundant layer of SHA256 hashing.
-    The associated FIDO authenticators would still be fully compatible with @webauthn@,
+    by feeding the hashed AD into <kbd>clientDataHash</kbd>.  This would eliminate the <code>clientDataJSON</code> 
+    element (the for <i>payments</i> applicable data is already featured in AD) and associated
+    JSON parsing, as well as removing one level of SHA256 hashing.
+    FIDO authenticators would still be fully compatible with @webauthn@,
     making it technically possible reusing them for login, only constrained by local policies.
      
 </div>
@@ -317,7 +318,7 @@ key encryption algorithm and encryption key reference method.</div>
     <td style='text-align:center'><kbd>7</kbd></td>
     <td><kbd>byte&nbsp;string</kbd></td>
     <td>
-      Algorithm specific authentication element.
+      Algorithm specific authentication data.
     </td>
   </tr>
   <tr>
