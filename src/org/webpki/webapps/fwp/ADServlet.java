@@ -83,9 +83,9 @@ public class ADServlet extends HttpServlet {
                     walletInternalJson.getObject(WalletCore.PAYMENT_REQUEST);
             byte[] unsignedAssertion = new FWPAssertionBuilder()
                 .setPaymentRequest(new FWPPaymentRequest(paymentRequest))
-                .setAccountData(selectedCard.getString(WalletCore.ACCOUNT_ID),
-                                selectedCard.getString(WalletCore.SERIAL_NUMBER),
-                                selectedCard.getString(WalletCore.PAYMENT_METHOD))
+                .setPaymentInstrumentData(selectedCard.getString(WalletCore.ACCOUNT_ID),
+                                          selectedCard.getString(WalletCore.SERIAL_NUMBER),
+                                          selectedCard.getString(WalletCore.PAYMENT_METHOD))
                 .setPayeeHost(request.getServerName())
                 .setPlatformData(system.operatingSystemName,
                                  system.operatingSystemVersion,

@@ -87,9 +87,9 @@ public class FWPAssertionBuilder {
                                                   nameVersion(browserName, browserVersion)));
     }
     
-    public FWPAssertionBuilder setAccountData(String accountId,
-                                              String serialNumber,
-                                              String paymentMethod) throws IOException {
+    public FWPAssertionBuilder setPaymentInstrumentData(String accountId,
+                                                        String serialNumber,
+                                                        String paymentMethod) throws IOException {
         setStringElement(FWPElements.ACCOUNT_ID, accountId);
         setStringElement(FWPElements.SERIAL_NUMBER, serialNumber);
         setStringElement(FWPElements.PAYMENT_METHOD, paymentMethod);

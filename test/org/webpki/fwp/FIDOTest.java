@@ -186,9 +186,9 @@ public class FIDOTest {
         return FWPCrypto.directSign(new FWPAssertionBuilder()
                                         .setPaymentRequest(getPaymentRequest(true))
                                         .setPayeeHost("spaceshop.com")
-                                        .setAccountData("FR7630002111110020050014382",
-                                                        "057862932",
-                                                        "https://bankdirect.com")
+                                        .setPaymentInstrumentData("FR7630002111110020050014382",
+                                                                  "057862932",
+                                                                  "https://bankdirect.com")
                                         .setPlatformData("Android", "10.0", "Chrome", "103")
                                         .setOptionalNetworkData(networkData)
                                         .create(fwpPreSigner),

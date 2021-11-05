@@ -136,9 +136,9 @@ public class TestVectorGeneration {
         byte[] unsignedFwpAssertion = new FWPAssertionBuilder()
                 .setPaymentRequest(paymentRequest)
                 .setOptionalTimeStamp(time)
-                .setAccountData("FR7630002111110020050014382",
-                                "0057162932",
-                                PAYMENT_METHOD)
+                .setPaymentInstrumentData("FR7630002111110020050014382",
+                                          "0057162932",
+                                          PAYMENT_METHOD)
                 .setPlatformData("Android", "10.0", "Chrome", "103")
                 .setOptionalNetworkData("\"additional stuff...\"")
                 .setPayeeHost(MERCHANT_HOST)
