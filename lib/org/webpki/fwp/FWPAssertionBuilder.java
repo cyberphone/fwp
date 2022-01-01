@@ -23,7 +23,6 @@ import java.security.GeneralSecurityException;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 
-import org.webpki.cbor.CBORDateTime;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
@@ -98,7 +97,8 @@ public class FWPAssertionBuilder {
 
     public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) throws IOException {
         return setElement(FWPElements.TIME_STAMP,
-                          new CBORDateTime(timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS));
+                          new CBORTextString(ISODateTime.formatDateTime(
+                                  timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS)));
     }
 
     public FWPAssertionBuilder setOptionalNetworkData(String jsonStringOrNull) throws IOException {

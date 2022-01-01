@@ -26,6 +26,8 @@ import java.util.HashSet;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
+import org.webpki.util.ISODateTime;
+
 /**
  * FWP relying party side assertion (SAD) support.
  */
@@ -155,7 +157,8 @@ public class FWPAssertionDecoder {
                 platformData.getObject(FWPElements.CBOR_PD_USER_AGENT));
 
         // Time Stamp
-        timeStamp = fwpAssertion.getObject(FWPElements.TIME_STAMP.cborLabel).getDateTime();
+        timeStamp = ISODateTime.parseDateTime(getString(FWPElements.TIME_STAMP),
+                                                        ISODateTime.COMPLETE);
 
         // Payee Host information from the browser
         payeeHost = getString(FWPElements.PAYEE_HOST);
