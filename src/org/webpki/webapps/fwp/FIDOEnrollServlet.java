@@ -129,8 +129,8 @@ public class FIDOEnrollServlet extends HttpServlet {
                 // Get card holder name.
                 String cardHolder = registerData.getString(WalletCore.CARD_HOLDER);
                 
-                // Get credintialId.  To simplify things a bit we keep it in B64U notation.
-                String credentialId = requestJson.getString(FWPCrypto.CREDENTIAL_ID);
+                // Get credintialId.
+                byte[] credentialId = requestJson.getBinary(FWPCrypto.CREDENTIAL_ID);
                 
                 // The object that holds it all but we don't care about attestations yet...
                 byte[] attestationObject = requestJson.getBinary(FWPCrypto.ATTESTATION_OBJECT);

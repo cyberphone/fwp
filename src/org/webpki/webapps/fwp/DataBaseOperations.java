@@ -18,6 +18,8 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
+import java.net.InetAddress;
+
 import java.security.GeneralSecurityException;
 
 import java.sql.CallableStatement;
@@ -45,7 +47,7 @@ public class DataBaseOperations {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     static void initiateUserAccount(String userId,
                                     String cardHolder,
-                                    String credentialId,
+                                    byte[] credentialId,
                                     byte[] rawPublicKey,
                                     String clientIpAddress,
                                     Connection connection)
@@ -53,7 +55,7 @@ public class DataBaseOperations {
 /*
         CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                                                 IN p_CardHolder VARCHAR(50),
-                                                IN p_CredentialId VARCHAR(100),
+                                                IN p_CredentialId VARBINARY(1024),
                                                 IN p_PublicKey VARBINARY(300),
                                                 IN p_S256KeyHash BINARY(32),
                                                 IN p_ClientIpAddress VARCHAR(50))
@@ -62,12 +64,36 @@ public class DataBaseOperations {
                 connection.prepareCall("{call InitiateUserAccountSP(?,?,?,?,?,?)}");) {
             stmt.setString(1, userId);
             stmt.setString(2, cardHolder);
-            stmt.setString(3, credentialId);
+            stmt.setBytes(3, credentialId);
             stmt.setBytes(4, rawPublicKey);
             stmt.setBytes(5, HashAlgorithms.SHA256.digest(rawPublicKey));
             stmt.setString(6, clientIpAddress);
             stmt.execute();
         }
+
+        // Potentially very slow operation, perform it in the background!
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    String host = InetAddress.getByName(clientIpAddress).getHostName();
+                    if (host.equals(clientIpAddress)) {
+                        return;
+                    }
+                    try (PreparedStatement stmt = 
+                            ApplicationService.jdbcDataSource.getConnection().prepareStatement(
+                                "UPDATE USERS SET ClientHost = ? WHERE UserID = ?;");) {
+                        stmt.setString(1, host);
+                        stmt.setString(2, userId);
+                        stmt.executeUpdate();
+                    }
+                } catch (SQLException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+           
+        }).start();
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +111,7 @@ public class DataBaseOperations {
     }
 
     static class CoreClientData {
-        String credentialId;
+        byte[] credentialId;
         byte[] cosePublicKey;
         String cardHolder;
     }
@@ -103,12 +129,12 @@ public class DataBaseOperations {
 */
         try (CallableStatement stmt = 
                 connection.prepareCall("{call GetCoreClientDataSP(?,?,?,?)}");) {
-            stmt.registerOutParameter(1, java.sql.Types.VARCHAR);
+            stmt.registerOutParameter(1, java.sql.Types.VARBINARY);
             stmt.registerOutParameter(2, java.sql.Types.VARBINARY);
             stmt.registerOutParameter(3, java.sql.Types.VARCHAR);
             stmt.setString(4, userId);
             stmt.execute();
-            String credentialId = stmt.getString(1);
+            byte[] credentialId = stmt.getBytes(1);
             if (credentialId == null) {
                 return null;
             }
@@ -121,14 +147,14 @@ public class DataBaseOperations {
     }
     
     static class VirtualCard {
-        String credentialId;
+        byte[] credentialId;
         byte[] publicKey;
         String cardHolder;
         String serialNumber;
         String accountId;
         String paymentMethod;
         
-        VirtualCard(String credentialId, 
+        VirtualCard(byte[] credentialId, 
                     byte[] cosePublicKey, 
                     String cardHolder,
                     String serialNumber, 
@@ -158,7 +184,7 @@ public class DataBaseOperations {
             stmt.setString(1, userId);
             try (ResultSet rs = stmt.executeQuery();) {
                 while (rs.next()) {
-                    virtualCards.add(new VirtualCard(rs.getString(1),
+                    virtualCards.add(new VirtualCard(rs.getBytes(1),
                                                      rs.getBytes(2),
                                                      rs.getString(3),
                                                      String.valueOf(rs.getInt(4)),
@@ -242,6 +268,20 @@ public class DataBaseOperations {
                 default:
                     throw new GeneralSecurityException("Non-matching key hash");
             }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Update user activity data                                                                  //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    public static void updateUserStatistics(String userId, boolean login, Connection connection) 
+            throws SQLException {
+        String element = login ? "WebAuthn" : "BasicBuy";
+        try (PreparedStatement stmt = 
+                ApplicationService.jdbcDataSource.getConnection().prepareStatement(
+                    "UPDATE USERS SET " + element + " = " + element + " + 1 WHERE UserID = ?;");) {
+            stmt.setString(1, userId);
+            stmt.executeUpdate();
         }
     }
 }

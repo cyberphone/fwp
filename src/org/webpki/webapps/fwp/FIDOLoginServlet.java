@@ -99,7 +99,7 @@ public class FIDOLoginServlet extends HttpServlet {
                         WalletCore.softError(response, resultJson, "User is missing, you need to reenroll");
                         return;
                     }
-                    resultJson.setString(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
+                    resultJson.setBinary(FWPCrypto.CREDENTIAL_ID, coreClientData.credentialId);
                 }
  
                 // - Provide FIDO challenge data
@@ -152,7 +152,11 @@ public class FIDOLoginServlet extends HttpServlet {
                             clientDataJSON, 
                             signature);
                 }
-
+                
+                // User statistics...
+                try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
+                    DataBaseOperations.updateUserStatistics(userId, true, connection);
+                }
                 // We did it, set logged-in attribute.
                 // Note that the session cookie is returned and set via the fetch() operation.
                 session.setAttribute(WalletCore.ATTR_LOGGED_IN_USER, userId);

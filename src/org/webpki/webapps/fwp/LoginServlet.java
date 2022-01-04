@@ -48,7 +48,6 @@ public class LoginServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
-    
     // DIV elements to turn on and turn off.
     private static final String WAITING_ID     = "wait";
     private static final String FAILED_ID      = "fail";
@@ -197,7 +196,7 @@ public class LoginServlet extends HttpServlet {
                 
                         "<div class='ctblh'>FIDO Credential ID (B64U)</div>" +
                         "<div class='ctbl'>")
-                .append(coreClientData.credentialId)
+                .append(ApplicationService.base64UrlEncode(coreClientData.credentialId))
                 .append("</div>" +
 
                         "<div class='ctblh'>FIDO Authenticator Data (HEX)</div>" +

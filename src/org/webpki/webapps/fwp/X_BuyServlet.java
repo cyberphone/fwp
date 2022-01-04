@@ -168,19 +168,25 @@ public class X_BuyServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
-        String walletRequest = request.getParameter(WalletCore.WALLET_REQUEST);
-        if (walletRequest == null) {
-            resultPage(request, response);
+
+        // Get the enrolled user.
+        String userId = WalletCore.getWalletCookie(request);
+        if (userId == null) {
+            response.sendRedirect("walletadmin");
             return;
         }
-        JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
         try {
-            // Get the enrolled user.
-            String userId = WalletCore.getWalletCookie(request);
-            if (userId == null) {
-                response.sendRedirect("walletadmin");
+            String walletRequest = request.getParameter(WalletCore.WALLET_REQUEST);
+            if (walletRequest == null) {
+                // User statistics...
+                try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
+                    DataBaseOperations.updateUserStatistics(userId, false, connection);
+                }           
+                resultPage(request, response);
                 return;
             }
+            JSONObjectReader walletRequestJson = JSONParser.parse(walletRequest);
+
             // What the Merchant wants...
             JSONObjectReader paymentRequest =
                     walletRequestJson.getObject(WalletCore.PAYMENT_REQUEST);
@@ -207,7 +213,7 @@ public class X_BuyServlet extends HttpServlet {
                             matching = new JSONArrayWriter();
                         }
                         matching.setObject(new JSONObjectWriter()
-                                .setString(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
+                                .setBinary(WalletCore.CREDENTIAL_ID, virtualCard.credentialId)
                                 .setBinary(WalletCore.PUBLIC_KEY, virtualCard.publicKey)
                                 .setString(WalletCore.ACCOUNT_ID, virtualCard.accountId)
                                 .setString(WalletCore.CARD_HOLDER, virtualCard.cardHolder)

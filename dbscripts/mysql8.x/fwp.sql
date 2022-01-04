@@ -63,14 +63,14 @@ CREATE TABLE USERS (
     CardHolder      VARCHAR(50)  NOT NULL,
     
     
-    -- FIDO CredentialId expressed as a Base64url-encoded string.
+    -- FIDO CredentialId.
     --
     -- In a real-world FWP implementation this would be a part of the local
     -- FWP wallet database since a verifier does not need this information.
     -- However, in a server-oriented setting using the WebAuthn API the
     -- FIDO CredentialId must be known by the verifier.  
 
-    CredentialId    VARCHAR(300) NOT NULL,
+    CredentialId    VARBINARY(1024) NOT NULL,
 
 
     -- The FWP wallet is obliged including the associated public key in
@@ -86,9 +86,19 @@ CREATE TABLE USERS (
     
     S256KeyHash     BINARY(32)   NOT NULL,
     
-    ClientIpAddress VARCHAR(50)  NOT NULL,                               -- Admin data
+    -- User statistics
+    
+    FWPSteps        INT          NOT NULL DEFAULT 0,                     -- The "technical" payment route
+    
+    BasicBuy        INT          NOT NULL DEFAULT 0,                     -- The basic payment route
 
-    Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Admin data
+    WebAuthn        INT          NOT NULL DEFAULT 0,                     -- WebAuthn operations
+
+    ClientIpAddress VARCHAR(50)  NOT NULL,                               -- From where?
+
+    ClientHost      VARCHAR(100) NULL,                                   -- Host of client (may not be available)
+
+    Created         TIMESTAMP    NOT NULL  DEFAULT CURRENT_TIMESTAMP,    -- Account creation time
                                                                         
     PRIMARY KEY (UserId)
 );
@@ -134,7 +144,7 @@ CREATE PROCEDURE ASSERT_TRUE (IN p_DidIt BOOLEAN,
 
 CREATE PROCEDURE InitiateUserAccountSP (IN p_UserId CHAR(36),
                                         IN p_CardHolder VARCHAR(50),
-                                        IN p_CredentialId VARCHAR(300),
+                                        IN p_CredentialId VARBINARY(1024),
                                         IN p_PublicKey VARBINARY(300),
                                         IN p_S256KeyHash BINARY(32),
                                         IN p_ClientIpAddress VARCHAR(50))
@@ -182,7 +192,7 @@ CREATE PROCEDURE DeletePaymentCardsSP (IN p_UserId CHAR(36))
   END
 //
 
-CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARCHAR(300),
+CREATE PROCEDURE GetCoreClientDataSP (OUT p_CredentialId VARBINARY(1024),
                                       OUT p_PublicKey VARBINARY(300),
                                       OUT p_CardHolder VARCHAR(50),
                                       IN p_UserId CHAR(36))
@@ -244,6 +254,7 @@ CREATE PROCEDURE AuthorizeSP (OUT p_Status INT,
       SET p_Status = 3;    -- Non-matching key
     ELSE                       
       SET p_Status = 0;    -- Success
+      UPDATE USERS SET FWPSteps = FWPSteps + 1 WHERE UserId = p_UserId;
     END IF;
   END
 //
@@ -255,7 +266,7 @@ SET collation_connection = 'utf8mb4_unicode_ci';
 
 SET @UserId = "2fb3f4f1-0d7d-43b9-b9f7-39d5dc5544fd";
 SET @CardHolder = "Luke Skywalker";
-SET @CredentialId = "gfdgddrer4535srwrsrwr";
+SET @CredentialId = x'aaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccc00000000000000000';
 SET @ClientIpAddress = "202.56.22.89";
 SET @S256KeyHash = x'b3b76a196ced26e7e5578346b25018c0e86d04e52e5786fdc2810a2a10bd104a';
 SET @DummyPublicKey = x'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';

@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp.admin;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,6 +43,10 @@ public class RegistrationListServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     
+    String convertToOptionalString(int value) {
+        return "</td><td style='text-align:center'>" + (value == 0 ? "-" : String.valueOf(value));
+    }
+    
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -56,23 +58,30 @@ public class RegistrationListServlet extends HttpServlet {
                 "<table class='tftable'><tr>" +
                 "<th style='text-align:center'>Created</th>" +
                 "<th style='text-align:center'>IP Address</th>" +
-                "<th style='text-align:center'>Host Name</th><tr>");
+                "<th style='text-align:center'>Host Name</th>" +
+                "<th style='text-align:center'>WebAuthn</th>" +
+                "<th style='text-align:center'>Basic Buy</th>" +
+                "<th style='text-align:center'>FWP Steps</th><tr>");
 
             try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 try (PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT MAX(Created) AS Instant, ClientIpAddress from USERS " +
+                        "SELECT MAX(Created) AS Instant, ClientIpAddress, " +
+                          "ClientHost, WebAuthn, BasicBuy, FWPSteps from USERS " +
                         "WHERE PublicKey IS NOT NULL " +
                         "GROUP BY ClientIpAddress " +
                         "ORDER BY Instant DESC LIMIT 100;");) {
                     try (ResultSet rs = stmt.executeQuery();) {
                         while (rs.next()) {
-                            String ipAddress = rs.getString(2);
+                            String host = rs.getString(3);
                             html.append("<tr><td>")
                                 .append(rs.getString(1))
                                 .append("</td><td>")
-                                .append(ipAddress)
+                                .append(rs.getString(2))
                                 .append("</td><td>")
-                                .append(InetAddress.getByName(ipAddress).getHostName())
+                                .append(host == null ? "<div style='text-align:center'>-</div>" : host)
+                                .append(convertToOptionalString(rs.getInt(4)))
+                                .append(convertToOptionalString(rs.getInt(5)))
+                                .append(convertToOptionalString(rs.getInt(6)))
                                 .append("</td></tr>");
                         }
                     }
