@@ -18,7 +18,7 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.sql.Connection;
+//import java.sql.Connection;
 
 import java.util.logging.Logger;
 
@@ -92,9 +92,12 @@ public class WalletAdminServlet extends HttpServlet {
             String userId = WalletCore.getWalletCookie(request);
             
             // This is the only database call needed for deleting payment cards (all of them...).
+
+/* To not destroy statistics we removed this step and only clear the wallet cookie
             try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 DataBaseOperations.deletePaymentCards(userId, connection);
             }
+*/
             
             // Tell the user that it worked...
             StringBuilder html = new StringBuilder(

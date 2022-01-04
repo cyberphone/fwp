@@ -109,11 +109,6 @@
         <servlet-class>org.webpki.webapps.fwp.admin.RegistrationListServlet</servlet-class>
     </servlet>
     
-    <servlet>
-        <servlet-name>X_BuyServlet</servlet-name>
-        <servlet-class>org.webpki.webapps.fwp.X_BuyServlet</servlet-class>
-    </servlet>
-
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -209,21 +204,6 @@
         <url-pattern>/admin/reglist</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>X_BuyServlet</servlet-name>
-        <url-pattern>/x-buy</url-pattern>
-    </servlet-mapping>
-
-    <security-constraint>
-      <web-resource-collection>
-        <web-resource-name>The app</web-resource-name>
-        <url-pattern>/*</url-pattern>
-      </web-resource-collection>
-      <user-data-constraint>
-        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-      </user-data-constraint>
-    </security-constraint>
-
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Bank admin manager</web-resource-name>
@@ -232,9 +212,6 @@
     <auth-constraint>
       <role-name>manager</role-name>
     </auth-constraint>
-    <user-data-constraint>
-      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
   </security-constraint>
 
   <login-config>

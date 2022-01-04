@@ -327,6 +327,14 @@ public class IssuerServlet extends HttpServlet {
                   "</table>" +
                 "</div>" +
 
+                "<div style='display:flex;justify-content:center;margin-top:1.5em'>" +
+                  "<div class='comment'>" +
+                    "You may try to replay this transaction and see what happens. " +
+                    "If you wait more than 10 minutes, the transaction request should " +
+                    "be rejected because it has expired." +
+                  "</div>" +
+                "</div>" +
+                    
                 "<div style='display:flex;justify-content:center'>" +
                   "<div class='stdbtn' onclick=\"document.forms.shoot.submit()\">" +
                     "&quot;Replay&quot;" +

@@ -162,7 +162,7 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             
             if (session == null) {
-                WalletCore.failed("No seesion!");
+                WalletCore.failed("No session!");
             }
             
             CBORObject publicKey = CBORObject.decode(coreClientData.cosePublicKey);

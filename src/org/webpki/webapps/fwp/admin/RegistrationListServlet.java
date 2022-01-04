@@ -56,6 +56,7 @@ public class RegistrationListServlet extends HttpServlet {
             
                 "<div style='display:flex;justify-content:center;margin-top:1.5em'>" +
                 "<table class='tftable'><tr>" +
+                "<th style='text-align:center'>User ID</th>" +
                 "<th style='text-align:center'>Created</th>" +
                 "<th style='text-align:center'>IP Address</th>" +
                 "<th style='text-align:center'>Host Name</th>" +
@@ -65,23 +66,24 @@ public class RegistrationListServlet extends HttpServlet {
 
             try (Connection connection = ApplicationService.jdbcDataSource.getConnection();) {
                 try (PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT MAX(Created) AS Instant, ClientIpAddress, " +
+                        "SELECT UserId, Created, ClientIpAddress, " +
                           "ClientHost, WebAuthn, BasicBuy, FWPSteps from USERS " +
                         "WHERE PublicKey IS NOT NULL " +
-                        "GROUP BY ClientIpAddress " +
-                        "ORDER BY Instant DESC LIMIT 100;");) {
+                        "ORDER BY Created DESC LIMIT 100;");) {
                     try (ResultSet rs = stmt.executeQuery();) {
                         while (rs.next()) {
-                            String host = rs.getString(3);
+                            String host = rs.getString(4);
                             html.append("<tr><td>")
                                 .append(rs.getString(1))
                                 .append("</td><td>")
                                 .append(rs.getString(2))
                                 .append("</td><td>")
+                                .append(rs.getString(3))
+                                .append("</td><td>")
                                 .append(host == null ? "<div style='text-align:center'>-</div>" : host)
-                                .append(convertToOptionalString(rs.getInt(4)))
                                 .append(convertToOptionalString(rs.getInt(5)))
                                 .append(convertToOptionalString(rs.getInt(6)))
+                                .append(convertToOptionalString(rs.getInt(7)))
                                 .append("</td></tr>");
                         }
                     }

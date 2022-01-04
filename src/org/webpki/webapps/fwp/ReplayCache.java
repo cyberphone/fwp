@@ -36,8 +36,6 @@ public enum ReplayCache {
     // a viable option for creating singletons in multi-threaded applications.
     INSTANCE;
 
-    private static final long CYCLE_TIME = 120000;
-
     private Logger logger = Logger.getLogger(ReplayCache.class.getName());
 
     private final ConcurrentHashMap<ByteBuffer, Long> cache = new ConcurrentHashMap<>();
@@ -49,7 +47,7 @@ public enum ReplayCache {
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(CYCLE_TIME);
+                        Thread.sleep(IssuerServlet.AUTHORIZATION_MAX_AGE / 5);
                         long now = System.currentTimeMillis();
                         cache.forEach((hashableSadObject, expirationTime) -> {
                             if (expirationTime < now) {

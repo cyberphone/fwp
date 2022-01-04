@@ -73,7 +73,9 @@ public class HTML {
         String admin = actor == Actors.ADMIN ? "../" : "";
         StringBuilder html = new StringBuilder(
                 "<!DOCTYPE html>" +
-                "<html lang='en'><head><link rel='icon' href='images/webpkiorg.png' sizes='192x192'>" + 
+                "<html lang='en'><head><link rel='icon' href='")
+        .append(admin)
+        .append("images/webpkiorg.png' sizes='192x192'>" + 
                 "<meta name='viewport' content='initial-scale=1.0'/>" + 
                 "<title>FWP Lab</title>" + 
                 "<link rel='stylesheet' type='text/css' href='")
