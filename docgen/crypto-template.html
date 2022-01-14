@@ -63,7 +63,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     COSE [<a href="https://tools.ietf.org/html/rfc8152"
              title="RFC8152">RFC8152<img src="images/xtl.svg" alt="link"></a>].
     However, this is only partially true because FIDO signatures (@webauthn@) are
-    incompatible with COSE. Unlike COSE, FWP authorization signatures build on
+    incompatible with COSE. In addition, FWP authorization signatures build on
     deterministic CBOR as outlined in RFC8949, section 4.2.1.
   </div>
  @Terminology@
@@ -462,12 +462,12 @@ Generate a key pair compatible with the <code>encryptionKey</code>.
 </li>
 <li>Create an empty CBOR <a href="#mainmap">Main map</a> object.</li>
 <li>
-  Copy the previously created CBOR <a href="#submap">Sub map</a> object to
-  the <code>keyEncryption</code> label.
-</li>
-<li>
   Copy the <code>contentEncryptionAlgorithm</code>
   to the <code>algorithm</code> label.
+</li>
+<li>
+  Copy the previously created CBOR <a href="#submap">Sub map</a> object to
+  the <code>keyEncryption</code> label.
 </li>
 <li>Serialize the current <a href="#mainmap">Main map</a> object and assign the result
 to an AAD (Additional Authenticated Data) variable.</li>
