@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORObject;
-
+import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
 import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
@@ -52,6 +52,7 @@ import org.webpki.fwp.PSPRequest;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -119,15 +120,21 @@ public class IssuerServlet extends HttpServlet {
                     new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
                 @Override
-                public PrivateKey locate(PublicKey publicKey,
-                                         byte[] keyId,
-                                         KeyEncryptionAlgorithms algorithm)
+                public PrivateKey locate(PublicKey optionalPublicKey,
+                                         byte[] optionalKeyId,
+                                         ContentEncryptionAlgorithms contentEncryptionAlgorithm,
+                                         KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
+                    if (optionalKeyId == null) {
+                        throw new GeneralSecurityException("Missing keyId");
+                    }
                     if (!ArrayUtil.compare(
-                            ApplicationService.issuerEncryptionKeyId.getBytes("utf-8"), keyId)) {
-                        throw new GeneralSecurityException("Unknown keyId: " + keyId);
+                            ApplicationService.issuerEncryptionKeyId.getBytes("utf-8"), 
+                            optionalKeyId)) {
+                        throw new GeneralSecurityException("Unknown keyId: " + 
+                            DebugFormatter.getHexString(optionalKeyId));
                     }
                     return ApplicationService.issuerEncryptionKey.getPrivate();
                 }

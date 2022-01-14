@@ -63,15 +63,14 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     COSE [<a href="https://tools.ietf.org/html/rfc8152"
              title="RFC8152">RFC8152<img src="images/xtl.svg" alt="link"></a>].
     However, this is only partially true because FIDO signatures (@webauthn@) are
-    not compatible with COSE. In similarity to FIDO, the cryptographic
-    solutions used by FWP build on the CTAP2 canonicalization scheme
-    which COSE does not use.
+    incompatible with COSE. Unlike COSE, FWP authorization signatures build on
+    deterministic CBOR as outlined in RFC8949, section 4.2.1.
   </div>
  @Terminology@
   <div>
     Throughout this document the CBOR types <kbd>unsigned&nbsp;integer</kbd> and
     <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
-    That is, it is the value which governs the actual type.
+    That is, it is the actual value that governs which sub type to use.
   </div>
   <div class="para">
     Items in <code>red</code> refer to elements associated with the selected @paymentcred@.

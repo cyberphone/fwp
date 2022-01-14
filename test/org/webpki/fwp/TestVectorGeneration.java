@@ -270,7 +270,8 @@ public class TestVectorGeneration {
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
                                      byte[] optionalKeyId,
-                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm)
+                                     ContentEncryptionAlgorithms contentEncryptionAlgorithm,
+                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
                     throws IOException, GeneralSecurityException {
                 if (!ArrayUtil.compare(ISSUER_KEY_ID, optionalKeyId)) {
                     throw new GeneralSecurityException("Wrong/missing ID");
