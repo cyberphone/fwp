@@ -296,8 +296,8 @@ public class CryptoDocument  {
                 offset += "&nbsp;";
             }
             string = string.substring(0, pos) + offset + 
-                    "<span style='color:grey'>// " + decorator.text + 
-                    "</span>" + string.substring(pos);
+                    "<span style='color:grey'>/ " + decorator.text + 
+                    " /</span>" + string.substring(pos);
         }
         return string;
     }
