@@ -32,6 +32,7 @@ import javax.sql.DataSource;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.webpki.cbor.CBORTextString;
 import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
@@ -56,7 +57,7 @@ public class ApplicationService extends InitPropertyReader implements ServletCon
     
     static KeyPair issuerEncryptionKey;
     
-    static String issuerEncryptionKeyId = "x25519:2021:01";
+    static CBORTextString issuerEncryptionKeyId = new CBORTextString("x25519:2021:01");
     
     static String issuerId = "https://mybank.fr/payment";
     

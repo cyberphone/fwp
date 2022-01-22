@@ -32,6 +32,8 @@ import org.webpki.cbor.CBORAsymKeyEncrypter;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+import org.webpki.cbor.CBORTextString;
+
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
 
@@ -60,12 +62,8 @@ public class TestVectorGeneration {
     static final String ISSUER_URL     = "https://mybank.fr";
     static final String ISSUER_ID      = "https://mybank.fr/payment";
     static final String PAYMENT_METHOD = "https://bankdirect.com";
-    static byte[] ISSUER_KEY_ID;
-    static {
-        try {
-            ISSUER_KEY_ID = "x25519:2021:3".getBytes("utf-8");
-        } catch (IOException e) {}
-    }
+    static final CBORTextString ISSUER_KEY_ID = new CBORTextString("x25519:2022:1");
+
     static final KeyEncryptionAlgorithms ISSUER_KEY_ENCRYPTION_ALGORITHM =
             KeyEncryptionAlgorithms.ECDH_ES_A256KW;
     static final ContentEncryptionAlgorithms ISSUER_CONTENT_ENCRYPTION_ALGORITHM =
@@ -119,7 +117,7 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
                 currPrivateKey.getBytes("utf-8"));
 
-        GregorianCalendar time = ISODateTime.parseDateTime("2021-07-02T12:34:07+02:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2022-02-02T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
@@ -269,11 +267,11 @@ public class TestVectorGeneration {
             
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
-                                     byte[] optionalKeyId,
+                                     CBORObject optionalKeyId,
                                      ContentEncryptionAlgorithms contentEncryptionAlgorithm,
                                      KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
                     throws IOException, GeneralSecurityException {
-                if (!ArrayUtil.compare(ISSUER_KEY_ID, optionalKeyId)) {
+                if (!ISSUER_KEY_ID.equals(optionalKeyId)) {
                     throw new GeneralSecurityException("Wrong/missing ID");
                 }
                 return x25519.getPrivate();

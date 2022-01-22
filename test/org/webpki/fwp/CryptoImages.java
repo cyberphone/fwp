@@ -18,8 +18,9 @@ package org.webpki.fwp;
 
 import java.io.File;
 
-import org.webpki.cbor.CBOREncrypter;
 import org.webpki.cbor.CBORInteger;
+
+import static org.webpki.cbor.CBORCryptoConstants.*;
 
 import org.webpki.util.ArrayUtil;
 
@@ -132,14 +133,14 @@ public class CryptoImages {
 
         headers("(Content Encryption)", "Main Map");
 
-        label("algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
-        label("keyEncryption", CBOREncrypter.KEY_ENCRYPTION_LABEL, !cborFull);
+        label("algorithm", ALGORITHM_LABEL, true);
+        label("keyEncryption", KEY_ENCRYPTION_LABEL, !cborFull);
         if (cborFull) {
-            label("keyId", CBOREncrypter.KEY_ID_LABEL, false);
+            label("keyId", KEY_ID_LABEL, false);
         }        
-        label("tag", CBOREncrypter.TAG_LABEL, true);
-        label("iv", CBOREncrypter.IV_LABEL, true);
-        label("cipherText", CBOREncrypter.CIPHER_TEXT_LABEL, true);
+        label("tag", TAG_LABEL, true);
+        label("iv", IV_LABEL, true);
+        label("cipherText", CIPHER_TEXT_LABEL, true);
         
         top = HEADER_HEIGHT;
         left += width + IMAGE_WIDTH + 2 * MARGIN;
@@ -147,11 +148,11 @@ public class CryptoImages {
 
         headers("(Key Encryption)", cborFull ? "Optional Sub Map" : "Sub Map");
 
-        label("algorithm", CBOREncrypter.ALGORITHM_LABEL, true);
-        label("keyId", CBOREncrypter.KEY_ID_LABEL, false);
-        label("publicKey", CBOREncrypter.PUBLIC_KEY_LABEL, false);
-        label("ephemeralKey", CBOREncrypter.EPHEMERAL_KEY_LABEL, !cborFull);
-        label("cipherText", CBOREncrypter.CIPHER_TEXT_LABEL, false);
+        label("algorithm", ALGORITHM_LABEL, true);
+        label("keyId", KEY_ID_LABEL, false);
+        label("publicKey", PUBLIC_KEY_LABEL, false);
+        label("ephemeralKey", EPHEMERAL_KEY_LABEL, !cborFull);
+        label("cipherText", CIPHER_TEXT_LABEL, false);
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")

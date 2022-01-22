@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
+import org.webpki.cbor.CBORCryptoConstants;
+
 public class CryptoDocument  {
     
     static final String DOC_GEN_DIRECTORY   = "docgen";
@@ -190,26 +192,29 @@ public class CryptoDocument  {
     }
     
     static {
-        addList("AD.txt");
-        addList("SAD.txt")
-            .add(new int[] {10, 3}, "authenticatorData")
-            .add(new int[] {10, 4}, "clientDataJSON")
-            .add(new int[] {10, 5}, "signature");
-
-        new DecoratorBuilder("ESAD.txt")
-            .add(new int[] {1}, "algorithm = A256GCM")
-            .add(new int[] {2}, "keyEncryption")
-            .add(new int[] {2, 1}, "algorithm = ECDH-ES+A256KW")
-            .add(new int[] {2, 3}, "keyId = Binary(&quot;" +
-                    new String(TestVectorGeneration.ISSUER_KEY_ID) + "&quot;)")
-            .add(new int[] {2, 5}, "ephemeralKey")
-            .add(new int[] {2, 5, 1}, "kty = OKP")
-            .add(new int[] {2, 5, -1}, "crv = X25519")
-            .add(new int[] {2, 5, -2}, "x")
-            .add(new int[] {2, 9}, "cipherText")
-            .add(new int[] {7}, "tag")
-            .add(new int[] {8}, "iv")
-            .add(new int[] {9}, "cipherText");
+        try {
+            addList("AD.txt");
+            addList("SAD.txt")
+                .add(new int[] {10, 3}, "authenticatorData")
+                .add(new int[] {10, 4}, "clientDataJSON")
+                .add(new int[] {10, 5}, "signature");
+        
+            new DecoratorBuilder("ESAD.txt")
+                .add(new int[] {CBORCryptoConstants.ALGORITHM_LABEL.getInt()}, "algorithm = A256GCM")
+                .add(new int[] {CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt()}, "keyEncryption")
+                .add(new int[] {2, CBORCryptoConstants.ALGORITHM_LABEL.getInt()}, "algorithm = ECDH-ES+A256KW")
+                .add(new int[] {2, CBORCryptoConstants.KEY_ID_LABEL.getInt()}, "keyId")
+                .add(new int[] {2, CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt()}, "ephemeralKey")
+                .add(new int[] {2, 5, CBORCryptoConstants.COSE_KTY_LABEL}, "kty = OKP")
+                .add(new int[] {2, 5, CBORCryptoConstants.COSE_OKP_CRV_LABEL}, "crv = X25519")
+                .add(new int[] {2, 5, CBORCryptoConstants.COSE_OKP_X_LABEL}, "x")
+                .add(new int[] {2, CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt()}, "cipherText")
+                .add(new int[] {CBORCryptoConstants.TAG_LABEL.getInt()}, "tag")
+                .add(new int[] {CBORCryptoConstants.IV_LABEL.getInt()}, "iv")
+                .add(new int[] {CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt()}, "cipherText");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     String processCodeTxt(String string) throws Exception {

@@ -26,7 +26,7 @@ import java.util.HashSet;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
-import org.webpki.cbor.JSONReader;
+import org.webpki.cbor.CBORFromJSON;
 
 import org.webpki.fwp.FWPCrypto.FWPPreSigner;
 
@@ -103,7 +103,7 @@ public class FWPAssertionBuilder {
 
     public FWPAssertionBuilder setOptionalNetworkData(String jsonStringOrNull) throws IOException {
         return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_DATA,
-                                                            JSONReader.convert(jsonStringOrNull));
+                                                            CBORFromJSON.convert(jsonStringOrNull));
     }
 
     public byte[] create(FWPPreSigner fwpPreSigner) throws IOException, GeneralSecurityException {
