@@ -122,7 +122,7 @@ public class WalletCore {
         "  jsonObject." + PHASE_JSON + " = currentPhase;\n" +
         "  const response = await fetch(serviceUrl, {\n" +
         "    headers: {\n" +
-        "      'Content-Type': 'application/json'\n" +
+        "      'Content-Type': '" + JSON_CONTENT_TYPE + "'\n" +
         "    },\n" +
         "    method: 'POST',\n" +
         "    credentials: 'same-origin',\n" +
