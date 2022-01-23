@@ -173,7 +173,7 @@ public class WalletCore {
     }
 
     static JSONObjectReader getJSON(HttpServletRequest request) throws IOException {
-        if (!request.getContentType().equals("application/json")) {
+        if (!request.getContentType().equals(JSON_CONTENT_TYPE)) {
             logger.log(Level.SEVERE, "JSON MIME type expected");
             throw new IOException("Unexpected MIME type:" + request.getContentType());
         }
