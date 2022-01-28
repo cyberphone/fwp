@@ -85,18 +85,18 @@ public class FWPCrypto {
     public static final int FIDO_KEYALG_RS256       = -257;
     
     // Authorization Signature (AS) container
-    static final int AS_ALGORITHM          = 1;
-    static final int AS_PUBLIC_KEY         = 2;
-    static final int AS_AUTHENTICATOR_DATA = 3;
-    static final int AS_CLIENT_DATA_JSON   = 4;
-    static final int AS_SIGNATURE          = 5;
+    public static final int AS_ALGORITHM            = 1;
+    public static final int AS_PUBLIC_KEY           = 2;
+    public static final int AS_AUTHENTICATOR_DATA   = 3;
+    public static final int AS_CLIENT_DATA_JSON     = 4;
+    public static final int AS_SIGNATURE            = 5;
     
     // For attestation public key objects
-    static final int COSE_ALGORITHM_LABEL  = 3;
+    static final int COSE_ALGORITHM_LABEL           = 3;
     
     // authData
-    static final int FLAG_OFFSET                 = 32;
-    static final int CREDENTIAL_ID_LENGTH_OFFSET = FLAG_OFFSET + 1 + 4 + 16;
+    static final int FLAG_OFFSET                    = 32;
+    static final int CREDENTIAL_ID_LENGTH_OFFSET    = FLAG_OFFSET + 1 + 4 + 16;
     
     static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
     
