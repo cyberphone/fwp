@@ -18,8 +18,6 @@ package org.webpki.webapps.fwp;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
-
 import java.security.GeneralSecurityException;
 
 import java.sql.CallableStatement;
@@ -31,6 +29,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
+
+import org.webpki.webutil.DNSReverseLookup;
 
 import org.webpki.crypto.HashAlgorithms;
 
@@ -77,7 +77,7 @@ public class DataBaseOperations {
             @Override
             public void run() {
                 try {
-                    String host = InetAddress.getByName(clientIpAddress).getHostName();
+                    String host = DNSReverseLookup.getHostName(clientIpAddress);
                     if (host.equals(clientIpAddress)) {
                         return;
                     }
@@ -88,7 +88,7 @@ public class DataBaseOperations {
                         stmt.setString(2, userId);
                         stmt.executeUpdate();
                     }
-                } catch (SQLException | IOException e) {
+                } catch (SQLException | IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
