@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.security.KeyPair;
+
 import java.util.Base64;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,10 +35,10 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.webpki.cbor.CBORTextString;
-import org.webpki.crypto.CustomCryptoProvider;
 
-import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
-import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
+import org.webpki.crypto.ContentEncryptionAlgorithms;
+import org.webpki.crypto.KeyEncryptionAlgorithms;
 
 import org.webpki.jose.JOSEKeyWords;
 

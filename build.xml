@@ -13,7 +13,7 @@
   <property name="testdata.dir" location="testdata"/>
   <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
     
-    <property name="webroot" value="webapps"/>
+  <property name="webroot" value="webapps"/>
 
   <property name="logging" value="false"/>
   

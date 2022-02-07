@@ -37,8 +37,7 @@ import org.webpki.cbor.CBORPublicKey;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
-
-import org.webpki.crypto.signatures.SignatureWrapper;
+import org.webpki.crypto.SignatureWrapper;
 
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;

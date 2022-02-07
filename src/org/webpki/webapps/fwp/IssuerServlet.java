@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORObject;
 
-import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
-import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
+import org.webpki.crypto.ContentEncryptionAlgorithms;
+import org.webpki.crypto.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
 import org.webpki.fwp.FWPCrypto;

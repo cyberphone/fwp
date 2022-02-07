@@ -36,9 +36,8 @@ import org.webpki.cbor.CBORTextString;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
-
-import org.webpki.crypto.encryption.ContentEncryptionAlgorithms;
-import org.webpki.crypto.encryption.KeyEncryptionAlgorithms;
+import org.webpki.crypto.ContentEncryptionAlgorithms;
+import org.webpki.crypto.KeyEncryptionAlgorithms;
 
 import org.webpki.jose.JOSEKeyWords;
 
