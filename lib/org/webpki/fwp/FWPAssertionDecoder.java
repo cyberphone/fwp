@@ -158,7 +158,7 @@ public class FWPAssertionDecoder {
 
         // Time Stamp
         timeStamp = ISODateTime.parseDateTime(getString(FWPElements.TIME_STAMP),
-                                                        ISODateTime.COMPLETE);
+                                              ISODateTime.COMPLETE);
 
         // Payee Host information from the browser
         payeeHost = getString(FWPElements.PAYEE_HOST);
