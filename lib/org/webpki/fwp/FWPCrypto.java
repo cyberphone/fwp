@@ -254,18 +254,12 @@ public class FWPCrypto {
         }       
     }
     
-    private static byte[] readAndRemove(CBORMap authorization, CBORInteger cborLabel) throws IOException {
-        byte[] data = authorization.getObject(cborLabel).getByteString();
-        authorization.removeObject(cborLabel);
-        return data;
-    }
-
     /**
      * Validate FWP assertion with respect to crypto.
      *
      * Exclusively called by FWPAssertionDecoder
      * @param fwpAssertion FWP assertion
-     * @param ctap2 
+     * @param userValidationFlags From the authenticator
      * @return Public key in COSE format
      * @throws IOException
      * @throws GeneralSecurityException
@@ -279,11 +273,12 @@ public class FWPCrypto {
         // Fetch the core FIDO assertion elements. Remove them
         // from the FWP assertion as well since they are not a
         // part of the FIDO "challenge" data.
-        byte[] authenticatorData = readAndRemove(authorization, AS_AUTHENTICATOR_DATA);
+        byte[] authenticatorData = authorization.readByteStringAndRemoveKey(AS_AUTHENTICATOR_DATA);
         // Note that the ctap2 option removes "clientDataJSON" from FWP assertions.
         boolean ctap2 = !authorization.hasKey(AS_CLIENT_DATA_JSON);
-        byte[] clientDataJSON = ctap2 ? null : readAndRemove(authorization, AS_CLIENT_DATA_JSON);
-        byte[] signature = readAndRemove(authorization, AS_SIGNATURE);
+        byte[] clientDataJSON = 
+                ctap2 ? null : authorization.readByteStringAndRemoveKey(AS_CLIENT_DATA_JSON);
+        byte[] signature = authorization.readByteStringAndRemoveKey(AS_SIGNATURE);
         
         // Collect authenticator data that may be useful in disputes.
         // Note that possible extension data (ED) is ignored.
