@@ -84,20 +84,20 @@ public class FWPCrypto {
     public static final int FIDO_KEYALG_RS256       = -257;
     
     // Authorization Signature (AS) container
-    public static final int AS_ALGORITHM            = 1;
-    public static final int AS_PUBLIC_KEY           = 2;
-    public static final int AS_AUTHENTICATOR_DATA   = 3;
-    public static final int AS_CLIENT_DATA_JSON     = 4;
-    public static final int AS_SIGNATURE            = 5;
+    public static final CBORInteger AS_ALGORITHM            = new CBORInteger(1);
+    public static final CBORInteger AS_PUBLIC_KEY           = new CBORInteger(2);
+    public static final CBORInteger AS_AUTHENTICATOR_DATA   = new CBORInteger(3);
+    public static final CBORInteger AS_CLIENT_DATA_JSON     = new CBORInteger(4);
+    public static final CBORInteger AS_SIGNATURE            = new CBORInteger(5);
     
     // For attestation public key objects
-    static final int COSE_ALGORITHM_LABEL           = 3;
+    static final CBORInteger COSE_ALGORITHM_LABEL           = new CBORInteger(3);
     
     // authData
     static final int FLAG_OFFSET                    = 32;
     static final int CREDENTIAL_ID_LENGTH_OFFSET    = FLAG_OFFSET + 1 + 4 + 16;
     
-    static final int FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
+    static final CBORInteger FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
     
     public enum UserValidation {PRESENT, VERIFIED};
 
@@ -254,7 +254,7 @@ public class FWPCrypto {
         }       
     }
     
-    private static byte[] readAndRemove(CBORMap authorization, int cborLabel) throws IOException {
+    private static byte[] readAndRemove(CBORMap authorization, CBORInteger cborLabel) throws IOException {
         byte[] data = authorization.getObject(cborLabel).getByteString();
         authorization.removeObject(cborLabel);
         return data;

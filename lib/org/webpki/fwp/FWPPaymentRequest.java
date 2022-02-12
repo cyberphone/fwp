@@ -18,6 +18,7 @@ package org.webpki.fwp;
 
 import java.io.IOException;
 
+import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
@@ -33,10 +34,10 @@ import org.webpki.json.JSONOutputFormats;
 public class FWPPaymentRequest {
 
     // Payment Request constants in CBOR
-    public static final int CBOR_PR_PAYEE_NAME  = 1;
-    public static final int CBOR_PR_REQUEST_ID  = 2;
-    public static final int CBOR_PR_AMOUNT      = 3;
-    public static final int CBOR_PR_CURRENCY    = 4;
+    public static final CBORInteger CBOR_PR_PAYEE_NAME  = new CBORInteger(1);
+    public static final CBORInteger CBOR_PR_REQUEST_ID  = new CBORInteger(2);
+    public static final CBORInteger CBOR_PR_AMOUNT      = new CBORInteger(3);
+    public static final CBORInteger CBOR_PR_CURRENCY    = new CBORInteger(4);
 
     // Payment Request constants in JSON
     public static final String JSON_PR_PAYEE_NAME = "payeeName";

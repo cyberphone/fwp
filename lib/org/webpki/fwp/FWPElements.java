@@ -16,6 +16,8 @@
  */
 package org.webpki.fwp;
 
+import org.webpki.cbor.CBORInteger;
+
 /**
  * Core elements of an FWP assertion.
  * 
@@ -34,21 +36,21 @@ public enum FWPElements {
     AUTHORIZATION             (10);
     
     
-    int cborLabel;
+    CBORInteger cborLabel;
 
     FWPElements(int cborLabel) {
-        this.cborLabel = cborLabel;
+        this.cborLabel = new CBORInteger(cborLabel);
     }
     
     public static final String CURRENT_VERSION = "1.0";
     
     // Platform Data
-    public static final int CBOR_PD_OPERATING_SYSTEM = 1;
-    public static final int CBOR_PD_USER_AGENT       = 2;
+    public static final CBORInteger CBOR_PD_OPERATING_SYSTEM = new CBORInteger(1);
+    public static final CBORInteger CBOR_PD_USER_AGENT       = new CBORInteger(2);
 
     // Platform Data sub elements
-    public static final int CBOR_PDSUB_NAME          = 3;
-    public static final int CBOR_PDSUB_VERSION       = 4;
+    public static final CBORInteger CBOR_PDSUB_NAME          = new CBORInteger(3);
+    public static final CBORInteger CBOR_PDSUB_VERSION       = new CBORInteger(4);
     
 }
     
