@@ -145,7 +145,7 @@ public class FWPCrypto {
             .getMap().getObject(FWP_AUTHORIZATION_LABEL).getMap().getObject(AS_ALGORITHM).getInt();
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
             // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
-            .setEcdsaSignatureEncoding(true)
+            .ecdsaAsn1SignatureEncoding(true)
             .update(authenticatorData)
             .update(HashAlgorithms.SHA256.digest(ctap2 ? unsignedFwpAssertion : clientDataJSON))
             .sign();
@@ -245,7 +245,7 @@ public class FWPCrypto {
                                                                       GeneralSecurityException {
         if (!new SignatureWrapper(algorithm, publicKey)
             // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
-            .setEcdsaSignatureEncoding(true)
+            .ecdsaAsn1SignatureEncoding(true)
             .update(authenticatorData)
             // Creating clientDataHash
             .update(HashAlgorithms.SHA256.digest(clientData))
