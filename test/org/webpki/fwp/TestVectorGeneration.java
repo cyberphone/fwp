@@ -46,7 +46,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.DebugFormatter;
+import org.webpki.util.HexaDecimal;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -191,13 +191,13 @@ public class TestVectorGeneration {
         result.append("\nRelying party URL: " + ISSUER_URL + "\n" +
                       "\nReturned FIDO '" + FWPCrypto.AUTHENTICATOR_DATA + 
                       "' in hexadecimal notation:\n")
-              .append(DebugFormatter.getHexString(
+              .append(HexaDecimal.encode(
                       authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getByteString()))
               .append("\n(here using the UP+UV flags and a zero counter value)\n");
 
         result.append("\nReturned FIDO '" + FWPCrypto.SIGNATURE + 
                       "' in hexadecimal notation:\n")
-        .append(DebugFormatter.getHexString(
+        .append(HexaDecimal.encode(
               authContainer.getObject(FWPCrypto.AS_SIGNATURE).getByteString()));
 
         result.append("\n\nSigned FWP assertion (SAD), here in CBOR 'diagnostic notation':\n")
@@ -210,7 +210,7 @@ public class TestVectorGeneration {
                       "' and '" +  FWPCrypto.SIGNATURE + 
                       "' respectively.\n")
               .append("\n\nThe signed FWP assertion as a hex-encoded binary: ")
-              .append(DebugFormatter.getHexString(fwpAssertion));
+              .append(HexaDecimal.encode(fwpAssertion));
 
   
         if (conditionalRewrite(testDataDir + FILE_UNSIGNED_CBOR, unsignedFwpAssertion)) {
@@ -249,7 +249,7 @@ public class TestVectorGeneration {
         result.append("\n\nEncrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:\n")
               .append(CBORObject.decode(encryptedAssertion).toString())
               .append("\n\nAnd as a hex-encoded binary: ")
-              .append(DebugFormatter.getHexString(encryptedAssertion))
+              .append(HexaDecimal.encode(encryptedAssertion))
               .append("\n");
         
         FWPJsonAssertion fwpJsonAssertion = new FWPJsonAssertion(PAYMENT_METHOD,

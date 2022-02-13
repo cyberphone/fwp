@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.DebugFormatter;
+import org.webpki.util.HexaDecimal;
 
 import org.webpki.cbor.CBORCryptoConstants;
 
@@ -346,8 +346,8 @@ public class CryptoDocument  {
             getTag(tagAndFile);
             String fileName = tagAndFile.substring(4);
             if (tagAndFile.startsWith("hex/")) {
-                replace(tagAndFile, DebugFormatter.getHexString(
-                        readBinaryFile(TEST_DATA_DIRECTORY + File.separator + fileName)));
+                replace(tagAndFile, HexaDecimal.encode(
+                		readBinaryFile(TEST_DATA_DIRECTORY + File.separator + fileName)));
             } else if (tagAndFile.startsWith("txt/")) {
                 replace(tagAndFile, decorate("testdata", fileName));
             } else {

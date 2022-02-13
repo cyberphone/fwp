@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSession;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
-import org.webpki.util.DebugFormatter;
+import org.webpki.util.HexaDecimal;
 
 import org.webpki.crypto.KeyAlgorithms;
 
@@ -201,7 +201,7 @@ public class LoginServlet extends HttpServlet {
 
                         "<div class='ctblh'>FIDO Authenticator Data (HEX)</div>" +
                         "<div class='ctbl'>")
-                .append(DebugFormatter.getHexString((byte[])session.getAttribute(WalletCore.ATTR_LOGIN_DATA)))
+                .append(HexaDecimal.encode((byte[])session.getAttribute(WalletCore.ATTR_LOGIN_DATA)))
                 .append("</div>" +
 
                         "<div class='ctblh'>FIDO ")

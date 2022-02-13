@@ -110,7 +110,7 @@ public class FIDOTest {
                            byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
         byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getByteString();
-// System.out.println(DebugFormatter.getHexDebugData(authData));
+// System.out.println(HexaDecimal.encode(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, FWPCrypto.FLAG_OFFSET));
         int credentialIdLength = (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
