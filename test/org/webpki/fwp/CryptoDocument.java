@@ -347,7 +347,7 @@ public class CryptoDocument  {
             String fileName = tagAndFile.substring(4);
             if (tagAndFile.startsWith("hex/")) {
                 replace(tagAndFile, HexaDecimal.encode(
-                		readBinaryFile(TEST_DATA_DIRECTORY + File.separator + fileName)));
+                        readBinaryFile(TEST_DATA_DIRECTORY + File.separator + fileName)));
             } else if (tagAndFile.startsWith("txt/")) {
                 replace(tagAndFile, decorate("testdata", fileName));
             } else {
