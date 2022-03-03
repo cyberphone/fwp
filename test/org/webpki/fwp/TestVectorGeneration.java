@@ -275,7 +275,7 @@ public class TestVectorGeneration {
                 }
                 return x25519.getPrivate();
             }
-        }).decrypt(encryptedAssertion);
+        }).decrypt(CBORObject.decode(encryptedAssertion));
  
         FWPAssertionDecoder decodedFwpAssertion =
                 new FWPAssertionDecoder(decryptedFwpAssertion);

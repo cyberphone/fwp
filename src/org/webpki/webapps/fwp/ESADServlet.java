@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyEncrypter;
-import org.webpki.cbor.CBORMap;
+import org.webpki.cbor.CBORObject;
 
 /**
  * Creates and shows the encrypted SAD object (ESAD).
@@ -56,7 +56,7 @@ public class ESADServlet extends HttpServlet {
                 WalletCore.failed("Missing wallet data");
                 return;
             }            
-            CBORMap encryptedAssertion = 
+            CBORObject encryptedAssertion = 
                     new CBORAsymKeyEncrypter(ApplicationService.issuerEncryptionKey.getPublic(),
                                              ApplicationService.issuerKeyEncryptionAlgorithm,
                                              ApplicationService.issuerContentEncryptionAlgorithm)

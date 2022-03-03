@@ -136,7 +136,7 @@ public class IssuerServlet extends HttpServlet {
                     return ApplicationService.issuerEncryptionKey.getPrivate();
                 }
                 
-            }).decrypt(fwpJsonAssertion.getEncryptedAuthorization());
+            }).decrypt(CBORObject.decode(fwpJsonAssertion.getEncryptedAuthorization()));
             // Succeeded.
             
             // Decode signed assertion (SAD).
