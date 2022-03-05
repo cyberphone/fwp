@@ -64,7 +64,7 @@ public class FIDOTest {
     static String keyDir;
     String currPrivateKey;
     
-    KeyPair readKey(String keyAlg) throws IOException {
+    KeyPair readKey(String keyAlg) throws IOException, GeneralSecurityException {
         JSONObjectReader key = 
                 JSONParser.parse(ArrayUtil.readFile(keyDir + keyAlg + "privatekey.jwk"));
         key.removeProperty(JOSEKeyWords.KID_JSON);

@@ -95,7 +95,7 @@ public class TestVectorGeneration {
                                              "| FIDO Web Pay (FWP) - Test Vectors |\n" +
                                              "|===================================|\n\n");
     
-    KeyPair readKey(String keyAlg) throws IOException {
+    KeyPair readKey(String keyAlg) throws IOException, GeneralSecurityException {
         JSONObjectReader key = 
                 JSONParser.parse(ArrayUtil.readFile(keyDir + keyAlg + "privatekey.jwk"));
         key.removeProperty(JOSEKeyWords.KID_JSON);
