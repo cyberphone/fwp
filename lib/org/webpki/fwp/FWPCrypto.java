@@ -16,6 +16,7 @@
  */
 package org.webpki.fwp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.net.URL;
@@ -340,17 +341,12 @@ public class FWPCrypto {
         int credentialIdLength = (authData[CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
                                  (authData[CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);
         int offset = CREDENTIAL_ID_LENGTH_OFFSET + 2 + credentialIdLength;
-        byte[] rawPublicKeyAndOptionalExtensionData = new byte[authData.length - offset];
-        System.arraycopy(authData,
-                         offset, 
-                         rawPublicKeyAndOptionalExtensionData, 
-                         0,
-                         rawPublicKeyAndOptionalExtensionData.length);
 
         // We silently drop possible Extension Data (ED).
-        CBORMap fidoPublicKey = CBORObject.decodeWithOptions(rawPublicKeyAndOptionalExtensionData,
-                                                             true, 
-                                                             false).getMap();
+        CBORMap fidoPublicKey = CBORObject.decodeWithOptions(
+                new ByteArrayInputStream(authData, offset, authData.length - offset),
+                true, 
+                false).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
         int signatureAlgorithm = fidoPublicKey.getObject(COSE_ALGORITHM_LABEL).getInt();
