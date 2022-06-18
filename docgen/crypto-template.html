@@ -68,9 +68,10 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </div>
  @Terminology@
   <div>
-    Throughout this document the CBOR types <kbd>unsigned&nbsp;integer</kbd> and
-    <kbd>negative&nbsp;integer</kbd> are denoted as <kbd>integer</kbd> only.
-    That is, it is the actual value that governs which sub type to use.
+    Throughout this document CBOR primitives are expressed in
+    CDDL [<a href="https://tools.ietf.org/html/rfc8610"
+             title="RFC8610">RFC8610<img src="images/xtl.svg" alt="link"></a>]
+    notation.
   </div>
   <div class="para">
     Items in <code>red</code> refer to elements associated with the selected @paymentcred@.
@@ -113,7 +114,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <tr>
     <td><code>signatureAlgorithm</code></td>
     <td style='text-align:center'><kbd>1</kbd></td>
-    <td><kbd>integer</kbd></td>
+    <td><kbd>int</kbd></td>
     <td>
       FIDO <code>signatureAlgorithm</code> associated with the selected @paymentcred@.
       The value to use is the &quot;Identifier&quot; specified in the #Signature Algorithms# table.
@@ -133,7 +134,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <tr>
     <td><code>authenticatorData</code></td>
     <td style='text-align:center'><kbd>3</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       FIDO assertion data element.
       See also @webauthn@.
@@ -142,7 +143,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <tr>
     <td><code>clientDataJSON</code></td>
     <td style='text-align:center'><kbd>4</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       FIDO assertion data element.
       See also @webauthn@.
@@ -151,7 +152,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   <tr>
     <td><code>signature</code></td>
     <td style='text-align:center'><kbd>5</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       FIDO assertion signature.
       See also @webauthn@.
@@ -297,7 +298,7 @@ key encryption algorithm and encryption key reference method.</div>
   <tr>
     <td><code>algorithm</code></td>
     <td style='text-align:center'><kbd>1</kbd></td>
-    <td><kbd>integer</kbd></td>
+    <td><kbd>int</kbd></td>
     <td>
       Symmetric key algorithm used for encrypting the actual content.
       The value to use is the &quot;Identifier&quot; specified in the
@@ -315,7 +316,7 @@ key encryption algorithm and encryption key reference method.</div>
   <tr>
     <td><code>tag</code></td>
     <td style='text-align:center'><kbd>8</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       Algorithm specific authentication data.
     </td>
@@ -323,7 +324,7 @@ key encryption algorithm and encryption key reference method.</div>
   <tr>
     <td><code>iv</code></td>
     <td style='text-align:center'><kbd>9</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       Algorithm specific initialization vector.
     </td>
@@ -331,7 +332,7 @@ key encryption algorithm and encryption key reference method.</div>
   <tr>
     <td><code>cipherText</code></td>
     <td style='text-align:center'><kbd>10</kbd></td>
-    <td><kbd>byte&nbsp;string</kbd></td>
+    <td><kbd>bstr</kbd></td>
     <td>
       Encrypted content.
     </td>
@@ -347,7 +348,7 @@ key encryption algorithm and encryption key reference method.</div>
     <tr>
       <td><code>algorithm</code></td>
       <td style='text-align:center'><kbd>1</kbd></td>
-      <td><kbd>integer</kbd></td>
+      <td><kbd>int</kbd></td>
       <td>
         Key encryption algorithm.
         The value to use is the &quot;Identifier&quot; specified in the
@@ -366,8 +367,8 @@ key encryption algorithm and encryption key reference method.</div>
         be present in an FWP compliant encryption object.
         <div class="para">
           Note that the this specification does not define any specific <code>keyId</code> syntax.
-          The sample uses a <kbd>text&nbsp;string</kbd> but it could equally well be 
-          a hash of the <code>publicKey</code> featured in a <kbd>byte&nbsp;string</kbd>.
+          The sample uses a <kbd>tstr</kbd> but it could equally well be 
+          a hash of the <code>publicKey</code> featured in a <kbd>bstr</kbd>.
         </div>
       </td>
     </tr>
@@ -385,7 +386,7 @@ key encryption algorithm and encryption key reference method.</div>
     </tr>
     <tr>
       <td><code>ephemeralKey</code></td>
-      <td style='text-align:center'><kbd>5</kbd></td>
+      <td style='text-align:center'><kbd>7</kbd></td>
       <td><kbd>map</kbd></td>
       <td>
         Ephemeral public key in COSE format.
@@ -398,7 +399,7 @@ key encryption algorithm and encryption key reference method.</div>
     <tr>
       <td><code>cipherText</code></td>
       <td style='text-align:center'><kbd>10</kbd></td>
-      <td><kbd>byte&nbsp;string</kbd></td>
+      <td><kbd>bstr</kbd></td>
       <td>
         <i>Optional</i>: Encrypted key for key-wrapping ECDH algorithms.
       </td>
@@ -733,6 +734,10 @@ Note that the ESAD sample uses a <code>keyId</code> for identifying the encrypti
 <tr>
 <td style="text-align:center;white-space:nowrap">2022-02-02</td>
 <td style="text-align:center">0.13</td><td>Main document update forced test data update.</td>
+</tr>
+</<tr>
+<td style="text-align:center;white-space:nowrap">2022-06-17</td>
+<td style="text-align:center">0.14</td><td>CBOR primitives expressed in CDDL notation.</td>
 </tr>
 </table>
 </div>

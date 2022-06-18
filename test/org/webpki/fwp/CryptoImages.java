@@ -58,7 +58,7 @@ public class CryptoImages {
     }
     
     int subMapWidth() {
-        return 440;
+        return cborFull ? 510 : 440;
     }
     
     int totalHeight() {
@@ -151,8 +151,13 @@ public class CryptoImages {
         label("algorithm", ALGORITHM_LABEL, true);
         label("keyId", KEY_ID_LABEL, false);
         label("publicKey", PUBLIC_KEY_LABEL, false);
+        if (cborFull) {
+            label("certificatePath", CERT_PATH_LABEL, false);
+        }
         label("ephemeralKey", EPHEMERAL_KEY_LABEL, !cborFull);
         label("cipherText", CIPHER_TEXT_LABEL, false);
+        
+        int longPath = 186 + (cborFull ? LABEL_HEIGHT + LABEL_GUTTER : 0);
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")
@@ -166,7 +171,7 @@ public class CryptoImages {
            .append(left - IMAGE_WIDTH - MARGIN)
            .append("," + HEADER_HEIGHT)
            .append("  m " + IMAGE_WIDTH + ",0 c -33,0 -35,68 -35,68 0,30 -18,68 "+
-                   "-48,72 30,8 48,35 48,80 v 186 c 0,0 0,74 36,74'/>\n");
+                   "-48,72 30,8 48,35 48,80 v " + longPath + " c 0,0 0,74 36,74'/>\n");
         
         ArrayUtil.writeFile(fileName, svg.append("</svg>\n").toString().getBytes("utf-8"));
     }

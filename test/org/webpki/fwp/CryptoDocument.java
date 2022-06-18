@@ -198,17 +198,20 @@ public class CryptoDocument  {
                 .add(new int[] {10, 3}, "authenticatorData")
                 .add(new int[] {10, 4}, "clientDataJSON")
                 .add(new int[] {10, 5}, "signature");
+            
+            int keyEncryption = CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt();
+            int ephemeralKey = CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt();
         
             new DecoratorBuilder("ESAD.txt")
                 .add(new int[] {CBORCryptoConstants.ALGORITHM_LABEL.getInt()}, "algorithm = A256GCM")
-                .add(new int[] {CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt()}, "keyEncryption")
-                .add(new int[] {2, CBORCryptoConstants.ALGORITHM_LABEL.getInt()}, "algorithm = ECDH-ES+A256KW")
-                .add(new int[] {2, CBORCryptoConstants.KEY_ID_LABEL.getInt()}, "keyId")
-                .add(new int[] {2, CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt()}, "ephemeralKey")
-                .add(new int[] {2, 5, CBORCryptoConstants.COSE_KTY_LABEL.getInt()}, "kty = OKP")
-                .add(new int[] {2, 5, CBORCryptoConstants.COSE_OKP_CRV_LABEL.getInt()}, "crv = X25519")
-                .add(new int[] {2, 5, CBORCryptoConstants.COSE_OKP_X_LABEL.getInt()}, "x")
-                .add(new int[] {2, CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt()}, "cipherText")
+                .add(new int[] {keyEncryption}, "keyEncryption")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.ALGORITHM_LABEL.getInt()}, "algorithm = ECDH-ES+A256KW")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.KEY_ID_LABEL.getInt()}, "keyId")
+                .add(new int[] {keyEncryption, ephemeralKey}, "ephemeralKey")
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_KTY_LABEL.getInt()}, "kty = OKP")
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_CRV_LABEL.getInt()}, "crv = X25519")
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_X_LABEL.getInt()}, "x")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt()}, "cipherText")
                 .add(new int[] {CBORCryptoConstants.TAG_LABEL.getInt()}, "tag")
                 .add(new int[] {CBORCryptoConstants.IV_LABEL.getInt()}, "iv")
                 .add(new int[] {CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt()}, "cipherText");

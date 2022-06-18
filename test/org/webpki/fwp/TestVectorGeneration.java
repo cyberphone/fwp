@@ -75,9 +75,9 @@ public class TestVectorGeneration {
     
     static final String FILE_SIGNATURE_JWK   = "signature.jwk";
     static final String FILE_ENCRYPTION_JWK  = "encryption.jwk";
-    static final String FILE_UNSIGNED_CBOR   = "AD.cbor";
-    static final String FILE_SIGNED_CBOR     = "SAD.cbor";
-    static final String FILE_ENCRYPTED_CBOR  = "ESAD.cbor";
+    static final String FILE_UNSIGNED_CBOR   = "ad.cbor";
+    static final String FILE_SIGNED_CBOR     = "sad.cbor";
+    static final String FILE_ENCRYPTED_CBOR  = "esad.cbor";
     static final String FILE_CHALLENGE_B64U  = "challenge.txt";
     static final String FILE_CLIENT_DATA_JSON  = "clientDataJSON.json";
     static final String FILE_FWP_ASSERTION_JSON  = "FWP-assertion.json";
@@ -116,7 +116,7 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
                 currPrivateKey.getBytes("utf-8"));
 
-        GregorianCalendar time = ISODateTime.parseDateTime("2022-02-02T10:14:07+01:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2022-06-17T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
@@ -346,7 +346,7 @@ public class TestVectorGeneration {
 
     private void writeTextVersion(String fileSignedCbor, 
                                   byte[] fwpAssertion) throws IOException {
-        ArrayUtil.writeFile(testDataDir + fileSignedCbor
+        ArrayUtil.writeFile(testDataDir + fileSignedCbor.toUpperCase()
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
                             CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
     }
