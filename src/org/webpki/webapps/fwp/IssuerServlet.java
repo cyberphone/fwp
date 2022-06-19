@@ -121,9 +121,9 @@ public class IssuerServlet extends HttpServlet {
                 @Override
                 public PrivateKey locate(PublicKey optionalPublicKey,
                                          CBORObject optionalKeyId,
-                                         ContentEncryptionAlgorithms contentEncryptionAlgorithm,
-                                         KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
-                        throws IOException, GeneralSecurityException {
+                                         KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                         ContentEncryptionAlgorithms contentEncryptionAlgorithm)
+                         throws IOException, GeneralSecurityException {
 
                     // Somewhat simplistic setup: a single encryption key
                     if (optionalKeyId == null) {

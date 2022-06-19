@@ -267,8 +267,8 @@ public class TestVectorGeneration {
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
                                      CBORObject optionalKeyId,
-                                     ContentEncryptionAlgorithms contentEncryptionAlgorithm,
-                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm) 
+                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                     ContentEncryptionAlgorithms contentEncryptionAlgorithm) 
                     throws IOException, GeneralSecurityException {
                 if (!ISSUER_KEY_ID.equals(optionalKeyId)) {
                     throw new GeneralSecurityException("Wrong/missing ID");
