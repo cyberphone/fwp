@@ -343,7 +343,7 @@ public class FWPCrypto {
         int offset = CREDENTIAL_ID_LENGTH_OFFSET + 2 + credentialIdLength;
 
         // We silently drop possible Extension Data (ED).
-        CBORMap fidoPublicKey = CBORObject.decodeWithOptions(
+        CBORMap fidoPublicKey = CBORObject.decode(
                 new ByteArrayInputStream(authData, offset, authData.length - offset),
                 true, 
                 false).getMap();
