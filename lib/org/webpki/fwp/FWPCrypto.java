@@ -346,7 +346,8 @@ public class FWPCrypto {
         CBORMap fidoPublicKey = CBORObject.decode(
                 new ByteArrayInputStream(authData, offset, authData.length - offset),
                 true, 
-                false).getMap();
+                false,
+                null).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
         int signatureAlgorithm = fidoPublicKey.getObject(COSE_ALGORITHM_LABEL).getInt();
