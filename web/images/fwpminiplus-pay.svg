@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg width='364' height='100' xmlns='http://www.w3.org/2000/svg'>
+  <title>FIDO Web Pay</title>
+  <!-- Anders Rundgren 2021-->
+  <rect x='1' y='1' width='361' height='98' stroke='grey' stroke-width='2' fill='none'/>
+<svg x='14' y='9' width='82' height='82' viewBox="0 0 68 68" xmlns='http://www.w3.org/2000/svg'>
+  <defs>
+    <radialGradient id='browserWorld'>
+      <stop offset='0.4' stop-color='#afc6e9'/>
+      <stop offset='0.8' stop-color='#5070ff'/>
+    </radialGradient>
+    <clipPath id='cardClip'>
+       <rect x='0' y='23' width='76' height='24'/>
+    </clipPath>
+  </defs>
+  <circle cx='34' cy='34' r='34' fill='url(#browserWorld)'/>
+  <g fill='none' stroke='white' stroke-width='2'>
+    <circle cx='34' cy='34' r='31'/>
+    <ellipse cx='34' cy='34' rx='13' ry='31'/>
+    <line x1='34' y1='4' x2='34' y2='64'/>
+  </g>
+  <circle cx='34' cy='34' r='31' fill='white' clip-path='url(#cardClip)'/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg"
+   viewBox='0 0 146 54'
+   x='20.5'
+   y='40'
+   width="70"
+   height="24">
+  <symbol id="fwp" width="148" height="50">
+    <path d="M 31.231311,2.3541641 V 8.417 H 9.012 v 14.187 h 18.781748 v 6.063 H 9.012063 v 19.124664 h -6.375 V 2.354 Z"/>
+    <path d="m 70.300185,2.3541641 h 4.375 l 9.3125,35.6249999 8.03125,-35.6249999 h 6.625 L 87.550185,47.791664 h -6.5 l -8.375,-31.75 -8.75,31.75 h -6.5 L 46.331435,2.3541641 h 6.625 l 8.03125,35.6249999 z"/>
+    <path d="m 113.51919,47.791664 h 6.375 v -17.3 c 0,0 9.9036,-2.09e-4 11.2185,-3.36e-4 2.70833,0 5.09375,-0.572917 7.15625,-1.71875 2.0625,-1.145833 3.65625,-2.760417 4.78125,-4.84375 1.14583,-2.104167 1.71378,-5.498887 1.71875,-7.3125 0.005,-1.813613 -0.59532,-5.101485 -1.71875,-7.3124999 -1.125,-2.1041667 -2.71875,-3.7291667 -4.78125,-4.875 C 136.20644,2.9374974 133.82102,2.354 131.11269,2.354 h -17.5935 z M 119.89419,8.417 h 11.43725 c 1.375,0 2.58333,0.3329974 3.625,0.9996641 1.04167,0.6458329 1.84375,1.5624999 2.40625,2.7499999 0.58333,1.1875 0.86637,3.234849 0.875,4.125 0.009,0.890151 -0.29862,2.837423 -0.875,4.09375 -0.5625,1.1875 -1.36458,2.104167 -2.40625,2.75 -1.04167,0.645833 -2.25,0.968766 -3.625,0.96875 -1.34907,-1.5e-5 -11.43725,-1.64e-4 -11.43725,-1.64e-4 z"/>
+  </symbol>
+  <use href="#fwp" x="2.5" y="2.5" stroke="#60a060" stroke-width="3"/>
+  <use href="#fwp" fill="#dcf8db" stroke="#35a152" stroke-width="3"/>
+</svg>
+
+<text font-size='30' font-family='Roboto,sans-serif'>
+<tspan x='112' y='43'>SEPA, CB, AMEX,</tspan>
+<tspan x='112' y='79'>VISA, MasterCard</tspan>
+</text>
+
+</svg>

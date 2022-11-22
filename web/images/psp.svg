@@ -1,0 +1,23 @@
+<svg width='1000' height='1005' xmlns='http://www.w3.org/2000/svg'>
+  <title>PSP Symbol</title>
+  <!-- Anders Rundgren 2021 -->
+  <defs>
+    <radialGradient cx='0.5' cy='0.5' id='bigGearGid' r='0.5' spreadMethod='pad'>
+      <stop offset='0.0' stop-color='white'/>
+      <stop offset='0.8' stop-color='#c4eb4e'/>
+    </radialGradient>
+    <radialGradient cx='0.5' cy='0.5' id='smallGearGid' r='0.5' spreadMethod='pad'>
+      <stop offset='0.3' stop-color='white'/>
+      <stop offset='1.0' stop-color='#eccb1e'/>
+    </radialGradient>
+    <radialGradient cx='0.5' cy='0.5' id='shaftGid' r='0.5' spreadMethod='pad'>
+      <stop offset='0.5' stop-color='white'/>
+      <stop offset='1.0' stop-color='#8080ff'/>
+    </radialGradient>
+  </defs>
+  <rect x='7.5' y='7.5' width='985' height='985' rx='70' fill='white' stroke='grey' stroke-width='15'/>
+  <path stroke='#009a00' stroke-width='20' fill='url(#bigGearGid)' d='M399.9,799.7 456.2,902.6 479,896.5 476.3,779.3 493.5,769.3 593.6,830.3 610.3,813.6 549.3,713.5 559.3,696.3 676.5,699 682.6,676.2 579.7,619.9 579.7,600.1 682.6,543.8 676.5,521 559.3,523.7 549.3,506.5 610.3,406.4 593.6,389.7 493.5,450.7 476.3,440.7 479,323.5 456.2,317.4 399.9,420.3 380.1,420.3 323.8,317.4 301,323.5 303.7,440.7 286.5,450.7 186.4,389.7 169.7,406.4 230.7,506.5 220.7,523.7 103.5,521 97.4,543.8 200.3,600.1 200.3,619.9 97.4,676.2 103.5,699 220.7,696.3 230.7,713.5 169.7,813.6 186.4,830.3 286.5,769.3 303.7,779.3 301,896.5 323.8,902.6 380.1,799.7 z'/>
+  <circle stroke='grey' stroke-width='15' fill='url(#shaftGid)' r='80' cx='390' cy='610'/>
+  <path stroke='#f27b2b' stroke-width='20' fill='url(#smallGearGid)' d='M656.4,357.2 661.5,471.3 692.2,478.1 745,376.8 755,373.7 856.4,426.3 877.6,403.1 816.4,306.7 818.6,296.5 914.9,235 905.4,205.1 791.3,209.9 783.6,202.8 778.5,88.7 747.8,81.9 695,183.2 685,186.3 583.6,133.7 562.4,156.9 623.6,253.3 621.4,263.5 525.1,325 534.6,354.9 648.7,350.1 z'/>
+  <circle stroke='grey' stroke-width='15' fill='url(#shaftGid)' r='50' cx='720' cy='280'/>
+</svg>

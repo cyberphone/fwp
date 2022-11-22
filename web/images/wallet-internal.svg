@@ -1,0 +1,7 @@
+<svg width='1000' height='1005' xmlns='http://www.w3.org/2000/svg'>
+<rect x='7.5' y='7.5' width='985' height='985' rx='70' fill='white' stroke='grey' stroke-width='15'/>
+<text font-size='220' font-weight='bold' font-family='Roboto,sans-serif' text-anchor='middle' fill='red'>
+<tspan x='500' y='450'>Wallet</tspan>
+<tspan x='500' y='750'>Internal</tspan>
+</text>
+</svg>

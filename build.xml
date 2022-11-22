@@ -1,0 +1,201 @@
+<project name="FIDO Web Pay (FWP) Demo" default="help">
+
+  <!-- set properties for this build -->
+  <property file="fwp.properties"/>
+  <property name="openkeystore.dir" location="${openkeystore}"/>
+  <property name="fido-web-pay.dir" location="${fido-web-pay}"/>
+  <property name="current.dir" location="."/>
+  <property name="src.dir" value="src"/>
+  <property name="test.dir" value="test"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="temp.dir" value=".tmp"/>
+  <property name="dist.dir" value="dist"/>
+  <property name="testdata.dir" location="testdata"/>
+  <property name="class_war_path" value="WEB-INF/classes/org/webpki/webapps/fwp"/>
+    
+  <property name="webroot" value="webapps"/>
+
+  <property name="logging" value="false"/>
+  
+  <property name="appcorename" value="fwp"/>
+  <property name="application" value="${appcorename}.war"/>
+  
+  <property name="keypassword" value="foo123"/>
+  <property name="webpki.lib.dir" value="${openkeystore.dir}/library/dist"/>
+  <condition property="zip.webpki.lib.dir" value="${webpki.lib.dir}" else="empty.lib">
+    <isset property="include.webpki.in.war"/>
+  </condition>
+  <property name="third.party.lib.dir" location="${openkeystore.dir}/resources/third-party-jars"/>
+  
+  <property name="debug" value="on"/>
+
+  <property name="javaversion" value="${ant.java.version}"/>
+  <condition property="tested.version" else="false">
+    <equals arg1="17" arg2="${javaversion}"/>
+  </condition>
+
+  <target name="_jdktest" unless="${tested.version}">
+    <echo message="&#10;
+***************************************************************&#10;
+    WARNING - This package has only been tested with Java 17!&#10;
+***************************************************************&#10;&#10;"/>
+  </target>
+
+  <property environment="env"/>
+  <condition property="catalina.home" value="${env.CATALINA_HOME}">
+    <isset property="env.CATALINA_HOME"/>
+  </condition>
+
+  <target name="help">
+      <echo message="build tomcat testfido cryptosvg cryptodoc vectors ctap2test -Ddata2sign=b64u -Dsignature=b64u authenticatordata=b64u"/>
+  </target>
+
+  <target name="tomcat">
+    <fail message="CATALINA_HOME must be set to environment!" unless="catalina.home"/>
+    <antcall target="build"/>
+    <copy file="${dist.dir}/${application}" todir="${catalina.home}/${webroot}" overwrite="true" preservelastmodified="true"/>
+  </target>
+
+  <target name="_compile">
+    <antcall target="_jdktest"/>
+    <mkdir dir="${dist.dir}"/>
+    <delete dir="${temp.dir}"/>
+    <mkdir dir="${temp.dir}"/>
+    <fixcrlf srcdir="."
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.css, **/*.svg, **/*.xml, **/*.html"/>
+    <javac debug="${debug}"
+           srcdir="${src.dir};${lib.dir}:${test.dir}"
+           destdir="${temp.dir}"
+           includeAntRuntime="false">
+        <classpath>
+              <fileset dir="${webpki.lib.dir}">
+                <include name="*.jar"/>
+             </fileset>
+             <fileset dir="${third.party.lib.dir}">
+                <include name="*.jar"/>
+              </fileset>
+        </classpath>
+    </javac>
+    </target>
+    
+  <target name="build" depends="_compile">
+    <copy file="web.xml" todir="${temp.dir}"/>
+    <replace file="${temp.dir}/web.xml">
+      <replacefilter token="@logging@" value="${logging}"/>
+    </replace>
+    <war destfile="${dist.dir}/${application}" webxml="${temp.dir}/web.xml">
+      <classes dir="${temp.dir}">
+         <exclude name="web.xml"/>
+      </classes>
+        <metainf dir=".">
+        <include name="context.xml"/>
+      </metainf>
+      <lib dir="${zip.webpki.lib.dir}">
+        <include name="webpki.org-libext*.jar"/>
+        <include name="webpki.org-webutil*.jar"/>
+      </lib>
+      <fileset dir="web"/>
+      <zipfileset dir="${openkeystore.dir}/resources/images" prefix="images/">
+        <include name="thelab.svg"/>
+      </zipfileset>
+      <zipfileset dir="${openkeystore.dir}/testdata/keys" prefix="${class_war_path}">
+        <include name="x25519privatekey.jwk"/>
+      </zipfileset>
+    </war>
+  </target>
+    
+  <target name="testfido" depends="_compile">
+    <property name="testvectors" location="${testdata.dir}/fido2testvectors.json"/>
+    <junit fork="no" haltonfailure="yes">
+       <test name="org.webpki.fwp.FIDOTest"/>
+       <formatter type="plain" usefile="false"/>
+       <sysproperty key="json.data" value="${testvectors}"/>
+       <sysproperty key="sample.keys" value="${openkeystore.dir}/testdata/keys"/>
+       <classpath>
+            <pathelement path="${temp.dir}"/>
+            <fileset dir="${webpki.lib.dir}">
+              <include name="*.jar"/>
+           </fileset>
+           <fileset dir="${third.party.lib.dir}">
+              <include name="*.jar"/>
+            </fileset>
+      </classpath>
+    </junit>
+  </target>
+
+  <target name="cryptosvg" depends="_compile">
+    <java fork="yes"
+          classname="org.webpki.fwp.CryptoImages"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${current.dir}"/>
+     </java>
+  </target>
+
+  <target name="cryptodoc" depends="_compile">
+    <java fork="yes"
+          classname="org.webpki.fwp.CryptoDocument"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${current.dir} ${fido-web-pay.dir}/specification/crypto.html"/>
+     </java>
+  </target>
+    
+  <target name="vectors" depends="_compile">
+    <java fork="yes"
+          classname="org.webpki.fwp.TestVectorGeneration"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${testdata.dir} ${openkeystore.dir}/testdata/keys"/>
+     </java>
+  </target>
+
+  <target name="ctap2test" depends="_compile">
+    <property name="data2sign" value=""/>
+    <property name="signature" value=""/>
+    <property name="authenticatordata" value=""/>
+    <java fork="yes"
+          classname="org.webpki.fwp.Ctap2Test"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${data2sign} ${signature} ${authenticatordata}"/>
+     </java>
+  </target>
+
+</project>

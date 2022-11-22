@@ -1,0 +1,45 @@
+<svg width='110' height='72' xmlns='http://www.w3.org/2000/svg'>
+  <title>Issuer Symbol</title>
+  <!-- Anders Rundgren 2021-->
+  <defs>
+    <linearGradient id='bankPillar' x1='0' x2='1'>
+      <stop offset='0' stop-color='#606060'/>
+      <stop offset="0.37" stop-color="#fdfff2"/>
+      <stop offset="0.63" stop-color="#fdfff2"/>
+      <stop offset='1' stop-color='#606060'/>
+    </linearGradient>
+    <filter height='200%' id='bankShaddow' width='200%' x='-50%' y='-50%'>
+      <feGaussianBlur stdDeviation='2'/>
+    </filter>
+    <linearGradient id='bankFront' x1='0.5' x2='0.5' y1='0' y2='1'>
+   <stop offset='0' stop-color='#eaeac5'/>
+   <stop offset='0.4' stop-color='#f7f7f7'/>
+   <stop offset='0.6' stop-color='#f7f7f7'/>
+   <stop offset='1' stop-color='#eaeac5'/>
+    </linearGradient>
+    <linearGradient id='bankRoof' x1='0' x2='1' y1='0' y2='1'>
+   <stop offset='0' stop-color='#f5f7e8'/>
+   <stop offset='1' stop-color='#dceace'/>
+    </linearGradient>
+  </defs>
+  <rect x='11' y='17' width='88' height='50' fill='white'/>
+  <g fill='#b0b0b0' filter='url(#bankShaddow)'>
+    <path d='m19.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m41,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m62.5,17.5l21.67,0l0,11l-10.67,0l0,35.5l-11,0'/>
+    <path d='m 84,17.5 h 17 v 11 H 95 V 64 H 84'/>
+  </g>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='17' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='38.66' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='60.33' y='26'/>
+  <rect fill='url(#bankPillar)' height='37.5' width='11' x='82' y='26'/>
+  <path d='m10.3,16 l44.70,-15 l44.70,15' fill='url(#bankRoof)' stroke='grey' stroke-width='1' stroke-linecap='round'/>
+  <g stroke-width='0.7' stroke='grey'>
+  <rect fill='url(#bankFront)' height='10' width='90' x='10' y='16'/>
+  <rect fill='url(#bankFront)' height='4' width='100' x='5' y='67.5'/>
+  <rect fill='url(#bankFront)' height='4' width='90' x='10' y='63.5'/>
+  </g>
+  <text x='55' y='23.9' font-size='8' font-weight='bold' font-family='Roboto,sans-serif' text-anchor='middle' fill='#707070'>
+B&#xa0;&#xa0;A&#xa0;&#xa0;N&#xa0;&#xa0;K
+</text>
+</svg>

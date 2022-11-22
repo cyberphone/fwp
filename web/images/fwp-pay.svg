@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg width='300' height='100' xmlns='http://www.w3.org/2000/svg'>
+  <title>FIDO Web Pay</title>
+  <!-- Anders Rundgren 2021-->
+  <rect x='1' y='1' width='297' height='98' stroke='grey' stroke-width='2' fill='none'/>
+<svg x='16' y='12' width='76' height='76' viewBox="0 0 68 68" xmlns='http://www.w3.org/2000/svg'>
+  <defs>
+    <radialGradient id='browserWorld'>
+      <stop offset='0.09' stop-color='#afc6e9'/>
+      <stop offset='0.5' stop-color='#5070ff'/>
+    </radialGradient>
+  </defs>
+  <circle cx='34' cy='34' r='34' fill='url(#browserWorld)'/>
+  <g fill='none' stroke='white' stroke-width='2'>
+    <circle cx='34' cy='34' r='30'/>
+    <ellipse cx='34' cy='34' rx='13' ry='30'/>
+    <line x1='34' y1='4' x2='34' y2='64'/>
+    <line x1='4' y1='34' x2='64' y2='34'/>
+    <line x1='7.5' y1='19' x2='60.5' y2='19'/>
+    <line x1='7.5' y1='49' x2='60.5' y2='49'/>
+  </g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg"
+   viewBox='0 0 138 54'
+   x='108'
+   y='19'
+   width="178"
+   height="67">
+  <title>FIDO Web Pay Logotype</title>
+  <defs>
+    <filter id='fwpShaddow'>
+      <feGaussianBlur stdDeviation='1.5'/>
+    </filter>
+  </defs>
+  <symbol id="fwp" width="132" height="50">
+    <path d="M 31.231311,2.3541641 V 8.417 H 9.012 l 0,14.187 h 18.781748 v 6.063 H 9.012063 v 19.124664 h -6.375 V 2.354 Z" />
+    <path d="m 62.300185,2.3541641 h 4.375 l 9.3125,35.6249999 8.03125,-35.6249999 h 6.625 L 79.550185,47.791664 h -6.5 l -8.375,-31.75 -8.75,31.75 h -6.5 L 38.331435,2.3541641 h 6.625 l 8.03125,35.6249999 z"/>
+    <path d="m 97.519187,47.791664 h 6.375003 V 30.167 c 0,0 9.9036,-2.09e-4 11.2185,-3.36e-4 2.70833,0 5.09375,-0.572917 7.15625,-1.71875 2.0625,-1.145833 3.65625,-2.760417 4.78125,-4.84375 1.14583,-2.104167 1.71378,-5.498887 1.71875,-7.3125 0.005,-1.813613 -0.59532,-5.101485 -1.71875,-7.3124999 -1.125,-2.1041667 -2.71875,-3.7291667 -4.78125,-4.875 C 120.20644,2.9374974 117.82102,2.354 115.11269,2.354 H 97.519187 Z M 103.89419,8.417 h 11.43725 c 1.375,0 2.58333,0.3329974 3.625,0.9996641 1.04167,0.6458329 1.84375,1.5624999 2.40625,2.7499999 0.58333,1.1875 0.86637,3.234849 0.875,4.125 0.009,0.890151 -0.29862,2.837423 -0.875,4.09375 -0.5625,1.1875 -1.36458,2.104167 -2.40625,2.75 -1.04167,0.645833 -2.25,0.968766 -3.625,0.96875 -1.34907,-1.5e-5 -11.43725,-1.64e-4 -11.43725,-1.64e-4 z"/>
+  </symbol>
+  <use href="#fwp" x="2" y="2" fill="black" opacity="0.4" stroke="black" stroke-opacity="0.4" stroke-width="2.5" filter="url(#fwpShaddow)"/>
+  <use href="#fwp" fill="#dcf8db" stroke="#35a152" stroke-width="2.5"/>
+</svg>
+</svg>

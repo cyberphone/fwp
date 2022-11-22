@@ -1,0 +1,20 @@
+{
+  "pspRequest": {
+    "paymentRequest": {
+      "payeeName": "Space Shop",
+      "requestId": "7040566321",
+      "amount": "435.00",
+      "currency": "EUR"
+    },
+    "fwpAssertion": {
+      "paymentNetworkId": "https://banknet2.org",
+      "issuerId": "https://mybank.fr/payment",
+      "encryptedAuthorization": "pQEDAqQBOB4DbXgyNTUxOToyMDIyOjEHowEBIAQhWCBgzORaW4eNXTJ37WalZKZzxwTUkfrCtS16ManwNP9tFQpYKPLnU6oCD70n9yZJbxxmHSaiPGrj0GzOyXdgaGLFVLAiJrg-A4soXJ8IUCksS69e_TV8ff_uuihR_H4JTM97vowM72uV_NGOvQpZAZDtVzpnQF5VO48lWDzmfxmgCWm_nnwiJALSZcrLJocTUhns4V2N4-3o26V0oylNT0aayawv-PhfIEG-Ll2LI4b7nLZbgfrZbvfrtMnin9AK31-bUFWTsnT7JlByx2zI8Y-Vv0ExqNIt6EgmjekZKk-UqpCrL0eK5bGKSt7PINwIiwIdB0HYEvX3fGd9Ofu_IxTtedTjOJq9AfqOsuHrtKHtRqKsCLoM-pM2-NAp-xzebKWmV5ZJJjXOjLsFhhAycd4fH3TSD8V-2CdksZxW0yPPr_zVpQECM_Ug-0UslN9iHpu2yu4YQqBfyESsXHgGaTV8T8Br6uApBjfcISUGtnoeLe-DrZdf_XNb3FM-yn_cQpgTkrfy8wOeDWTE1kKOm5z-rHjoZyfPJXJvyuY86fmM7f9-uj4Uodgrt6VxPx66qdObFxuTlJuJUEIkaEMXYVFgl9jANXnu1cpXqjd9YxbyaV-6IM2LeMIfYR75cYORy2BKwup-sdjhiSE6j6aT73QYenBwhVCRrxsVdNlzCG--"
+    },
+    "receiveAccount": "DE89370400440532013000",
+    "clientIpAddress": "220.13.198.144",
+    "timeStamp": "2022-08-18T09:14:23Z"
+  },
+  "payeeHost": "spaceshop.com",
+  "timeStamp": "2022-08-18T09:14:23Z"
+}

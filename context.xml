@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+
+    <CookieProcessor sameSiteCookies="strict" />
+
+    <Resource name="jdbc/FWP" auth="Container" type="javax.sql.DataSource"
+              maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+              username="fwp" password="foo123" driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/FWP?useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=CET"/>
+
+</Context>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <context-param>
+        <description>Logging flag</description>
+        <param-name>logging</param-name>
+        <param-value>@logging@</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.webpki.webapps.fwp.ApplicationService</listener-class>
+     </listener>
+
+    <servlet>
+        <servlet-name>HomeServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.HomeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>EnrollServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.EnrollServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>WalletAdminServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.WalletAdminServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CardServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.CardServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FIDOEnrollServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOEnrollServlet</servlet-class>
+    </servlet>    
+        
+    <servlet>
+        <servlet-name>BuyServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.BuyServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>PaymentRequestServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.PaymentRequestServlet</servlet-class>
+    </servlet>
+
+     <servlet>
+        <servlet-name>WalletUIServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.WalletUIServlet</servlet-class>
+    </servlet>
+   
+    <servlet>
+        <servlet-name>ADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.ADServlet</servlet-class>
+    </servlet>    
+
+    <servlet>
+        <servlet-name>SADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.SADServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>ESADServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.ESADServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>FinalizeAssertionServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FinalizeAssertionServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>MerchantServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.MerchantServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>PSPServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.PSPServlet</servlet-class>
+    </servlet> 
+
+    <servlet>
+        <servlet-name>IssuerServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.IssuerServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>FIDOPayServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOPayServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.LoginServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FIDOLoginServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.FIDOLoginServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>RegistrationListServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.fwp.admin.RegistrationListServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>HomeServlet</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EnrollServlet</servlet-name>
+        <url-pattern>/enroll</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>WalletAdminServlet</servlet-name>
+        <url-pattern>/walletadmin</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CardServlet</servlet-name>
+        <url-pattern>/card</url-pattern>
+    </servlet-mapping>    
+
+    <servlet-mapping>
+        <servlet-name>FIDOEnrollServlet</servlet-name>
+        <url-pattern>/fidoenroll</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuyServlet</servlet-name>
+        <url-pattern>/buy</url-pattern>
+    </servlet-mapping>
+       
+    <servlet-mapping>
+        <servlet-name>PaymentRequestServlet</servlet-name>
+        <url-pattern>/pr</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>WalletUIServlet</servlet-name>
+        <url-pattern>/ui</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ADServlet</servlet-name>
+        <url-pattern>/ad</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SADServlet</servlet-name>
+        <url-pattern>/sad</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>ESADServlet</servlet-name>
+        <url-pattern>/esad</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FinalizeAssertionServlet</servlet-name>
+        <url-pattern>/finalizeassertion</url-pattern>
+    </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>MerchantServlet</servlet-name>
+        <url-pattern>/merchant</url-pattern>
+    </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>PSPServlet</servlet-name>
+        <url-pattern>/pspreq</url-pattern>
+    </servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>IssuerServlet</servlet-name>
+        <url-pattern>/issuerreq</url-pattern>
+    </servlet-mapping>     
+
+    <servlet-mapping>
+        <servlet-name>FIDOPayServlet</servlet-name>
+        <url-pattern>/fidopay</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>FIDOLoginServlet</servlet-name>
+        <url-pattern>/fidologin</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RegistrationListServlet</servlet-name>
+        <url-pattern>/admin/reglist</url-pattern>
+    </servlet-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Bank admin manager</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>manager</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>Bank admin</realm-name>
+  </login-config>
+
+  <security-role>
+    <description>The role that is required to log in as admin</description>
+    <role-name>manager</role-name>
+  </security-role>
+
+</web-app>

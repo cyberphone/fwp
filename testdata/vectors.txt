@@ -1,0 +1,167 @@
+|===================================|
+| FIDO Web Pay (FWP) - Test Vectors |
+|===================================|
+
+
+
+User FIDO key in JWK format:
+{
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "6BKxpty8cI-exDzCkh-goU6dXq3MbcY0cd1LaAxiNrU",
+  "y": "mCbcvUzm44j3Lt2b5BPyQloQ91tf2D2V-gzeUxWaUdg",
+  "d": "6XxMFXhcYT5QN9w5TIg2aSKsbcj-pj4BnZkK7ZOt4B8"
+}
+
+
+Merchant 'W3C PaymentRequest' (PRCD) data in pretty-printed JSON notation:
+{
+  "payeeName": "Space Shop",
+  "requestId": "7040566321",
+  "amount": "435.00",
+  "currency": "EUR"
+}
+
+Merchant 'hostname' according to the browser: spaceshop.com
+
+
+Unsigned FWP assertion, here in CBOR 'diagnostic notation':
+{
+  1: "1.0",
+  2: {
+    1: "Space Shop",
+    2: "7040566321",
+    3: "435.00",
+    4: "EUR"
+  },
+  3: "spaceshop.com",
+  4: "FR7630002111110020050014382",
+  5: "https://banknet2.org",
+  6: "0057162932",
+  7: "additional stuff...",
+  8: {
+    1: {
+      3: "Android",
+      4: "10.0"
+    },
+    2: {
+      3: "Chrome",
+      4: "103"
+    }
+  },
+  9: "2022-08-18T10:14:07+01:00",
+  10: {
+    1: -7,
+    2: {
+      1: 2,
+      -1: 1,
+      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
+      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
+    }
+  }
+}
+
+Note that the last element (10) contains the COSE signature algorithm (ES256) and the FIDO public key (EC/P256) which is also is part of the data to be signed.
+
+
+The unsigned FWP assertion (binary) converted into a SHA256 hash, here in Base64Url notation:
+mGoGJ74WwTdcRrPZgcfxk3M96edQ7H9P4anv5bn4XGc
+This is subsequently used as FIDO 'challenge'.
+
+
+****************************************
+* FIDO/WebAuthn assertion happens here *
+****************************************
+Relying party URL: https://mybank.fr
+
+Returned FIDO 'authenticatorData' in hexadecimal notation:
+412e175a0f0bdc06dabf0b1db79b97541c08dbacee7e31c97a553588ee922ea70500000017
+(here using the UP+UV flags and a zero counter value)
+
+Returned FIDO 'signature' in hexadecimal notation:
+304402202164244e30bbfa9c886e2ee4b66e4475c43614df7cc9687904829127990d7b7802200b286bb9708e7e5716cf33c5007f7cd166359e88b8d77c5f3fb035c05b084288
+
+Signed FWP assertion (SAD), here in CBOR 'diagnostic notation':
+{
+  1: "1.0",
+  2: {
+    1: "Space Shop",
+    2: "7040566321",
+    3: "435.00",
+    4: "EUR"
+  },
+  3: "spaceshop.com",
+  4: "FR7630002111110020050014382",
+  5: "https://banknet2.org",
+  6: "0057162932",
+  7: "additional stuff...",
+  8: {
+    1: {
+      3: "Android",
+      4: "10.0"
+    },
+    2: {
+      3: "Chrome",
+      4: "103"
+    }
+  },
+  9: "2022-08-18T10:14:07+01:00",
+  10: {
+    1: -7,
+    2: {
+      1: 2,
+      -1: 1,
+      -2: h'e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b5',
+      -3: h'9826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8'
+    },
+    3: h'412e175a0f0bdc06dabf0b1db79b97541c08dbacee7e31c97a553588ee922ea70500000017',
+    4: h'304402202164244e30bbfa9c886e2ee4b66e4475c43614df7cc9687904829127990d7b7802200b286bb9708e7e5716cf33c5007f7cd166359e88b8d77c5f3fb035c05b084288'
+  }
+}
+
+The added elements 3,5,4','clientDataJSON' and 'signature' respectively.
+
+
+The signed FWP assertion as a hex-encoded binary: aa0163312e3002a4016a53706163652053686f70026a3730343035363633323103663433352e30300463455552036d737061636573686f702e636f6d04781b465237363330303032313131313130303230303530303134333832057468747470733a2f2f62616e6b6e6574322e6f7267066a3030353731363239333207736164646974696f6e616c2073747566662e2e2e08a201a20367416e64726f6964046431302e3002a203664368726f6d650463313033097819323032322d30382d31385431303a31343a30372b30313a30300aa4012602a401022001215820e812b1a6dcbc708f9ec43cc2921fa0a14e9d5eadcc6dc63471dd4b680c6236b52258209826dcbd4ce6e388f72edd9be413f2425a10f75b5fd83d95fa0cde53159a51d8035825412e175a0f0bdc06dabf0b1db79b97541c08dbacee7e31c97a553588ee922ea70500000017045846304402202164244e30bbfa9c886e2ee4b66e4475c43614df7cc9687904829127990d7b7802200b286bb9708e7e5716cf33c5007f7cd166359e88b8d77c5f3fb035c05b084288
+
+
+*******************************
+* FWP encryption happens here *
+*******************************
+
+Issuer encryption key in JWK format:
+{
+  "kty": "OKP",
+  "crv": "X25519",
+  "x": "6ZoM7yBYlJYNmxwFl4UT3MtCoTv7ztUjpRuKEXrV8Aw",
+  "d": "cxfl86EVmcqrR07mWENCf1F_5Ni5mt1ViGyERB6Q1vA"
+}
+
+
+Encrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:
+{
+  1: 3,
+  2: {
+    1: -31,
+    3: "x25519:2022:1",
+    7: {
+      1: 1,
+      -1: 4,
+      -2: h'60cce45a5b878d5d3277ed66a564a673c704d491fac2b52d7a31a9f034ff6d15'
+    },
+    10: h'f2e753aa020fbd27f726496f1c661d26a23c6ae3d06ccec977606862c554b02226b83e038b285c9f'
+  },
+  8: h'292c4baf5efd357c7dffeeba2851fc7e',
+  9: h'cf7bbe8c0cef6b95fcd18ebd',
+  10: h'ed573a67405e553b8f25583ce67f19a00969bf9e7c222402d265cacb2687135219ece15d8de3ede8dba574a3294d4f469ac9ac2ff8f85f2041be2e5d8b2386fb9cb65b81fad96ef7ebb4c9e29fd00adf5f9b505593b274fb265072c76cc8f18f95bf4131a8d22de848268de9192a4f94aa90ab2f478ae5b18a4adecf20dc088b021d0741d812f5f77c677d39fbbf2314ed79d4e3389abd01fa8eb2e1ebb4a1ed46a2ac08ba0cfa9336f8d029fb1cde6ca5a65796492635ce8cbb0586103271de1f1f74d20fc57ed82764b19c56d323cfaffcd5a5010233f520fb452c94df621e9bb6caee1842a05fc844ac5c780669357c4fc06beae0290637dc212506b67a1e2def83ad975ffd735bdc533eca7fdc42981392b7f2f3039e0d64c4d6428e9b9cfeac78e86727cf25726fcae63ce9f98cedff7eba3e14a1d82bb7a5713f1ebaa9d39b171b93949b8950422468431761516097d8c03579eed5ca57aa377d6316f2695fba20cd8b78c21f611ef9718391cb604ac2ea7eb1d8e189213a8fa693ef74187a7070855091af1b1574d973086fbe'
+}
+
+And as a hex-encoded binary: a5010302a401381e036d7832353531393a323032323a3107a30101200421582060cce45a5b878d5d3277ed66a564a673c704d491fac2b52d7a31a9f034ff6d150a5828f2e753aa020fbd27f726496f1c661d26a23c6ae3d06ccec977606862c554b02226b83e038b285c9f0850292c4baf5efd357c7dffeeba2851fc7e094ccf7bbe8c0cef6b95fcd18ebd0a590190ed573a67405e553b8f25583ce67f19a00969bf9e7c222402d265cacb2687135219ece15d8de3ede8dba574a3294d4f469ac9ac2ff8f85f2041be2e5d8b2386fb9cb65b81fad96ef7ebb4c9e29fd00adf5f9b505593b274fb265072c76cc8f18f95bf4131a8d22de848268de9192a4f94aa90ab2f478ae5b18a4adecf20dc088b021d0741d812f5f77c677d39fbbf2314ed79d4e3389abd01fa8eb2e1ebb4a1ed46a2ac08ba0cfa9336f8d029fb1cde6ca5a65796492635ce8cbb0586103271de1f1f74d20fc57ed82764b19c56d323cfaffcd5a5010233f520fb452c94df621e9bb6caee1842a05fc844ac5c780669357c4fc06beae0290637dc212506b67a1e2def83ad975ffd735bdc533eca7fdc42981392b7f2f3039e0d64c4d6428e9b9cfeac78e86727cf25726fcae63ce9f98cedff7eba3e14a1d82bb7a5713f1ebaa9d39b171b93949b8950422468431761516097d8c03579eed5ca57aa377d6316f2695fba20cd8b78c21f611ef9718391cb604ac2ea7eb1d8e189213a8fa693ef74187a7070855091af1b1574d973086fbe
+
+
+FWP assertion delivered by the browser:
+{
+  "paymentNetworkId": "https://banknet2.org",
+  "issuerId": "https://mybank.fr/payment",
+  "encryptedAuthorization": "pQEDAqQBOB4DbXgyNTUxOToyMDIyOjEHowEBIAQhWCBgzORaW4eNXTJ37WalZKZzxwTUkfrCtS16ManwNP9tFQpYKPLnU6oCD70n9yZJbxxmHSaiPGrj0GzOyXdgaGLFVLAiJrg-A4soXJ8IUCksS69e_TV8ff_uuihR_H4JTM97vowM72uV_NGOvQpZAZDtVzpnQF5VO48lWDzmfxmgCWm_nnwiJALSZcrLJocTUhns4V2N4-3o26V0oylNT0aayawv-PhfIEG-Ll2LI4b7nLZbgfrZbvfrtMnin9AK31-bUFWTsnT7JlByx2zI8Y-Vv0ExqNIt6EgmjekZKk-UqpCrL0eK5bGKSt7PINwIiwIdB0HYEvX3fGd9Ofu_IxTtedTjOJq9AfqOsuHrtKHtRqKsCLoM-pM2-NAp-xzebKWmV5ZJJjXOjLsFhhAycd4fH3TSD8V-2CdksZxW0yPPr_zVpQECM_Ug-0UslN9iHpu2yu4YQqBfyESsXHgGaTV8T8Br6uApBjfcISUGtnoeLe-DrZdf_XNb3FM-yn_cQpgTkrfy8wOeDWTE1kKOm5z-rHjoZyfPJXJvyuY86fmM7f9-uj4Uodgrt6VxPx66qdObFxuTlJuJUEIkaEMXYVFgl9jANXnu1cpXqjd9YxbyaV-6IM2LeMIfYR75cYORy2BKwup-sdjhiSE6j6aT73QYenBwhVCRrxsVdNlzCG--"
+}
