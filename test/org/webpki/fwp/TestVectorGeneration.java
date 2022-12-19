@@ -116,7 +116,7 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
                 currPrivateKey.getBytes("utf-8"));
 
-        GregorianCalendar time = ISODateTime.parseDateTime("2022-08-18T10:14:07+01:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2022-12-19T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =

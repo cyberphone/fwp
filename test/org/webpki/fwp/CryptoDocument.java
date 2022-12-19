@@ -177,21 +177,21 @@ public class CryptoDocument  {
 
     static DecoratorBuilder addList(String fileName) {
         return new DecoratorBuilder(fileName)
-            .add(new int[] {10}, "authorization")
-            .add(new int[] {10, 1}, "signatureAlgorithm = ES256")
-            .add(new int[] {10, 2}, "publicKey")
-            .add(new int[] {10, 2, 1}, "kty = EC")
-            .add(new int[] {10, 2, -1}, "crv = P-256")
-            .add(new int[] {10, 2, -2}, "x")
-            .add(new int[] {10, 2, -3}, "y");
+            .add(new int[] {-1}, "authorization")
+            .add(new int[] {-1, 1}, "signatureAlgorithm = ES256")
+            .add(new int[] {-1, 2}, "publicKey")
+            .add(new int[] {-1, 2, 1}, "kty = EC")
+            .add(new int[] {-1, 2, -1}, "crv = P-256")
+            .add(new int[] {-1, 2, -2}, "x")
+            .add(new int[] {-1, 2, -3}, "y");
     }
     
     static {
         try {
             addList("AD.txt");
             addList("SAD.txt")
-                .add(new int[] {10, 3}, "authenticatorData")
-                .add(new int[] {10, 4}, "signature");
+                .add(new int[] {-1, 3}, "authenticatorData")
+                .add(new int[] {-1, 4}, "signature");
             
             int keyEncryption = CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt();
             int ephemeralKey = CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt();

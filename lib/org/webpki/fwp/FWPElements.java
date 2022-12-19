@@ -33,7 +33,7 @@ public enum FWPElements {
     NETWORK_OPTIONS           (7),
     PLATFORM_DATA             (8),
     TIME_STAMP                (9),
-    AUTHORIZATION             (10);
+    AUTHORIZATION             (-1);
     
     
     CBORInteger cborLabel;
