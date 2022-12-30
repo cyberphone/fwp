@@ -18,7 +18,7 @@ package org.webpki.fwp;
 
 import java.io.File;
 
-import org.webpki.cbor.CBORInteger;
+import org.webpki.cbor.CBORObject;
 
 import static org.webpki.cbor.CBORCryptoConstants.*;
 
@@ -67,7 +67,7 @@ public class CryptoImages {
                            5 * LABEL_HEIGHT + 4 * LABEL_GUTTER) + HEADER_HEIGHT + MARGIN;
     }
     
-    void label(String labelText, CBORInteger cborLabel, boolean mandatory) throws Exception {
+    void label(String labelText, CBORObject cborLabel, boolean mandatory) throws Exception {
         if (top != HEADER_HEIGHT) {
             top += LABEL_GUTTER;
         }
