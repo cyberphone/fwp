@@ -124,7 +124,7 @@ public class FWPAssertionDecoder {
     
     public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
                                                                  GeneralSecurityException {
-        // Convert binary into CBOR objects.
+        // Convert SAD binary into CBOR objects.
         fwpAssertion = CBORObject.decode(signedFwpAssertion).getMap();
         
         // Payment Request (PRCD)
