@@ -41,7 +41,7 @@ import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORCryptoUtils;
 import org.webpki.cbor.CBORDecrypter;
 import org.webpki.cbor.CBORObject;
-import org.webpki.cbor.CBORTypes;
+
 import org.webpki.crypto.ContentEncryptionAlgorithms;
 import org.webpki.crypto.KeyEncryptionAlgorithms;
 
@@ -152,7 +152,7 @@ public class IssuerServlet extends HttpServlet {
              
               // Decrypt ESAD returning SAD.
             byte[] fwpAssertionBinary = decrypter.decrypt(
-                    CBORObject.decode(fwpJsonAssertion.getEncryptedAuthorization()));
+                    CBORObject.decode(fwpJsonAssertion.getUserAuthorization()));
             // Succeeded.
             
             // Decode signed assertion (SAD).
