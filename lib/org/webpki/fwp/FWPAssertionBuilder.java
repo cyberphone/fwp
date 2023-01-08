@@ -62,10 +62,6 @@ public class FWPAssertionBuilder {
                                        new CBORTextString(version));
     }
 
-    public FWPAssertionBuilder() throws IOException {
-        setStringElement(FWPElements.FWP_VERSION, FWPElements.CURRENT_VERSION);
-    }
-
     public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
             throws IOException {
         return setElement(FWPElements.PAYMENT_REQUEST, jsonPaymentRequest.serializeAsCBOR());

@@ -53,6 +53,9 @@ public class FWPCrypto {
     
     private FWPCrypto() {}
     
+    // ESAD container Id
+    public static final String FWP_ESAD_OBJECT_ID   = "https://fido-web-pay.github.io/ns/p1";
+    
     // FIDO call data
     public static final String CREDENTIAL_ID        = "credentialId";
     public static final String USER_ID              = "userId";

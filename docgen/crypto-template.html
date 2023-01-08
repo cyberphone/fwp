@@ -100,9 +100,9 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
    <div>
     This object is referred to as @authorizationdata@.
   </div>
-   <div id="authorization" class="para">
+   <div id="signature" class="para">
      Since this section is about cryptographic constructs, only the data in the
-     <code>authorization</code> <kbd>map</kbd> (label <kbd>10</kbd>) is
+     <code>signature</code> <kbd>map</kbd> (label <kbd>-1</kbd>) is
      elaborated on here.
    </div>
    <div class="para">
@@ -141,7 +141,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     </td>
   </tr>
   <tr>
-    <td><code>signature</code></td>
+    <td><code>signatureValue</code></td>
     <td style='text-align:center'><kbd>4</kbd></td>
     <td><kbd>bstr</kbd></td>
     <td>
@@ -153,7 +153,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </div>
    <div>
 As can be seen in the listing, the <code>signatureAlgorithm</code> and 
-<code>publicKey</code> elements are already featured in the <code>authorization</code> <kbd>map</kbd>.
+<code>publicKey</code> elements are already featured in the <code>signature</code> <kbd>map</kbd>.
 This is because they are static and can thus be included in the data
 to be signed, potentially making the signature scheme more resistant to tampering.
 </div>
@@ -186,7 +186,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     </div>
    <div>
     After adding the asserted FIDO <code>authenticatorData</code> and
-    <code>signature</code> elements to the <a href="#authorization">authorization</a>
+    <code>signatureValue</code> elements to the <a href="#signature">signature</a>
    <kbd>map</kbd> of AD, the resulting sample should read as follows:</div>
     <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox" style='min-width:50em'>
@@ -236,7 +236,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
   For privacy and security reasons the user authorization component of @fwpassertions@
   MUST be encrypted.
 </div>
-<div class="para">The listing below shows how the sample #SAD# object could be encrypted:</div>
+<div class="para">The listing below shows a sample of an encrypted #SAD# object:</div>
 <div style='overflow-x:auto;padding-right:0.2em'>
   <div class="staticbox" style='min-width:50em'>
   @txt/ESAD.txt@
@@ -256,8 +256,17 @@ to be signed, potentially making the signature scheme more resistant to tamperin
 <div class="para">
   The encryption scheme is based on an ECDH profile derived from
 <a href="https://cyberphone.github.io/javaapi/org/webpki/cbor/package-summary.html#cef">
-CBOR Encryption Format (CEF)<img src="images/xtl.svg" alt="link">
-</a>.  ESAD objects are packaged as follows:
+CBOR Encryption Format (CEF)<img src="images/xtl.svg" alt="link"></a>.
+</div>
+<div class="para">
+To identify the ESAD object profile, as well as the encrypted SAD object,
+a common <a href="https://www.ietf.org/archive/id/draft-rundgren-cotx-03.html">
+COTX<img src="images/xtl.svg" alt="link"></a> tag with the value
+<kbd style='white-space:nowrap'>&quot;https://fido-web-pay.github.io/ns/p1&quot;</kbd>
+is wrapping the encryption elements. 
+</div> 
+<div class="para">
+ESAD objects are packaged as follows:
 </div>
     <div style="overflow-x:auto;padding:8pt 0">
       @fwp-crypto.svg@
@@ -447,8 +456,10 @@ Generate a key pair compatible with the <code>encryptionKey</code>.
   Copy the previously created CBOR <a href="#submap">Sub map</a> object to
   the <code>keyEncryption</code> label.
 </li>
-<li>Serialize the current <a href="#mainmap">Main map</a> object and assign the result
-to an AAD (Additional Authenticated Data) variable.</li>
+<li>
+  Wrap the current <a href="#mainmap">Main map</a> object in a COTX tag
+  and assign the serialized result to an AAD (Additional Authenticated Data) variable.
+</li>
 <li>
   Generate an IV (Initialization Vector) compliant with the
   <code>contentEncryptionAlgorithm</code>. See #Content Encryption Algorithms#.
@@ -470,7 +481,7 @@ cipherText, tag = encrypt(<code>contentEncryptionAlgorithm</code>,<br>
 <code>cipherText</code>, <code>tag</code>, and <code>iv</code> labels
 respectively.
 </ol>
-<div class="para">The resulting CBOR <a href="#mainmap">Main map</a>
+<div class="para">The wrapped CBOR <a href="#mainmap">Main map</a>
 object represents an #ESAD# object according to this specification.</div>
 @Content Encryption Algorithms@
 <div>Compliant FWP
@@ -623,13 +634,13 @@ is assumed to be a #SAD# object.</div>
 @Decode Signed Authorization Data (SAD)@
 <div>Decode the #SAD# binary using a suitable CBOR parser.</div>
 <div class="para">Fetch and remove the FIDO elements <code>authenticatorData</code>
-and <code>signature</code> from the decoded object
+and <code>signatureValue</code> from the decoded object
 which now effectively is an #AD# object.
 </div>
 @Validate Signature@
 <div>
 The signature is validated by applying the elements received in the 
-<a href="#authorization">authorization</a> <kbd>map</kbd> to
+<a href="#signature">signature</a> <kbd>map</kbd> to
 a suitable signature validation API like:
 </div>
 <div class="formula">
@@ -639,7 +650,7 @@ validate(<code>signatureAlgorithm</code>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>publicKey</code>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:grey">// Signed data</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>authenticatorData</code> || SHA256(#AD#),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>signature</code>)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>signatureValue</code>)
 </kbd>
 </div>
 <div class="comment box">
@@ -706,7 +717,11 @@ Note that the ESAD sample uses a <code>keyId</code> for identifying the encrypti
 </tr>
 <tr>
 <td style="text-align:center;white-space:nowrap">2022-12-19</td>
-<td style="text-align:center">0.16</td><td>Set authorization key to -1.</td>
+<td style="text-align:center">0.16</td><td>Set <code>signature</code> key to -1.</td>
+</tr>
+<tr>
+<td style="text-align:center;white-space:nowrap">2023-01-07</td>
+<td style="text-align:center">0.17</td><td>Added COTX wrapper to ESAD.</td>
 </tr>
 </table>
 </div>

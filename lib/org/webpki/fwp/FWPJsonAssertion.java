@@ -29,7 +29,7 @@ public class FWPJsonAssertion {
 
     public static final String PAYMENT_NETWORK_ID      = "paymentNetworkId";
     public static final String ISSUER_ID               = "issuerId";
-    public static final String ENCRYPTED_AUTHORIZATION = "encryptedAuthorization";
+    public static final String USER_AUTHORIZATION      = "userAuthorization";
     
     String paymentNetworkId;
     public String getPaymentNetwordId() {
@@ -49,7 +49,7 @@ public class FWPJsonAssertion {
     public FWPJsonAssertion(JSONObjectReader reader) throws IOException {
         paymentNetworkId = reader.getString(PAYMENT_NETWORK_ID);
         issuerId = reader.getString(ISSUER_ID);
-        encryptedAuthorization = reader.getBinary(ENCRYPTED_AUTHORIZATION);
+        encryptedAuthorization = reader.getBinary(USER_AUTHORIZATION);
     }
     
     public FWPJsonAssertion(String paymentNetworkId,
@@ -68,7 +68,7 @@ public class FWPJsonAssertion {
         return new JSONObjectWriter()
                 .setString(PAYMENT_NETWORK_ID, paymentNetworkId)
                 .setString(ISSUER_ID, issuerId)
-                .setBinary(ENCRYPTED_AUTHORIZATION, encryptedAuthorization);
+                .setBinary(USER_AUTHORIZATION, encryptedAuthorization);
     }
     
     @Override

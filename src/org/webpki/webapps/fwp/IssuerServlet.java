@@ -38,8 +38,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
+import org.webpki.cbor.CBORCryptoUtils;
+import org.webpki.cbor.CBORDecrypter;
 import org.webpki.cbor.CBORObject;
-
+import org.webpki.cbor.CBORTypes;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
 import org.webpki.crypto.KeyEncryptionAlgorithms;
 
@@ -68,6 +70,40 @@ public class IssuerServlet extends HttpServlet {
     
     static final long AUTHORIZATION_MAX_AGE    = 600000;
     static final long AUTHORIZATION_MAX_FUTURE = 120000;
+    
+    static final CBORDecrypter decrypter = 
+            new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
+
+        @Override
+        public PrivateKey locate(PublicKey optionalPublicKey,
+                                 CBORObject optionalKeyId,
+                                 KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                 ContentEncryptionAlgorithms contentEncryptionAlgorithm)
+                 throws IOException, GeneralSecurityException {
+
+            // Somewhat simplistic setup: a single encryption key
+            if (optionalKeyId == null) {
+                throw new GeneralSecurityException("Missing keyId");
+            }
+            if (!ApplicationService.issuerEncryptionKeyId.equals(
+                    optionalKeyId)) {
+                throw new GeneralSecurityException("Unknown keyId: " + optionalKeyId);
+            }
+            return ApplicationService.issuerEncryptionKey.getPrivate();
+        }
+        
+    }).setTagPolicy(CBORCryptoUtils.POLICY.MANDATORY, new CBORCryptoUtils.Collector() {
+
+        @Override
+        public void foundData(CBORObject tag) 
+                throws IOException, GeneralSecurityException {
+            String typeUrl = tag.getTag().getObject().getArray().getObject(0).getTextString();
+            if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
+                throw new GeneralSecurityException("Unexpected type URL: " + typeUrl);
+            }
+        }
+
+    });
     
     static long transactionId = 56807446412l;
 
@@ -115,28 +151,8 @@ public class IssuerServlet extends HttpServlet {
             FWPPaymentRequest fwpPaymentRequest = pspRequest.getPaymentRequest();
              
               // Decrypt ESAD returning SAD.
-            byte[] fwpAssertionBinary = 
-                    new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
-
-                @Override
-                public PrivateKey locate(PublicKey optionalPublicKey,
-                                         CBORObject optionalKeyId,
-                                         KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                         ContentEncryptionAlgorithms contentEncryptionAlgorithm)
-                         throws IOException, GeneralSecurityException {
-
-                    // Somewhat simplistic setup: a single encryption key
-                    if (optionalKeyId == null) {
-                        throw new GeneralSecurityException("Missing keyId");
-                    }
-                    if (!ApplicationService.issuerEncryptionKeyId.equals(
-                            optionalKeyId)) {
-                        throw new GeneralSecurityException("Unknown keyId: " + optionalKeyId);
-                    }
-                    return ApplicationService.issuerEncryptionKey.getPrivate();
-                }
-                
-            }).decrypt(CBORObject.decode(fwpJsonAssertion.getEncryptedAuthorization()));
+            byte[] fwpAssertionBinary = decrypter.decrypt(
+                    CBORObject.decode(fwpJsonAssertion.getEncryptedAuthorization()));
             // Succeeded.
             
             // Decode signed assertion (SAD).

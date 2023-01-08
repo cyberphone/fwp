@@ -29,9 +29,11 @@ import java.util.GregorianCalendar;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORAsymKeyEncrypter;
+import org.webpki.cbor.CBORCryptoUtils;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+import org.webpki.cbor.CBORTag;
 import org.webpki.cbor.CBORTextString;
 
 import org.webpki.crypto.CustomCryptoProvider;
@@ -116,7 +118,7 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
                 currPrivateKey.getBytes("utf-8"));
 
-        GregorianCalendar time = ISODateTime.parseDateTime("2022-12-19T10:14:07+01:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2023-01-07T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
@@ -136,7 +138,7 @@ public class TestVectorGeneration {
                 .setPaymentInstrumentData("FR7630002111110020050014382",
                                           "0057162932",
                                           PAYMENT_METHOD)
-                .setPlatformData("Android", "10.0", "Chrome", "103")
+                .setPlatformData("Android", "12.0", "Chrome", "108")
                 .setNetworkOptions("\"additional stuff...\"")
                 .setPayeeHost(MERCHANT_HOST)
                 .create(fwpSigner);
@@ -233,7 +235,14 @@ public class TestVectorGeneration {
                 new CBORAsymKeyEncrypter(x25519.getPublic(),
                                          ISSUER_KEY_ENCRYPTION_ALGORITHM,
                                          ISSUER_CONTENT_ENCRYPTION_ALGORITHM)
-                .setKeyId(ISSUER_KEY_ID).encrypt(fwpAssertion).encode();
+                .setKeyId(ISSUER_KEY_ID)
+                .setIntercepter(new CBORCryptoUtils.Intercepter() {
+
+                    @Override
+                    public CBORObject wrap(CBORMap unwrappedMap) {
+                        return new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, unwrappedMap);
+                    }
+                }).encrypt(fwpAssertion).encode();
         if (!signRewrite) {
             try {
                 encryptedAssertion = ArrayUtil.readFile(testDataDir + FILE_ENCRYPTED_CBOR);
@@ -275,6 +284,17 @@ public class TestVectorGeneration {
                 }
                 return x25519.getPrivate();
             }
+          
+        }).setTagPolicy(CBORCryptoUtils.POLICY.MANDATORY, new CBORCryptoUtils.Collector() {
+            
+            @Override
+            public void foundData(CBORObject tag) throws IOException, GeneralSecurityException {
+                String typeUrl = tag.getTag().getObject().getArray().getObject(0).getTextString();
+                if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
+                    throw new GeneralSecurityException("Unexpected type URL: " + typeUrl);
+                }
+            }
+
         }).decrypt(CBORObject.decode(encryptedAssertion));
  
         FWPAssertionDecoder decodedFwpAssertion =

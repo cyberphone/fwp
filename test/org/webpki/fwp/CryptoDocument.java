@@ -177,7 +177,7 @@ public class CryptoDocument  {
 
     static DecoratorBuilder addList(String fileName) {
         return new DecoratorBuilder(fileName)
-            .add(new int[] {-1}, "authorization")
+            .add(new int[] {-1}, "signature")
             .add(new int[] {-1, 1}, "signatureAlgorithm = ES256")
             .add(new int[] {-1, 2}, "publicKey")
             .add(new int[] {-1, 2, 1}, "kty = EC")
@@ -191,7 +191,7 @@ public class CryptoDocument  {
             addList("AD.txt");
             addList("SAD.txt")
                 .add(new int[] {-1, 3}, "authenticatorData")
-                .add(new int[] {-1, 4}, "signature");
+                .add(new int[] {-1, 4}, "signatureValue");
             
             int keyEncryption = CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt();
             int ephemeralKey = CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt();
@@ -300,6 +300,9 @@ public class CryptoDocument  {
             string = string.substring(0, pos) + offset + 
                     "<span style='color:grey'>/ " + decorator.text + 
                     " /</span>" + string.substring(pos);
+        }
+        if (fileName.equals("ESAD.txt")) {
+            string = "<span style='color:grey'>/ COTX wrapper /</span><br>" + string;
         }
         return string;
     }

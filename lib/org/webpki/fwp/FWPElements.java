@@ -24,15 +24,14 @@ import org.webpki.cbor.CBORInteger;
  */
 public enum FWPElements {
     
-    FWP_VERSION               (1),
-    PAYMENT_REQUEST           (2),
-    PAYEE_HOST                (3),
-    ACCOUNT_ID                (4),
-    PAYMENT_NETWORK_ID        (5),
-    SERIAL_NUMBER             (6),
-    NETWORK_OPTIONS           (7),
-    PLATFORM_DATA             (8),
-    TIME_STAMP                (9),
+    PAYMENT_REQUEST           (1),
+    PAYEE_HOST                (2),
+    ACCOUNT_ID                (3),
+    PAYMENT_NETWORK_ID        (4),
+    SERIAL_NUMBER             (5),
+    NETWORK_OPTIONS           (6),
+    PLATFORM_DATA             (7),
+    TIME_STAMP                (8),
     AUTHORIZATION             (-1);
     
     
@@ -41,8 +40,6 @@ public enum FWPElements {
     FWPElements(int cborLabel) {
         this.cborLabel = new CBORInteger(cborLabel);
     }
-    
-    public static final String CURRENT_VERSION = "1.0";
     
     // Platform Data
     public static final CBORInteger CBOR_PD_OPERATING_SYSTEM = new CBORInteger(1);

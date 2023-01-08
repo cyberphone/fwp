@@ -17,7 +17,7 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
-
+import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -27,7 +27,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyEncrypter;
+import org.webpki.cbor.CBORCryptoUtils;
+import org.webpki.cbor.CBOREncrypter;
+import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
+import org.webpki.cbor.CBORTag;
+
+import org.webpki.fwp.FWPCrypto;
 
 /**
  * Creates and shows the encrypted SAD object (ESAD).
@@ -43,6 +49,27 @@ public class ESADServlet extends HttpServlet {
     private static final String WAITING_ID     = "wait";
     private static final String ACTIVATE_ID    = "activate";
     
+    private static CBOREncrypter encrypter = null;
+    
+    static {
+        try { 
+            encrypter = new CBORAsymKeyEncrypter(
+                    ApplicationService.issuerEncryptionKey.getPublic(),
+                    ApplicationService.issuerKeyEncryptionAlgorithm,
+                    ApplicationService.issuerContentEncryptionAlgorithm)
+                    
+            .setIntercepter(new CBORCryptoUtils.Intercepter() {
+    
+                @Override
+                public CBORObject wrap(CBORMap unwrappedMap) {
+                    return new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, unwrappedMap);
+                }
+                
+            }).setKeyId(ApplicationService.issuerEncryptionKeyId);
+        } catch (IOException | GeneralSecurityException e) {
+        }
+    }
+    
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.setCharacterEncoding("utf-8");
@@ -56,11 +83,7 @@ public class ESADServlet extends HttpServlet {
                 WalletCore.failed("Missing wallet data");
                 return;
             }            
-            CBORObject encryptedAssertion = 
-                    new CBORAsymKeyEncrypter(ApplicationService.issuerEncryptionKey.getPublic(),
-                                             ApplicationService.issuerKeyEncryptionAlgorithm,
-                                             ApplicationService.issuerContentEncryptionAlgorithm)
-                .setKeyId(ApplicationService.issuerEncryptionKeyId).encrypt(
+            CBORObject encryptedAssertion = encrypter.encrypt(
                         ApplicationService.base64UrlDecode(signedAuthorizationDataB64U));
 
             StringBuilder html = new StringBuilder(

@@ -127,13 +127,6 @@ public class FWPAssertionDecoder {
         // Convert binary into CBOR objects.
         fwpAssertion = CBORObject.decode(signedFwpAssertion).getMap();
         
-        // Are we compatible?
-        String version = getString(FWPElements.FWP_VERSION);
-        if (!version.equals(FWPElements.CURRENT_VERSION)) {
-            throw new IOException("Received version: " + version + 
-                                  " expected: " + FWPElements.CURRENT_VERSION);
-        }
-
         // Payment Request (PRCD)
         paymentRequest = new FWPPaymentRequest(
                 fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
