@@ -118,7 +118,7 @@ public class TestVectorGeneration {
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
                 currPrivateKey.getBytes("utf-8"));
 
-        GregorianCalendar time = ISODateTime.parseDateTime("2023-01-07T10:14:07+01:00",
+        GregorianCalendar time = ISODateTime.parseDateTime("2023-02-16T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
@@ -141,6 +141,7 @@ public class TestVectorGeneration {
                 .setPlatformData("Android", "12.0", "Chrome", "108")
                 .setNetworkOptions("\"additional stuff...\"")
                 .setPayeeHost(MERCHANT_HOST)
+                .setLocation(40.748440, -73.984559)  // Empire State Building
                 .create(fwpSigner);
         
         byte[] fwpAssertion = 

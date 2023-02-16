@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 
+import org.webpki.cbor.CBORArray;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
@@ -98,7 +99,12 @@ public class FWPAssertionDecoder {
     private String paymentNetwork;
     public String getPaymentNetwork() {
         return paymentNetwork;
-    } 
+    }
+
+    private double[] location;
+    public double[] getLocation() {
+        return location;
+    }
 
     public void verifyClaimedPaymentRequest(FWPPaymentRequest claimedPaymentRequest) 
             throws IOException {
@@ -163,6 +169,17 @@ public class FWPAssertionDecoder {
             networkOptions = fwpAssertion.getObject(FWPElements.NETWORK_OPTIONS.cborLabel);
             // We mark it as "read" to not get a problem with checkForUnread().
             networkOptions.scan();
+        }
+
+        // Optional location.
+        if (fwpAssertion.hasKey(FWPElements.LOCATION.cborLabel)) {
+            // There is a location, get it!
+            CBORArray cborLocation = 
+                    fwpAssertion.getObject(FWPElements.LOCATION.cborLabel).getArray();
+            location = new double[2];
+            for (int i = 0; i < 2; i++) {
+                location[i] = cborLocation.getObject(i).getDouble();
+            }
         }
         
         // Finally, the authorization signature.

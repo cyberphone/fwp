@@ -26,6 +26,8 @@ import java.util.HashSet;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORArray;
+import org.webpki.cbor.CBORFloatingPoint;
 import org.webpki.cbor.CBORFromJSON;
 
 import org.webpki.fwp.FWPCrypto.FWPPreSigner;
@@ -92,6 +94,15 @@ public class FWPAssertionBuilder {
         return this;
     }
 
+    public FWPAssertionBuilder setLocation(double latitude, double longitude) 
+            throws IOException {
+        setElement(FWPElements.LOCATION, 
+                   new CBORArray()
+                       .addObject(new CBORFloatingPoint(latitude))
+                       .addObject(new CBORFloatingPoint(longitude)));
+        return this;
+    }
+
     public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) 
             throws IOException {
         return setElement(FWPElements.TIME_STAMP,
@@ -111,8 +122,10 @@ public class FWPAssertionBuilder {
         }
         setElement(FWPElements.AUTHORIZATION, fwpPreSigner.appendSignatureObject());
         for (FWPElements name : FWPElements.values()) {
-            // Only NETWORK_DATA is optional.
-            if (!elementList.contains(name) && name != FWPElements.NETWORK_OPTIONS) {
+            // NETWORK_DATA and LOCATION are optional.
+            if (!elementList.contains(name) &&
+                name != FWPElements.NETWORK_OPTIONS &&
+                name != FWPElements.LOCATION) {
                 throw new IOException("Missing element: " + name.toString());
             }
         }

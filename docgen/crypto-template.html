@@ -74,7 +74,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     notation.
   </div>
   <div class="para">
-    Items in <code>red</code> refer to elements associated with the selected @paymentcred@.
+    Items in <code>red</code> refer to attributes associated with the selected @paymentcred@.
   </div>
 @User Authorization@
   <div>
@@ -136,7 +136,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
     <td style='text-align:center'><kbd>3</kbd></td>
     <td><kbd>bstr</kbd></td>
     <td>
-      FIDO assertion data element.
+      FIDO assertion data attribute.
       See also @webauthn@.
     </td>
   </tr>
@@ -153,7 +153,7 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
   </div>
    <div>
 As can be seen in the listing, the <code>signatureAlgorithm</code> and 
-<code>publicKey</code> elements are already featured in the <code>signature</code> <kbd>map</kbd>.
+<code>publicKey</code> attributes are already featured in the <code>signature</code> <kbd>map</kbd>.
 This is because they are static and can thus be included in the data
 to be signed, potentially making the signature scheme more resistant to tampering.
 </div>
@@ -186,7 +186,7 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     </div>
    <div>
     After adding the asserted FIDO <code>authenticatorData</code> and
-    <code>signatureValue</code> elements to the <a href="#signature">signature</a>
+    <code>signatureValue</code> attributes to the <a href="#signature">signature</a>
    <kbd>map</kbd> of AD, the resulting sample should read as follows:</div>
     <div style='overflow-x:auto;padding-right:0.2em'>
       <div class="staticbox" style='min-width:50em'>
@@ -263,7 +263,7 @@ To identify the ESAD object profile, as well as the encrypted SAD object,
 a common <a href="https://www.ietf.org/archive/id/draft-rundgren-cotx-03.html">
 COTX<img src="images/xtl.svg" alt="link"></a> tag with the value
 <kbd style='white-space:nowrap'>&quot;https://fido-web-pay.github.io/ns/p1&quot;</kbd>
-is wrapping the encryption elements. 
+is wrapping the encryption attributes. 
 </div> 
 <div class="para">
 ESAD objects are packaged as follows:
@@ -273,7 +273,7 @@ ESAD objects are packaged as follows:
     </div>
 <div>Numbers in parentheses represent the CBOR <kbd>map</kbd> key
 (label) associated with the symbolic name.
-The elements in the dashed boxes are <i>optional</i>, depending on
+The attributes in the dashed boxes are <i>optional</i>, depending on
 key encryption algorithm and encryption key reference method.</div>
 <div id="mainmap" class="para">Main map definition:</div>
 
@@ -348,7 +348,7 @@ key encryption algorithm and encryption key reference method.</div>
         <i>Optional</i>: To facilitate a streamlined decryption process,
         the encryption object MUST include a reference to the
         encryption key.  This reference is either provided through a <code>keyId</code>
-        or through the <code>publicKey</code> itself. That is, both elements MUST NOT
+        or through the <code>publicKey</code> itself. That is, both attributes MUST NOT
         be present in an FWP compliant encryption object.
         <div class="para">
           Note that the this specification does not define any specific <code>keyId</code> syntax.
@@ -364,7 +364,7 @@ key encryption algorithm and encryption key reference method.</div>
       <td>
         <i>Optional</i>: Public key in COSE format.  See <code>keyId</code>.
         <div class="para">
-          Note that a <code>publicKey</code> element MUST only contain the
+          Note that a <code>publicKey</code> attribute MUST only contain the
           core public key data.
         </div>
       </td>
@@ -376,7 +376,7 @@ key encryption algorithm and encryption key reference method.</div>
       <td>
         Ephemeral public key in COSE format.
         <div class="para">
-          Note that a <code>publicKey</code> element MUST only contain the
+          Note that a <code>publicKey</code> attribute MUST only contain the
           core public key data.
         </div>
       </td>
@@ -398,8 +398,8 @@ To encrypt a #SAD# object, the following steps MUST be performed:
   <li>
     Retrieve the <code>keyEncryptionAlgorithm</code>,
     <code>contentEncryptionAlgorithm</code>,
-    and <code>encryptionKey</code> elements of the selected @paymentcred@.
-    The compatibility of these elements with respect to this specification,
+    and <code>encryptionKey</code> attributes of the selected @paymentcred@.
+    The compatibility of these attributes with respect to this specification,
     as well as with the client implementation, is assumed
     to have been verified during credential enrollment.
   </li>
@@ -515,7 +515,7 @@ COSE content encryption algorithms:</div>
   </table>
 </div>
 <div>The length of the &quot;Key&quot;, &quot;Tag&quot;, and &quot;IV&quot;
-elements are in bytes.</div>
+attributes are in bytes.</div>
 @Key Algorithms@
 <div>
   Compliant FWP implementations MUST as a
@@ -552,7 +552,7 @@ COSE key encryption algorithms:</div>
   </table>
 </div>
 <div>
-  The length of the &quot;Derived&nbsp;Key&quot; element is in bytes.
+  The length of the &quot;Derived&nbsp;Key&quot; attribute is in bytes.
 </div>
 
 @Key Derivation Function@
@@ -590,28 +590,28 @@ Perform the following steps to decrypt the ESAD object:
   <li>
     Retrieve the private encryption key associated with the <code>encryptionKeyId</code> or
     the <code>publicKey</code> in the <a href="#submap">Sub map</a>, depending on
-    which of the elements that are defined (which in most cases is known in advance
+    which of the attributes that are defined (which in most cases is known in advance
     since the issuer and relying party usually is the same entity).
   </li>
 <li>
-Fetch the ECDH algorithm to use from the <code>algorithm</code> element in the <a href="#submap">Sub map</a>.
+Fetch the ECDH algorithm to use from the <code>algorithm</code> attribute in the <a href="#submap">Sub map</a>.
 </li>
   <li>
   Perform an ECDH key agreement operation including #KDF# with the retrieved private key
-  and the <code>ephemeralKey</code> element in the <a href="#submap">Sub map</a>. 
+  and the <code>ephemeralKey</code> attribute in the <a href="#submap">Sub map</a>. 
 </li>
 <li>
 For key wrapping ECDH algorithms, use the result of the ECDH operation
 to unwrap a <kbd>contentEncryptionKey</kbd> (specified by
-the <code>cipherText</code> element in the <a href="#submap">Sub map</a>), while <kbd>ECDH-ES</kbd>
+the <code>cipherText</code> attribute in the <a href="#submap">Sub map</a>), while <kbd>ECDH-ES</kbd>
 returns the <kbd>contentEncryptionKey</kbd> directly.  See #Key Encryption Algorithms#.
 </li>
 <li>
   Fetch the <kbd>contentEncryptionAlgorithm</kbd> specified by the <code>algorithm</code>
-  element in the <a href="#mainmap">Main map</a>.  See #Content Encryption Algorithms#.
+  attribute in the <a href="#mainmap">Main map</a>.  See #Content Encryption Algorithms#.
 </li>
 <li>Fetch and remove the <code>tag</code>, <code>iv</code>, and <code>cipherText</code>
-elements in the <a href="#mainmap">Main map</a>.</li>
+attributes in the <a href="#mainmap">Main map</a>.</li>
 <li>Serialize the remaining CBOR object and assign the result to an
 <kbd>AAD</kbd> (Additional Authenticated Data) variable.</li>
 <li>
@@ -633,13 +633,13 @@ elements in the <a href="#mainmap">Main map</a>.</li>
 is assumed to be a #SAD# object.</div>
 @Decode Signed Authorization Data (SAD)@
 <div>Decode the #SAD# binary using a suitable CBOR parser.</div>
-<div class="para">Fetch and remove the FIDO elements <code>authenticatorData</code>
+<div class="para">Fetch and remove the FIDO attributes <code>authenticatorData</code>
 and <code>signatureValue</code> from the decoded object
 which now effectively is an #AD# object.
 </div>
 @Validate Signature@
 <div>
-The signature is validated by applying the elements received in the 
+The signature is validated by applying the attributes received in the 
 <a href="#signature">signature</a> <kbd>map</kbd> to
 a suitable signature validation API like:
 </div>

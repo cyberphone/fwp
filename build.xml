@@ -80,7 +80,7 @@
               </fileset>
         </classpath>
     </javac>
-    </target>
+  </target>
     
   <target name="build" depends="_compile">
     <copy file="web.xml" todir="${temp.dir}"/>
@@ -176,6 +176,16 @@
        </classpath>
        <arg line="${testdata.dir} ${openkeystore.dir}/testdata/keys"/>
      </java>
+     <copy todir="${fido-web-pay.dir}/specification/originals" overWrite="true">
+       <fileset dir="${testdata.dir}">
+         <include name="AD.txt"/>
+         <include name="SAD.txt"/>
+         <include name="ESAD.txt"/>
+         <include name="FWP-assertion.json"/>
+         <include name="PSP-request.json"/>
+         <include name="ISSUER-request.json"/>
+       </fileset>
+     </copy>
   </target>
 
   <target name="ctap2test" depends="_compile">

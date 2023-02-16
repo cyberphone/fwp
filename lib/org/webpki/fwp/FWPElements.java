@@ -29,9 +29,10 @@ public enum FWPElements {
     ACCOUNT_ID                (3),
     PAYMENT_NETWORK_ID        (4),
     SERIAL_NUMBER             (5),
-    NETWORK_OPTIONS           (6),
-    PLATFORM_DATA             (7),
-    TIME_STAMP                (8),
+    NETWORK_OPTIONS           (6),  // Optional (Merchant)
+    PLATFORM_DATA             (7), 
+    LOCATION                  (8),  // Optional (Client)
+    TIME_STAMP                (9),
     AUTHORIZATION             (-1);
     
     

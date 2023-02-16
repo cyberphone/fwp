@@ -340,6 +340,9 @@ public class IssuerServlet extends HttpServlet {
                     "<tr><th>IP&nbsp;Address</th><td>")
             .append(pspRequest.getClientIpAddress())
             .append("</td></tr>" +
+                    "<tr><th>Location</th><td>")
+            .append("N/A")
+            .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
             .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
                                                ISODateTime.LOCAL_NO_SUBSECONDS))
