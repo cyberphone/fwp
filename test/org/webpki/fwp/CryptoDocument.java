@@ -189,6 +189,7 @@ public class CryptoDocument  {
     static {
         try {
             addList("AD.txt");
+            addList("hashed-AD.bin");
             addList("SAD.txt")
                 .add(new int[] {-1, 3}, "authenticatorData")
                 .add(new int[] {-1, 4}, "signatureValue");
@@ -366,6 +367,7 @@ public class CryptoDocument  {
         this.template =  readStringFile(DOC_GEN_DIRECTORY + File.separator + "crypto-template.html");
         process(new String[]{"hex/ad.cbor", 
                              "txt/AD.txt",
+                             "hex/hashed-AD.bin",
                              "hex/sad.cbor", 
                              "txt/SAD.txt",
                              "hex/esad.cbor",

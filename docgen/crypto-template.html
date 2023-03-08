@@ -39,8 +39,8 @@ a {color:#4366bf;text-decoration:none;font-weight:500;white-space:nowrap}
 </style>
 </head>
 <body>
-  <img style="max-width:30%" src="images/fwp.svg" alt="logo" title="FWP logotype"/>
-  <img style="max-width:30%;position:absolute;right:1em;top:1em" src="images/ipr.svg" alt="IPR declaration" title="IPR declaration"/>
+  <img style="max-width:30%" src="images/fwp.svg" alt="logo" title="FWP logotype">
+  <img style="max-width:30%;position:absolute;right:1em;top:1em" src="images/ipr.svg" alt="IPR declaration" title="IPR declaration">
   <div style="text-align:center" class="header">FIDO Web Pay - Crypto</div>
   <div id="toc" class="header">Table of Contents</div>
   @table-of-contents@
@@ -181,18 +181,26 @@ to be signed, potentially making the signature scheme more resistant to tamperin
     turn to @webauthn@.  Note that AD is signed after <i>hashing</i>, making
     <code>clientDataHash</code> the actual data to be signed:
 </div>
-    <div style='overflow-x:auto;padding:0.5em 0.2em 0 0'>
+<div style='overflow-x:auto;padding:0.5em 0.2em 0 0'>
 <img src='https://www.w3.org/TR/webauthn-2/images/fido-signature-formats-figure2.svg' alt='signature'>
-    </div>
-   <div>
-    After adding the asserted FIDO <code>authenticatorData</code> and
-    <code>signatureValue</code> attributes to the <a href="#signature">signature</a>
-   <kbd>map</kbd> of AD, the resulting sample should read as follows:</div>
-    <div style='overflow-x:auto;padding-right:0.2em'>
-      <div class="staticbox" style='min-width:50em'>
-      @txt/SAD.txt@
-      </div>
-    </div>
+</div>
+<div>
+    The SHA256 hash of the sample AD should read as follows if encoded in hexadecimal:
+</div>
+<div style='overflow-x:auto;padding-right:0.2em'>
+  <div class="staticbox" style='min-width:50em'>
+    @hex/hashed-AD.bin@
+  </div>
+ </div>
+ <div class="para">
+  After adding the asserted FIDO <code>authenticatorData</code> and
+  <code>signatureValue</code> attributes to the <a href="#signature">signature</a>
+ <kbd>map</kbd> of AD, the resulting sample should read as follows:</div>
+<div style='overflow-x:auto;padding-right:0.2em'>
+  <div class="staticbox" style='min-width:50em'>
+  @txt/SAD.txt@
+  </div>
+</div>
 <div>This object is subsequently referred to as Signed Authorization Data (SAD).</div>
 <div class="para">
     The sample SAD object should read as follows if encoded in hexadecimal:
@@ -734,8 +742,8 @@ Note that the ESAD sample uses a <code>keyId</code> for identifying the encrypti
       </div>
  @Trademarks@
       <div>
-        FIDO is a registered trademark of the FIDO alliance.<br />
-        EMV is a registered trademark of EMVCo.<br />&nbsp;<br />
+        FIDO is a registered trademark of the FIDO alliance.<br>
+        EMV is a registered trademark of EMVCo.<br>&nbsp;<br>
         This specification represents an <i>independent effort</i>,
         not associated with the FIDO alliance or EMVCo.
       </div>

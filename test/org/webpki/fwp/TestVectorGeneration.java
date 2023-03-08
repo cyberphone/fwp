@@ -78,7 +78,7 @@ public class TestVectorGeneration {
     static final String FILE_SIGNATURE_JWK   = "signature.jwk";
     static final String FILE_ENCRYPTION_JWK  = "encryption.jwk";
     static final String FILE_UNSIGNED_CBOR   = "ad.cbor";
-    static final String FILE_HASHED_TEXT     = "hashed-AD.txt";
+    static final String FILE_HASHED_BIN     = "hashed-AD.bin";
     static final String FILE_SIGNED_CBOR     = "sad.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "esad.cbor";
     static final String FILE_CHALLENGE_B64U  = "challenge.txt";
@@ -145,8 +145,8 @@ public class TestVectorGeneration {
                 .setLocation(40.748440, -73.984559)  // Empire State Building
                 .create(fwpSigner);
         
-        conditionalRewrite(testDataDir + FILE_HASHED_TEXT, 
-                HexaDecimal.encode(HashAlgorithms.SHA256.digest(unsignedFwpAssertion)));
+        conditionalRewrite(testDataDir + FILE_HASHED_BIN, 
+                HashAlgorithms.SHA256.digest(unsignedFwpAssertion));
 
         byte[] fwpAssertion = 
                 FWPCrypto.directSign(unsignedFwpAssertion,
