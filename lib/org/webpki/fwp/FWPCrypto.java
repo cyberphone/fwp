@@ -35,6 +35,7 @@ import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+import org.webpki.cbor.CBORTextString;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
@@ -68,7 +69,7 @@ public class FWPCrypto {
     public static final String SIGNATURE            = "signature";
     
     // For FIDO attestations only
-    public static final String AUTH_DATA_CBOR       = "authData";
+    public static final CBORTextString AUTH_DATA_CBOR = new CBORTextString("authData");
 
     // Attestation Object flags
     public static final int    FLAG_UP              = 0x01;

@@ -40,6 +40,7 @@ import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
+import org.webpki.cbor.CBORTextString;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
@@ -291,7 +292,8 @@ public class FIDOTest {
                             new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
         baos.write(publicKey.encode());
         if (extension) {
-            baos.write(new CBORMap().setObject("blah", new CBORInteger(-3)).encode());
+            baos.write(new CBORMap().setObject(new CBORTextString("blah"), 
+                                               new CBORInteger(-3)).encode());
         }
         
         byte[] attestationObject = new CBORMap()
