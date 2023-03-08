@@ -78,6 +78,7 @@ public class TestVectorGeneration {
     static final String FILE_SIGNATURE_JWK   = "signature.jwk";
     static final String FILE_ENCRYPTION_JWK  = "encryption.jwk";
     static final String FILE_UNSIGNED_CBOR   = "ad.cbor";
+    static final String FILE_HASHED_TEXT     = "hashed-AD.txt";
     static final String FILE_SIGNED_CBOR     = "sad.cbor";
     static final String FILE_ENCRYPTED_CBOR  = "esad.cbor";
     static final String FILE_CHALLENGE_B64U  = "challenge.txt";
@@ -144,6 +145,9 @@ public class TestVectorGeneration {
                 .setLocation(40.748440, -73.984559)  // Empire State Building
                 .create(fwpSigner);
         
+        conditionalRewrite(testDataDir + FILE_HASHED_TEXT, 
+                HexaDecimal.encode(HashAlgorithms.SHA256.digest(unsignedFwpAssertion)));
+
         byte[] fwpAssertion = 
                 FWPCrypto.directSign(unsignedFwpAssertion,
                                      p256.getPrivate(),
@@ -303,7 +307,7 @@ public class TestVectorGeneration {
         decodedFwpAssertion.verifyClaimedPaymentRequest(paymentRequest);
 
         conditionalRewrite(testDataDir + FILE_TESTVECTOR_TEXT, 
-                           result.toString().getBytes("utf-8"));
+                           result.toString());
 
         
         // The following were only added for the specification samples...
@@ -315,7 +319,7 @@ public class TestVectorGeneration {
                                                "220.13.198.144", 
                                                time);
         conditionalRewrite(testDataDir + FILE_PSP_REQUEST_JSON, 
-                pspRequest.toString().getBytes("utf-8"));
+                pspRequest.toString());
 
         
         time.add(GregorianCalendar.SECOND, 1);
@@ -323,7 +327,7 @@ public class TestVectorGeneration {
                                                         "spaceshop.com", 
                                                         time);
         conditionalRewrite(testDataDir + FILE_ISSUER_REQUEST_JSON, 
-                issuerRequest.toString().getBytes("utf-8"));
+                issuerRequest.toString());
 
     }
 
@@ -340,6 +344,9 @@ public class TestVectorGeneration {
         return true;
     }
 
+    boolean conditionalRewrite(String fileName, String newFile) throws IOException {
+        return conditionalRewrite(fileName, newFile.getBytes("utf-8"));
+    }
 
     CBORMap cleanSignature(byte[] assertion) throws IOException {
         CBORMap fwpAssertion = CBORObject.decode(assertion).getMap();
