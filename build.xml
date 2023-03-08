@@ -179,7 +179,6 @@
      <copy todir="${fido-web-pay.dir}/specification/originals" overWrite="true">
        <fileset dir="${testdata.dir}">
          <include name="AD.txt"/>
-         <include name="hashed-AD.txt"/>
          <include name="SAD.txt"/>
          <include name="ESAD.txt"/>
          <include name="FWP-assertion.json"/>
