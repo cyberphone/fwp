@@ -30,12 +30,12 @@ import java.security.interfaces.RSAKey;
 
 import java.util.HashSet;
 
-import org.webpki.cbor.CBORByteString;
+import org.webpki.cbor.CBORBytes;
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
-import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORString;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
@@ -69,7 +69,7 @@ public class FWPCrypto {
     public static final String SIGNATURE            = "signature";
     
     // For FIDO attestations only
-    public static final CBORTextString AUTH_DATA_CBOR = new CBORTextString("authData");
+    public static final CBORString AUTH_DATA_CBOR = new CBORString("authData");
 
     // Attestation Object flags
     public static final int    FLAG_UP              = 0x01;
@@ -121,10 +121,10 @@ public class FWPCrypto {
         }
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
         CBORMap authorization = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
-        authorization.setObject(AS_AUTHENTICATOR_DATA, new CBORByteString(authenticatorData))
-                     .setObject(AS_SIGNATURE, new CBORByteString(signature));
+        authorization.setObject(AS_AUTHENTICATOR_DATA, new CBORBytes(authenticatorData))
+                     .setObject(AS_SIGNATURE, new CBORBytes(signature));
         if (clientDataJSON != null) {
-            authorization.setObject(AS_CLIENT_DATA_JSON, new CBORByteString(clientDataJSON));
+            authorization.setObject(AS_CLIENT_DATA_JSON, new CBORBytes(clientDataJSON));
         }
         return cborFwpAssertion.encode();
     }
@@ -280,12 +280,12 @@ public class FWPCrypto {
         // Fetch the core FIDO assertion elements. Remove them
         // from the FWP assertion as well since they are not a
         // part of the FIDO "challenge" data.
-        byte[] authenticatorData = authorization.readByteStringAndRemoveKey(AS_AUTHENTICATOR_DATA);
+        byte[] authenticatorData = authorization.readBytesAndRemoveKey(AS_AUTHENTICATOR_DATA);
         // Note that the ctap2 option removes "clientDataJSON" from FWP assertions.
         boolean ctap2 = !authorization.hasKey(AS_CLIENT_DATA_JSON);
         byte[] clientDataJSON = 
-                ctap2 ? null : authorization.readByteStringAndRemoveKey(AS_CLIENT_DATA_JSON);
-        byte[] signature = authorization.readByteStringAndRemoveKey(AS_SIGNATURE);
+                ctap2 ? null : authorization.readBytesAndRemoveKey(AS_CLIENT_DATA_JSON);
+        byte[] signature = authorization.readBytesAndRemoveKey(AS_SIGNATURE);
         
         // Collect authenticator data that may be useful in disputes.
         // Note that possible extension data (ED) is ignored.
@@ -353,7 +353,7 @@ public class FWPCrypto {
 
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
-                .getMap().getObject(AUTH_DATA_CBOR).getByteString();
+                .getMap().getObject(AUTH_DATA_CBOR).getBytes();
         if ((authData[FLAG_OFFSET] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[FLAG_OFFSET] & 0xff));

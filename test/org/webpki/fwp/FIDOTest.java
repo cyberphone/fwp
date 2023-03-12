@@ -35,12 +35,12 @@ import java.util.GregorianCalendar;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import org.webpki.cbor.CBORByteString;
+import org.webpki.cbor.CBORBytes;
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
-import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORString;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
@@ -110,7 +110,7 @@ public class FIDOTest {
                            String rpUrl,
                            byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
-        byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getByteString();
+        byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getBytes();
 // System.out.println(HexaDecimal.encode(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, FWPCrypto.FLAG_OFFSET));
@@ -292,12 +292,12 @@ public class FIDOTest {
                             new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
         baos.write(publicKey.encode());
         if (extension) {
-            baos.write(new CBORMap().setObject(new CBORTextString("blah"), 
+            baos.write(new CBORMap().setObject(new CBORString("blah"), 
                                                new CBORInteger(-3)).encode());
         }
         
         byte[] attestationObject = new CBORMap()
-                .setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORByteString(baos.toByteArray())).encode();
+                .setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORBytes(baos.toByteArray())).encode();
         assertTrue("pubk", keyPair.getPublic().equals(
                 CBORPublicKey.decode(CBORObject.decode(FWPCrypto.extractUserCredential(attestationObject)
                         .rawCosePublicKey))));

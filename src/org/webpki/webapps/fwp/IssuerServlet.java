@@ -97,7 +97,7 @@ public class IssuerServlet extends HttpServlet {
         @Override
         public void foundData(CBORObject tag) 
                 throws IOException, GeneralSecurityException {
-            String typeUrl = tag.getTag().getObject().getArray().getObject(0).getTextString();
+            String typeUrl = tag.getTag().getObject().getArray().getObject(0).getString();
             if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
                 throw new GeneralSecurityException("Unexpected type URL: " + typeUrl);
             }

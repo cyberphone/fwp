@@ -50,9 +50,9 @@ public class FWPAssertionDecoder {
         
         PlatformNameVersion(CBORObject nameVersion) throws IOException {
             this.name = nameVersion.getMap().getObject(
-                    FWPElements.CBOR_PDSUB_NAME).getTextString();
+                    FWPElements.CBOR_PDSUB_NAME).getString();
             this.version = nameVersion.getMap().getObject(
-                    FWPElements.CBOR_PDSUB_VERSION).getTextString();
+                    FWPElements.CBOR_PDSUB_VERSION).getString();
         }
     }
     
@@ -115,7 +115,7 @@ public class FWPAssertionDecoder {
     }
     
     private String getString(FWPElements name) throws IOException {
-        return fwpAssertion.getObject(name.cborLabel).getTextString();
+        return fwpAssertion.getObject(name.cborLabel).getString();
     }
     
     private byte[] publicKey;

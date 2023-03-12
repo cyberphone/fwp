@@ -25,9 +25,9 @@ import java.util.HashSet;
 
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
-import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORString;
 import org.webpki.cbor.CBORArray;
-import org.webpki.cbor.CBORFloatingPoint;
+import org.webpki.cbor.CBORDouble;
 import org.webpki.cbor.CBORFromJSON;
 
 import org.webpki.fwp.FWPCrypto.FWPPreSigner;
@@ -54,14 +54,14 @@ public class FWPAssertionBuilder {
 
     private FWPAssertionBuilder setStringElement(FWPElements element,
                                                  String string) throws IOException {
-        return setElement(element, new CBORTextString(string));
+        return setElement(element, new CBORString(string));
     }
 
     private CBORMap nameVersion(String name, String version) throws IOException {
         return new CBORMap().setObject(FWPElements.CBOR_PDSUB_NAME,
-                                       new CBORTextString(name))
+                                       new CBORString(name))
                             .setObject(FWPElements.CBOR_PDSUB_VERSION,
-                                       new CBORTextString(version));
+                                       new CBORString(version));
     }
 
     public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
@@ -98,15 +98,15 @@ public class FWPAssertionBuilder {
             throws IOException {
         setElement(FWPElements.LOCATION, 
                    new CBORArray()
-                       .addObject(new CBORFloatingPoint(latitude))
-                       .addObject(new CBORFloatingPoint(longitude)));
+                       .addObject(new CBORDouble(latitude))
+                       .addObject(new CBORDouble(longitude)));
         return this;
     }
 
     public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) 
             throws IOException {
         return setElement(FWPElements.TIME_STAMP,
-                          new CBORTextString(ISODateTime.formatDateTime(
+                          new CBORString(ISODateTime.formatDateTime(
                                   timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS)));
     }
 

@@ -21,7 +21,7 @@ import java.io.IOException;
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
-import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORString;
 
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
@@ -75,10 +75,10 @@ public class FWPPaymentRequest {
     
     public FWPPaymentRequest(CBORObject cborObject) throws IOException {
         CBORMap cborPaymentRequest = cborObject.getMap();
-        payeeName = cborPaymentRequest.getObject(CBOR_PR_PAYEE_NAME).getTextString();
-        requestId = cborPaymentRequest.getObject(CBOR_PR_REQUEST_ID).getTextString();
-        amount = cborPaymentRequest.getObject(CBOR_PR_AMOUNT).getTextString();
-        currency = cborPaymentRequest.getObject(CBOR_PR_CURRENCY).getTextString();
+        payeeName = cborPaymentRequest.getObject(CBOR_PR_PAYEE_NAME).getString();
+        requestId = cborPaymentRequest.getObject(CBOR_PR_REQUEST_ID).getString();
+        amount = cborPaymentRequest.getObject(CBOR_PR_AMOUNT).getString();
+        currency = cborPaymentRequest.getObject(CBOR_PR_CURRENCY).getString();
         cborObject.checkForUnread();
     }
     
@@ -102,10 +102,10 @@ public class FWPPaymentRequest {
     
     public CBORMap serializeAsCBOR() throws IOException {
         return new CBORMap()
-                .setObject(CBOR_PR_PAYEE_NAME, new CBORTextString(payeeName))
-                .setObject(CBOR_PR_REQUEST_ID, new CBORTextString(requestId))
-                .setObject(CBOR_PR_AMOUNT, new CBORTextString(amount))
-                .setObject(CBOR_PR_CURRENCY, new CBORTextString(currency));
+                .setObject(CBOR_PR_PAYEE_NAME, new CBORString(payeeName))
+                .setObject(CBOR_PR_REQUEST_ID, new CBORString(requestId))
+                .setObject(CBOR_PR_AMOUNT, new CBORString(amount))
+                .setObject(CBOR_PR_CURRENCY, new CBORString(currency));
     }
 
     public JSONObjectWriter getWriter() throws IOException {

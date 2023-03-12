@@ -34,7 +34,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 import org.webpki.cbor.CBORTag;
-import org.webpki.cbor.CBORTextString;
+import org.webpki.cbor.CBORString;
 
 import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.HashAlgorithms;
@@ -63,7 +63,7 @@ public class TestVectorGeneration {
     static final String ISSUER_URL     = "https://mybank.fr";
     static final String ISSUER_ID      = "https://mybank.fr/payment";
     static final String PAYMENT_METHOD = "https://banknet2.org";
-    static final CBORTextString ISSUER_KEY_ID = new CBORTextString("x25519:2022:1");
+    static final CBORString ISSUER_KEY_ID = new CBORString("x25519:2022:1");
 
     static final KeyEncryptionAlgorithms ISSUER_KEY_ENCRYPTION_ALGORITHM =
             KeyEncryptionAlgorithms.ECDH_ES_A256KW;
@@ -182,7 +182,7 @@ public class TestVectorGeneration {
                       "****************************************");
         
         byte[] clientDataJSONbin = ctap2 ? null : authContainer.getObject(
-                FWPCrypto.AS_CLIENT_DATA_JSON).getByteString();
+                FWPCrypto.AS_CLIENT_DATA_JSON).getBytes();
   
         if (!ctap2) {
             conditionalRewrite(testDataDir + FILE_CLIENT_DATA_JSON, 
@@ -199,13 +199,13 @@ public class TestVectorGeneration {
                       "\nReturned FIDO '" + FWPCrypto.AUTHENTICATOR_DATA + 
                       "' in hexadecimal notation:\n")
               .append(HexaDecimal.encode(
-                      authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getByteString()))
+                      authContainer.getObject(FWPCrypto.AS_AUTHENTICATOR_DATA).getBytes()))
               .append("\n(here using the UP+UV flags and a zero counter value)\n");
 
         result.append("\nReturned FIDO '" + FWPCrypto.SIGNATURE + 
                       "' in hexadecimal notation:\n")
         .append(HexaDecimal.encode(
-              authContainer.getObject(FWPCrypto.AS_SIGNATURE).getByteString()));
+              authContainer.getObject(FWPCrypto.AS_SIGNATURE).getBytes()));
 
         result.append("\n\nSigned FWP assertion (SAD), here in CBOR 'diagnostic notation':\n")
               .append(CBORObject.decode(fwpAssertion).toString())
@@ -294,7 +294,7 @@ public class TestVectorGeneration {
             
             @Override
             public void foundData(CBORObject tag) throws IOException, GeneralSecurityException {
-                String typeUrl = tag.getTag().getObject().getArray().getObject(0).getTextString();
+                String typeUrl = tag.getTag().getObject().getArray().getObject(0).getString();
                 if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
                     throw new GeneralSecurityException("Unexpected type URL: " + typeUrl);
                 }
