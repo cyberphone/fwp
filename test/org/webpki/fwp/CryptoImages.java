@@ -35,8 +35,9 @@ public class CryptoImages {
     
     static int LABEL_GUTTER = 20;
     static int LABEL_HEIGHT = 80;
+    static int LABEL_MIDDLE = (LABEL_GUTTER + LABEL_GUTTER + LABEL_HEIGHT) / 2;
     
-    static int IMAGE_WIDTH  = 85;
+    static int IMAGE_WIDTH  = 83;
     
     static final int TEXT_LEFT_MARGIN = 24;
     static final int TEXT_FONT_SIZE = 40;
@@ -46,6 +47,7 @@ public class CryptoImages {
     static final int SUB_HEADER_Y_OFFSET = 120;
 
     boolean cborFull;
+    boolean initialLabel;
     StringBuilder svg;
     StringBuilder textLabels;
     StringBuilder headerTexts;
@@ -62,15 +64,16 @@ public class CryptoImages {
     }
     
     int totalHeight() {
-        return (cborFull ? 6 * LABEL_HEIGHT + 5 * LABEL_GUTTER
+        return (cborFull ? 7 * LABEL_HEIGHT + 5 * LABEL_GUTTER
                                        :
                            5 * LABEL_HEIGHT + 4 * LABEL_GUTTER) + HEADER_HEIGHT + MARGIN;
     }
     
     void label(String labelText, CBORObject cborLabel, boolean mandatory) throws Exception {
-        if (top != HEADER_HEIGHT) {
+        if (!initialLabel) {
             top += LABEL_GUTTER;
         }
+        initialLabel = false;
         svg.append("<rect x='")
            .append(left)
            .append("' y='")
@@ -95,6 +98,7 @@ public class CryptoImages {
     }
     
     void headers(String subHeaderText, String mainHeaderText) {
+        initialLabel = true;
         headerTexts.append("<text x='")
                    .append(left + width / 2)
                    .append("' y='")
@@ -133,6 +137,9 @@ public class CryptoImages {
 
         headers("(Content Encryption)", "Main Map");
 
+ //       if (cborFull) {
+ //           label("customData", CUSTOM_DATA_LABEL, false);
+ //       }
         label("algorithm", ALGORITHM_LABEL, true);
         label("keyEncryption", KEY_ENCRYPTION_LABEL, !cborFull);
         if (cborFull) {
@@ -157,7 +164,7 @@ public class CryptoImages {
         label("ephemeralKey", EPHEMERAL_KEY_LABEL, !cborFull);
         label("cipherText", CIPHER_TEXT_LABEL, false);
         
-        int longPath = 186 + (cborFull ? LABEL_HEIGHT + LABEL_GUTTER : 0);
+        int longPath = (LABEL_HEIGHT + LABEL_GUTTER) * (cborFull ? 3 : 2);
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")
@@ -167,11 +174,14 @@ public class CryptoImages {
                                "' font-family='Noto Mono,monospace' fill='maroon'>\n")
            .append(textLabels)
            .append("</g>\n" +
-                   "<path fill='none' stroke='#4366bf' stroke-width='3' stroke-linecap='round' d='M")
-           .append(left - IMAGE_WIDTH - MARGIN)
+                   "<path fill='none' stroke='#4366bf' stroke-width='3' stroke-linecap='round' d='m ")
+           .append(left - MARGIN)
            .append("," + HEADER_HEIGHT)
-           .append("  m " + IMAGE_WIDTH + ",0 c -33,0 -35,68 -35,68 0,30 -18,68 "+
-                   "-48,72 30,8 48,35 48,80 v " + longPath + " c 0,0 0,74 36,74'/>\n");
+           .append(" c -35,0 -35," + LABEL_HEIGHT + " -35," + LABEL_HEIGHT +
+                   " v 0" +
+                   " c 0,0 0,49 -48," + LABEL_MIDDLE + 
+                   " c 48,11 48," + LABEL_MIDDLE + " 48," + LABEL_MIDDLE +
+                   " v " + longPath + " c 0,0 0," + LABEL_HEIGHT + " 35," + LABEL_HEIGHT + "'/>\n");
         
         ArrayUtil.writeFile(fileName, svg.append("</svg>\n").toString().getBytes("utf-8"));
     }

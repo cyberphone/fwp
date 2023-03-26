@@ -27,7 +27,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORString;
 import org.webpki.cbor.CBORArray;
-import org.webpki.cbor.CBORDouble;
+import org.webpki.cbor.CBORFloatingPoint;
 import org.webpki.cbor.CBORFromJSON;
 
 import org.webpki.fwp.FWPCrypto.FWPPreSigner;
@@ -98,8 +98,8 @@ public class FWPAssertionBuilder {
             throws IOException {
         setElement(FWPElements.LOCATION, 
                    new CBORArray()
-                       .addObject(new CBORDouble(latitude))
-                       .addObject(new CBORDouble(longitude)));
+                       .addObject(new CBORFloatingPoint(latitude))
+                       .addObject(new CBORFloatingPoint(longitude)));
         return this;
     }
 
