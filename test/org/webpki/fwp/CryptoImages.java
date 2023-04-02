@@ -64,7 +64,7 @@ public class CryptoImages {
     }
     
     int totalHeight() {
-        return (cborFull ? 7 * LABEL_HEIGHT + 5 * LABEL_GUTTER
+        return (cborFull ? 6 * LABEL_HEIGHT + 5 * LABEL_GUTTER
                                        :
                            5 * LABEL_HEIGHT + 4 * LABEL_GUTTER) + HEADER_HEIGHT + MARGIN;
     }
