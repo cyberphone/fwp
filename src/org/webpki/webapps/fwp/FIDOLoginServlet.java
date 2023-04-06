@@ -143,7 +143,7 @@ public class FIDOLoginServlet extends HttpServlet {
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
                     PublicKey publicKey = 
-                            CBORPublicKey.decode(CBORObject.decode(coreClientData.cosePublicKey));
+                            CBORPublicKey.convert(CBORObject.decode(coreClientData.cosePublicKey));
                     FWPCrypto.validateFidoSignature(
                             FWPCrypto.getWebPkiAlgorithm(
                                     FWPCrypto.publicKey2CoseSignatureAlgorithm(publicKey)), 

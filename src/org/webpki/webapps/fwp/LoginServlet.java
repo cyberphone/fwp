@@ -210,7 +210,7 @@ public class LoginServlet extends HttpServlet {
                 .append("</div>" +
 
                         "<div class='ctblh'>FIDO ")
-                .append(KeyAlgorithms.getKeyAlgorithm(CBORPublicKey.decode(publicKey)).getKeyType())
+                .append(KeyAlgorithms.getKeyAlgorithm(CBORPublicKey.convert(publicKey)).getKeyType())
                 .append(
                         " Public Key (COSE)</div>" +
                         "<div class='ctbl'>")

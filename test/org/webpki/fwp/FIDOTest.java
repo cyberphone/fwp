@@ -122,7 +122,7 @@ public class FIDOTest {
                                            credentialId,
                                            0,
                                            credentialIdLength));
-        return CBORPublicKey.decode(CBORObject.decode(
+        return CBORPublicKey.convert(CBORObject.decode(
                 FWPCrypto.extractUserCredential(attestation.encode()).rawCosePublicKey));
     }
     
@@ -203,7 +203,7 @@ public class FIDOTest {
     public void CreateAssertions() throws Exception {
         KeyPair keyPair = readKey("p256");
         fwpPreSigner = new FWPCrypto.FWPPreSigner(
-             CBORPublicKey.encode(keyPair.getPublic()).encode());
+             CBORPublicKey.convert(keyPair.getPublic()).encode());
         try {
             new FWPAssertionBuilder()
                 .setPaymentRequest(getPaymentRequest(true))
@@ -230,7 +230,7 @@ public class FIDOTest {
     public void DecodeAssertions() throws Exception {
         KeyPair keyPair = readKey("p256");
         fwpPreSigner = new FWPCrypto.FWPPreSigner(
-             CBORPublicKey.encode(keyPair.getPublic()).encode());
+             CBORPublicKey.convert(keyPair.getPublic()).encode());
         FWPAssertionDecoder decoder = 
                 new FWPAssertionDecoder(buildGoodPaymenRequest(null, keyPair.getPrivate()));
         FWPPaymentRequest paymentRequest = decoder.getPaymentRequest();
@@ -287,7 +287,7 @@ public class FIDOTest {
         baos.write(credentialId.length & 0xff);
         baos.write(credentialId);
         
-        CBORMap publicKey = CBORPublicKey.encode(keyPair.getPublic());
+        CBORMap publicKey = CBORPublicKey.convert(keyPair.getPublic());
         publicKey.setObject(FWPCrypto.COSE_ALGORITHM_LABEL,
                             new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
         baos.write(publicKey.encode());
@@ -299,7 +299,7 @@ public class FIDOTest {
         byte[] attestationObject = new CBORMap()
                 .setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORBytes(baos.toByteArray())).encode();
         assertTrue("pubk", keyPair.getPublic().equals(
-                CBORPublicKey.decode(CBORObject.decode(FWPCrypto.extractUserCredential(attestationObject)
+                CBORPublicKey.convert(CBORObject.decode(FWPCrypto.extractUserCredential(attestationObject)
                         .rawCosePublicKey))));
     }
     

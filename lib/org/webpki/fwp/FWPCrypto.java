@@ -171,7 +171,7 @@ public class FWPCrypto {
         }
 
         CBORMap appendSignatureObject() throws IOException, GeneralSecurityException {
-            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(CBORPublicKey.decode(publicKey));
+            int coseAlgorithm = publicKey2CoseSignatureAlgorithm(CBORPublicKey.convert(publicKey));
 
             // Add the authorization container map including the members that
             // also are signed.
@@ -300,7 +300,7 @@ public class FWPCrypto {
         // Here it is converted to the Java format since this
         // is necessary for validation using Java standard tools.
         CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
-        PublicKey publicKey = CBORPublicKey.decode(cborPublicKey);
+        PublicKey publicKey = CBORPublicKey.convert(cborPublicKey);
         
         // The mandatory COSE signature algorithm.
         int coseAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
@@ -382,7 +382,7 @@ public class FWPCrypto {
 
         // Verify that we got a genuine FIDO/COSE public key and
         // that the associated signature algorithm matches.
-        PublicKey publicKey = CBORPublicKey.decode(fidoPublicKey);
+        PublicKey publicKey = CBORPublicKey.convert(fidoPublicKey);
         algorithmComplianceTest(publicKey, signatureAlgorithm);
         
         // Back to black (raw) :)

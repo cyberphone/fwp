@@ -123,7 +123,7 @@ public class TestVectorGeneration {
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
         
         FWPCrypto.FWPPreSigner fwpSigner =
-                new FWPCrypto.FWPPreSigner(CBORPublicKey.encode(p256.getPublic()).encode());
+                new FWPCrypto.FWPPreSigner(CBORPublicKey.convert(p256.getPublic()).encode());
        
         FWPPaymentRequest paymentRequest = 
                 new FWPPaymentRequest("Space Shop", "7040566321", "435.00", "EUR");
