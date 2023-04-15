@@ -46,6 +46,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.UTF8;
 
 /**
  * FWP and FIDO crypto support.
@@ -144,7 +145,7 @@ public class FWPCrypto {
 
         // Hard-coded FIDO Authenticator Data
         byte[] authenticatorData = ArrayUtil.add(
-                HashAlgorithms.SHA256.digest(new URL(origin).getHost().getBytes("utf-8")),
+                HashAlgorithms.SHA256.digest(UTF8.encode(new URL(origin).getHost())),
                 new byte[] {(byte)flags, 0, 0, 0, 23});
 
         // Create a FIDO compatible signature.

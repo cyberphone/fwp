@@ -50,6 +50,7 @@ import org.webpki.json.JSONParser;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HexaDecimal;
 import org.webpki.util.ISODateTime;
+import org.webpki.util.UTF8;
 
 /**
  * Create FWP test vectors.
@@ -117,7 +118,7 @@ public class TestVectorGeneration {
               .append(currPrivateKey);
 
         conditionalRewrite(testDataDir + FILE_SIGNATURE_JWK, 
-                currPrivateKey.getBytes("utf-8"));
+                UTF8.encode(currPrivateKey));
 
         GregorianCalendar time = ISODateTime.parseDateTime("2023-02-16T10:14:07+01:00",
                                                            ISODateTime.LOCAL_NO_SUBSECONDS);
@@ -171,7 +172,7 @@ public class TestVectorGeneration {
                 HashAlgorithms.SHA256.digest(unsignedFwpAssertion));
 
         conditionalRewrite(testDataDir + FILE_CHALLENGE_B64U, 
-                challengeB64U.getBytes("utf-8"));
+                UTF8.encode(challengeB64U));
 
         result.append("\n\nThe unsigned FWP assertion (binary) " +
                       "converted into a SHA256 hash, here in Base64Url notation:\n")
@@ -234,7 +235,7 @@ public class TestVectorGeneration {
               .append(currPrivateKey);
 
         conditionalRewrite(testDataDir + FILE_ENCRYPTION_JWK, 
-                currPrivateKey.getBytes("utf-8"));
+                UTF8.encode(currPrivateKey));
         
         byte[] encryptedAssertion = 
                 new CBORAsymKeyEncrypter(x25519.getPublic(),
@@ -273,7 +274,7 @@ public class TestVectorGeneration {
               .append(fwpJsonAssertion.toString());
 
         conditionalRewrite(testDataDir + FILE_FWP_ASSERTION_JSON, 
-                           fwpJsonAssertion.toString().getBytes("utf-8"));
+                           UTF8.encode(fwpJsonAssertion.toString()));
 
         byte[] decryptedFwpAssertion = 
                 new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
@@ -345,7 +346,7 @@ public class TestVectorGeneration {
     }
 
     boolean conditionalRewrite(String fileName, String newFile) throws IOException {
-        return conditionalRewrite(fileName, newFile.getBytes("utf-8"));
+        return conditionalRewrite(fileName, UTF8.encode(newFile));
     }
 
     CBORMap cleanSignature(byte[] assertion) throws IOException {
@@ -376,7 +377,7 @@ public class TestVectorGeneration {
                                   byte[] fwpAssertion) throws IOException {
         ArrayUtil.writeFile(testDataDir + fileSignedCbor.toUpperCase()
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
-                            CBORObject.decode(fwpAssertion).toString().getBytes("utf-8"));
+                           UTF8.encode(CBORObject.decode(fwpAssertion).toString()));
     }
 
 

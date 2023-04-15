@@ -52,6 +52,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.UTF8;
 
 /**
  * JSON JUnit suite
@@ -112,7 +113,7 @@ public class FIDOTest {
 // System.out.println(attestation.toString());
         byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getBytes();
 // System.out.println(HexaDecimal.encode(authData));
-        byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
+        byte[] rpId = HashAlgorithms.SHA256.digest(UTF8.encode(new URL(rpUrl).getHost()));
         assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, FWPCrypto.FLAG_OFFSET));
         int credentialIdLength = (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
                                  (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);
@@ -266,19 +267,19 @@ public class FIDOTest {
     void doOneAttestation(boolean hugeCi, boolean extension) throws Exception {
         String rpUrl = "https://example.com/g"; 
         KeyPair keyPair = readKey("p256");
-        byte[] credentialId = (hugeCi ? 
+        byte[] credentialId = UTF8.encode(hugeCi ? 
                 "0123456701234567012345670123456701234567012345670123456701234567" +
                 "0123456701234567012345670123456701234567012345670123456701234567" +
                 "0123456701234567012345670123456701234567012345670123456701234567" +
                 "HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBy     " +
                 "0123456701234567012345670123456701234567012345670123456701234567" +
                 "0123456701234567012345670123456701234567012345670123456701234567" 
-                                      :
-                "012345670123456701234567012ByteArrayOutputStream").getBytes("utf-8");
+                                                 :
+                "012345670123456701234567012ByteArrayOutputStream");
         
         // authData object.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] rpId = HashAlgorithms.SHA256.digest(new URL(rpUrl).getHost().getBytes("utf-8"));
+        byte[] rpId = HashAlgorithms.SHA256.digest(UTF8.encode(new URL(rpUrl).getHost()));
         baos.write(rpId);
         baos.write(FWPCrypto.FLAG_AT);
         baos.write(new byte[] {0,5,2,70});

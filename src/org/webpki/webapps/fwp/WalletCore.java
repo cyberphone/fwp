@@ -37,6 +37,8 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
+import org.webpki.util.UTF8;
+
 import org.webpki.webutil.ServletUtil;
 
 /**
@@ -201,7 +203,7 @@ public class WalletCore {
     }
     
     static void returnSVG(HttpServletResponse response, String svg) throws IOException {
-        byte[] rawData = svg.getBytes("utf-8");
+        byte[] rawData = UTF8.encode(svg);
         response.setContentType(SVG_CONTENT_TYPE);
         response.setHeader(HTTP_PRAGMA, "No-Cache");
         response.setDateHeader(HTTP_EXPIRES, 0);

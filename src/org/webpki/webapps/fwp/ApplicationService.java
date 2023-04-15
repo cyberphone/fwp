@@ -45,7 +45,7 @@ import org.webpki.jose.JOSEKeyWords;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
-
+import org.webpki.util.UTF8;
 import org.webpki.webutil.InitPropertyReader;
 
 /**
@@ -91,7 +91,7 @@ public class ApplicationService extends InitPropertyReader implements ServletCon
     }
     
     String getEmbeddedResourceString(String name) throws IOException {
-        return new String(getEmbeddedResource(name), "utf-8").trim();
+        return UTF8.decode(getEmbeddedResource(name)).trim();
     }
 
     @Override

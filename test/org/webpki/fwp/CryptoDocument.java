@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HexaDecimal;
+import org.webpki.util.UTF8;
 
 import org.webpki.cbor.CBORCryptoConstants;
 
@@ -253,7 +254,7 @@ public class CryptoDocument  {
     }
     
     String readStringFile(String path) throws Exception {
-        return new String(readBinaryFile(path), "utf-8");
+        return UTF8.decode(readBinaryFile(path));
     }
     
     String pattern(String tagAndFile) {
@@ -396,7 +397,7 @@ public class CryptoDocument  {
 
         generateLinks();
         
-        ArrayUtil.writeFile(resultFile, template.getBytes("utf-8"));
+        ArrayUtil.writeFile(resultFile, UTF8.encode(template));
     }
 
     public static void main(String[] argc) {
