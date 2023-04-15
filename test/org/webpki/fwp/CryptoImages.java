@@ -30,7 +30,7 @@ import org.webpki.util.UTF8;
  */
 public class CryptoImages {
     
-    static int HEADER_HEIGHT = 180;
+    static int HEADER_HEIGHT = 150;
     
     static int MARGIN = 20;
     
@@ -44,8 +44,8 @@ public class CryptoImages {
     static final int TEXT_FONT_SIZE = 40;
     static final int TEXT_Y_OFFSET = 54;
     static final int HEADER_FONT_SIZE = 50;
-    static final int HEADER_Y_OFFSET = 70;
-    static final int SUB_HEADER_Y_OFFSET = 120;
+    static final int HEADER_Y_OFFSET = 60;
+    static final int SUB_HEADER_Y_OFFSET = 110;
 
     boolean cborFull;
     boolean initialLabel;

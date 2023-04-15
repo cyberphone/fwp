@@ -375,7 +375,7 @@ public class CryptoDocument  {
                              "txt/ESAD.txt"});
 
         String svg =  readStringFile(DOC_GEN_DIRECTORY + File.separator + FWP_CRYPTO_SVG);
-        svg = "<svg style='display:block;width:27em;padding:1em' class='box' " + 
+        svg = "<svg style='display:block;width:27em;padding:0.5em' class='box' " + 
                           svg.substring(svg.indexOf("<svg ") + 5);
         replace(FWP_CRYPTO_SVG, svg);
         replace(WEB_AUTHN, "<a href='https://www.w3.org/TR/webauthn-2/' " +
