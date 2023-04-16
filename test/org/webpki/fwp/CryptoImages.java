@@ -22,8 +22,7 @@ import org.webpki.cbor.CBORObject;
 
 import static org.webpki.cbor.CBORCryptoConstants.*;
 
-import org.webpki.util.ArrayUtil;
-import org.webpki.util.UTF8;
+import org.webpki.util.IO;
 
 /**
  * Make SVG images for CBOR encryption and the FWP subset
@@ -184,7 +183,7 @@ public class CryptoImages {
                    " c 48,11 48," + LABEL_MIDDLE + " 48," + LABEL_MIDDLE +
                    " v " + longPath + " c 0,0 0," + LABEL_HEIGHT + " 35," + LABEL_HEIGHT + "'/>\n");
         
-        ArrayUtil.writeFile(fileName, UTF8.encode(svg.append("</svg>\n").toString()));
+        IO.writeFile(fileName, svg.append("</svg>\n").toString());
     }
     
     public CryptoImages(String buildDirectory) throws Exception {

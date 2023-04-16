@@ -52,6 +52,7 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.IO;
 import org.webpki.util.UTF8;
 
 /**
@@ -68,7 +69,7 @@ public class FIDOTest {
     
     KeyPair readKey(String keyAlg) throws IOException, GeneralSecurityException {
         JSONObjectReader key = 
-                JSONParser.parse(ArrayUtil.readFile(keyDir + keyAlg + "privatekey.jwk"));
+                JSONParser.parse(IO.readFile(keyDir + keyAlg + "privatekey.jwk"));
         key.removeProperty(JOSEKeyWords.KID_JSON);
         currPrivateKey = key.toString();
         return key.getKeyPair();
@@ -79,7 +80,7 @@ public class FIDOTest {
     public static void openFile() throws Exception {
         // Start deprecating Bouncycastle since Android will remove most of it anyway
         CustomCryptoProvider.forcedLoad(false);
-        testVectors = JSONParser.parse(ArrayUtil.readFile(System.getProperty("json.data")));
+        testVectors = JSONParser.parse(IO.readFile(System.getProperty("json.data")));
         keyDir = System.getProperty("sample.keys") + File.separatorChar;
     }
     

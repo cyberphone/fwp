@@ -49,6 +49,7 @@ import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HexaDecimal;
+import org.webpki.util.IO;
 import org.webpki.util.ISODateTime;
 import org.webpki.util.UTF8;
 
@@ -101,7 +102,7 @@ public class TestVectorGeneration {
     
     KeyPair readKey(String keyAlg) throws IOException, GeneralSecurityException {
         JSONObjectReader key = 
-                JSONParser.parse(ArrayUtil.readFile(keyDir + keyAlg + "privatekey.jwk"));
+                JSONParser.parse(IO.readFile(keyDir + keyAlg + "privatekey.jwk"));
         key.removeProperty(JOSEKeyWords.KID_JSON);
         currPrivateKey = key.toString();
         return key.getKeyPair();
@@ -251,13 +252,13 @@ public class TestVectorGeneration {
                 }).encrypt(fwpAssertion).encode();
         if (!signRewrite) {
             try {
-                encryptedAssertion = ArrayUtil.readFile(testDataDir + FILE_ENCRYPTED_CBOR);
+                encryptedAssertion = IO.readFile(testDataDir + FILE_ENCRYPTED_CBOR);
             } catch (Exception e) {
                 signRewrite = true;
             }
         }
         if (signRewrite) {
-            ArrayUtil.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
+            IO.writeFile(testDataDir + FILE_ENCRYPTED_CBOR, encryptedAssertion);
             writeTextVersion(FILE_ENCRYPTED_CBOR, encryptedAssertion);
         }
         
@@ -334,14 +335,14 @@ public class TestVectorGeneration {
 
     boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {
         try {
-            byte[] oldFile = ArrayUtil.readFile(fileName);
+            byte[] oldFile = IO.readFile(fileName);
             if (ArrayUtil.compare(oldFile, newFile)) {
                 return false;
             }
         } catch (Exception e) {
             
         }
-        ArrayUtil.writeFile(fileName, newFile);
+        IO.writeFile(fileName, newFile);
         return true;
     }
 
@@ -359,7 +360,7 @@ public class TestVectorGeneration {
     private byte[] optionalSignatureRewrite(String fileName, 
                                             byte[] fwpAssertion) throws IOException {
         try {
-            byte[] oldFwpAssertion = ArrayUtil.readFile(fileName);
+            byte[] oldFwpAssertion = IO.readFile(fileName);
             if (cleanSignature(oldFwpAssertion).equals(cleanSignature(fwpAssertion))) {
                 return oldFwpAssertion;
             }
@@ -367,7 +368,7 @@ public class TestVectorGeneration {
             
         }
         signRewrite = true;
-        ArrayUtil.writeFile(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
+        IO.writeFile(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
         writeTextVersion(FILE_SIGNED_CBOR, fwpAssertion);
         return fwpAssertion;
     }
@@ -375,9 +376,9 @@ public class TestVectorGeneration {
 
     private void writeTextVersion(String fileSignedCbor, 
                                   byte[] fwpAssertion) throws IOException {
-        ArrayUtil.writeFile(testDataDir + fileSignedCbor.toUpperCase()
+        IO.writeFile(testDataDir + fileSignedCbor.toUpperCase()
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
-                           UTF8.encode(CBORObject.decode(fwpAssertion).toString()));
+                           CBORObject.decode(fwpAssertion).toString());
     }
 
 

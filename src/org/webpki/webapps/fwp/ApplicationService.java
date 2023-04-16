@@ -44,7 +44,7 @@ import org.webpki.jose.JOSEKeyWords;
 
 import org.webpki.json.JSONParser;
 
-import org.webpki.util.ArrayUtil;
+import org.webpki.util.IO;
 import org.webpki.util.UTF8;
 import org.webpki.webutil.InitPropertyReader;
 
@@ -87,7 +87,7 @@ public class ApplicationService extends InitPropertyReader implements ServletCon
         if (is == null) {
             throw new IOException("Resource fail for: " + name);
         }
-        return ArrayUtil.getByteArrayFromInputStream(is);
+        return IO.getByteArrayFromInputStream(is);
     }
     
     String getEmbeddedResourceString(String name) throws IOException {
