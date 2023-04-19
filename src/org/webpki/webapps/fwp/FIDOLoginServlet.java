@@ -23,8 +23,10 @@ import java.security.PublicKey;
 
 import java.sql.Connection;
 
-import java.util.logging.Logger;
+import java.util.Arrays;
+
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -43,8 +45,6 @@ import org.webpki.fwp.FWPCrypto;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-
-import org.webpki.util.ArrayUtil;
 
 /**
  * This Servlet is called by the LoginServlet SPA
@@ -126,7 +126,7 @@ public class FIDOLoginServlet extends HttpServlet {
 
                 // Check that we are in "sync".
                 byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
-                if (!ArrayUtil.compare(
+                if (!Arrays.equals(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                     loginData.getBinary(FWPCrypto.CHALLENGE))) {
                     WalletCore.failed("Challenge mismatch");

@@ -24,6 +24,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.GregorianCalendar;
 
@@ -47,7 +48,6 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
-import org.webpki.util.ArrayUtil;
 import org.webpki.util.HexaDecimal;
 import org.webpki.util.IO;
 import org.webpki.util.ISODateTime;
@@ -336,7 +336,7 @@ public class TestVectorGeneration {
     boolean conditionalRewrite(String fileName, byte[] newFile) throws IOException {
         try {
             byte[] oldFile = IO.readFile(fileName);
-            if (ArrayUtil.compare(oldFile, newFile)) {
+            if (Arrays.equals(oldFile, newFile)) {
                 return false;
             }
         } catch (Exception e) {

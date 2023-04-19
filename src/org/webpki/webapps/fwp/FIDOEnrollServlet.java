@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 
 import java.sql.Connection;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import java.util.logging.Logger;
@@ -41,8 +42,6 @@ import org.webpki.fwp.FWPCrypto;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
-
-import org.webpki.util.ArrayUtil;
 
 /**
  * This Servlet is called by the EnrollServlet SPA
@@ -124,7 +123,7 @@ public class FIDOEnrollServlet extends HttpServlet {
 
                 // Check that we are in "sync".
                 byte[] clientDataJSON = requestJson.getBinary(FWPCrypto.CLIENT_DATA_JSON);
-                if (!ArrayUtil.compare(
+                if (!Arrays.equals(
                         JSONParser.parse(clientDataJSON).getBinary(FWPCrypto.CHALLENGE),
                         registerData.getBinary(FWPCrypto.CHALLENGE))) {
                     WalletCore.failed("Challenge mismatch");

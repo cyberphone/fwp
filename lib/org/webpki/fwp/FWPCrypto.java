@@ -28,6 +28,7 @@ import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import org.webpki.cbor.CBORBytes;
@@ -45,7 +46,6 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 
-import org.webpki.util.ArrayUtil;
 import org.webpki.util.UTF8;
 
 /**
@@ -116,7 +116,7 @@ public class FWPCrypto {
                                       byte[] signature) throws IOException, 
                                                                GeneralSecurityException {
         if (clientDataJSON != null && 
-            !ArrayUtil.compare(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
+            !Arrays.equals(HashAlgorithms.SHA256.digest(unsignedFwpAssertion),
                 JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
@@ -144,10 +144,10 @@ public class FWPCrypto {
             .serializeToBytes(JSONOutputFormats.NORMALIZED);
 
         // Hard-coded FIDO Authenticator Data
-        byte[] authenticatorData = ArrayUtil.add(
-                HashAlgorithms.SHA256.digest(UTF8.encode(new URL(origin).getHost())),
-                new byte[] {(byte)flags, 0, 0, 0, 23});
-
+        byte[] authenticatorData = Arrays.copyOf(
+                HashAlgorithms.SHA256.digest(UTF8.encode(new URL(origin).getHost())), 37);
+        System.arraycopy(new byte[] {(byte)flags, 0, 0, 0, 23}, 0, authenticatorData, 32, 5);
+   
         // Create a FIDO compatible signature.
         int coseAlgorithm = CBORObject.decode(unsignedFwpAssertion)
             .getMap().getObject(FWP_AUTHORIZATION_LABEL).getMap().getObject(AS_ALGORITHM).getInt();
@@ -311,8 +311,8 @@ public class FWPCrypto {
         
         // This is not WebAuthn, this is FIDO Web Pay: 
         // FIDO "challenge" = hash of locally created FWP assertion data.
-        if (!ctap2 && !ArrayUtil.compare(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
-                                         JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
+        if (!ctap2 && !Arrays.equals(HashAlgorithms.SHA256.digest(fwpAssertion.encode()),
+                                     JSONParser.parse(clientDataJSON).getBinary(CHALLENGE))) {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         

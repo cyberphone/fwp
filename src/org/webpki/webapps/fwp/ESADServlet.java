@@ -17,7 +17,7 @@
 package org.webpki.webapps.fwp;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -49,15 +49,10 @@ public class ESADServlet extends HttpServlet {
     private static final String WAITING_ID     = "wait";
     private static final String ACTIVATE_ID    = "activate";
     
-    private static CBOREncrypter encrypter = null;
-    
-    static {
-        try { 
-            encrypter = new CBORAsymKeyEncrypter(
-                    ApplicationService.issuerEncryptionKey.getPublic(),
-                    ApplicationService.issuerKeyEncryptionAlgorithm,
-                    ApplicationService.issuerContentEncryptionAlgorithm)
-                    
+    private static CBOREncrypter encrypter = new CBORAsymKeyEncrypter(
+        ApplicationService.issuerEncryptionKey.getPublic(),
+        ApplicationService.issuerKeyEncryptionAlgorithm,
+        ApplicationService.issuerContentEncryptionAlgorithm)     
             .setIntercepter(new CBORCryptoUtils.Intercepter() {
     
                 @Override
@@ -66,9 +61,6 @@ public class ESADServlet extends HttpServlet {
                 }
                 
             }).setKeyId(ApplicationService.issuerEncryptionKeyId);
-        } catch (IOException | GeneralSecurityException e) {
-        }
-    }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {

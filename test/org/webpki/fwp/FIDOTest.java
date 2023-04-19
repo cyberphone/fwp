@@ -30,6 +30,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 import org.junit.BeforeClass;
@@ -51,7 +52,6 @@ import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONParser;
 
-import org.webpki.util.ArrayUtil;
 import org.webpki.util.IO;
 import org.webpki.util.UTF8;
 
@@ -103,8 +103,8 @@ public class FIDOTest {
         JSONObjectReader json = JSONParser.parse(clientDataJSON);
         assertTrue(FWPCrypto.CDJ_TYPE, json.getString(FWPCrypto.CDJ_TYPE).equals(subType));
         assertTrue(FWPCrypto.CDJ_ORIGIN, json.getString(FWPCrypto.CDJ_ORIGIN).equals(rpUrl));
-        assertTrue(FWPCrypto.CHALLENGE, ArrayUtil.compare(challenge, 
-                                                          json.getBinary(FWPCrypto.CHALLENGE)));
+        assertTrue(FWPCrypto.CHALLENGE, Arrays.equals(challenge, 
+                                                      json.getBinary(FWPCrypto.CHALLENGE)));
         return clientDataJSON;
     }
     
@@ -115,15 +115,17 @@ public class FIDOTest {
         byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getBytes();
 // System.out.println(HexaDecimal.encode(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(UTF8.encode(new URL(rpUrl).getHost()));
-        assertTrue("rpId", ArrayUtil.compare(authData, rpId, 0, FWPCrypto.FLAG_OFFSET));
+        assertTrue("rpId", Arrays.equals(
+                authData, 0, FWPCrypto.FLAG_OFFSET,  rpId, 0, FWPCrypto.FLAG_OFFSET));
         int credentialIdLength = (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET] << 8) + 
                                  (authData[FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 1] & 0xff);
         assertTrue("cil", credentialIdLength == credentialId.length);
-        assertTrue("ci", ArrayUtil.compare(authData,
-                                           FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 2,
-                                           credentialId,
-                                           0,
-                                           credentialIdLength));
+        assertTrue("ci", Arrays.equals(authData,
+                FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 2,
+                FWPCrypto.CREDENTIAL_ID_LENGTH_OFFSET + 2 + credentialIdLength,
+                credentialId,
+                0,
+                credentialIdLength));
         return CBORPublicKey.convert(CBORObject.decode(
                 FWPCrypto.extractUserCredential(attestation.encode()).rawCosePublicKey));
     }
@@ -149,7 +151,7 @@ public class FIDOTest {
                                                      createChallenge);
         JSONObjectReader get = vector.getObject("get");
         byte[] getCredentialId = get.getBinary(FWPCrypto.CREDENTIAL_ID);
-        assertTrue("keyHandle", ArrayUtil.compare(createCredentialId, getCredentialId));
+        assertTrue("keyHandle", Arrays.equals(createCredentialId, getCredentialId));
         byte[] getChallenge = get.getBinary(FWPCrypto.CHALLENGE);
         JSONObjectReader getResponse = vector.getObject("get.response");
         byte[] authenticatorData = getResponse.getBinary(FWPCrypto.AUTHENTICATOR_DATA);
