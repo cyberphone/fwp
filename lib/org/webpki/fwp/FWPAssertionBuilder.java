@@ -48,7 +48,7 @@ public class FWPAssertionBuilder {
         if (!elementList.add(name)) {
             throw new IOException("Duplicate: " + name.toString());
         }
-        fwpAssertion.setObject(name.cborLabel, value);
+        fwpAssertion.set(name.cborLabel, value);
         return this;
     }
 
@@ -58,10 +58,8 @@ public class FWPAssertionBuilder {
     }
 
     private CBORMap nameVersion(String name, String version) throws IOException {
-        return new CBORMap().setObject(FWPElements.CBOR_PDSUB_NAME,
-                                       new CBORString(name))
-                            .setObject(FWPElements.CBOR_PDSUB_VERSION,
-                                       new CBORString(version));
+        return new CBORMap().set(FWPElements.CBOR_PDSUB_NAME, new CBORString(name))
+                            .set(FWPElements.CBOR_PDSUB_VERSION, new CBORString(version));
     }
 
     public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
@@ -78,10 +76,10 @@ public class FWPAssertionBuilder {
                                                String browserName,
                                                String browserVersion) throws IOException {
         return setElement(FWPElements.PLATFORM_DATA,
-                          new CBORMap().setObject(FWPElements.CBOR_PD_OPERATING_SYSTEM,
-                                                  nameVersion(osName, osVersion))
-                                       .setObject(FWPElements.CBOR_PD_USER_AGENT,
-                                                  nameVersion(browserName, browserVersion)));
+                          new CBORMap().set(FWPElements.CBOR_PD_OPERATING_SYSTEM,
+                                            nameVersion(osName, osVersion))
+                                       .set(FWPElements.CBOR_PD_USER_AGENT,
+                                            nameVersion(browserName, browserVersion)));
     }
     
     public FWPAssertionBuilder setPaymentInstrumentData(String accountId,
@@ -98,16 +96,16 @@ public class FWPAssertionBuilder {
             throws IOException {
         setElement(FWPElements.LOCATION, 
                    new CBORArray()
-                       .addObject(new CBORFloatingPoint(latitude))
-                       .addObject(new CBORFloatingPoint(longitude)));
+                       .add(new CBORFloatingPoint(latitude))
+                       .add(new CBORFloatingPoint(longitude)));
         return this;
     }
 
     public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) 
             throws IOException {
         return setElement(FWPElements.TIME_STAMP,
-                          new CBORString(ISODateTime.formatDateTime(
-                                  timeStamp, ISODateTime.LOCAL_NO_SUBSECONDS)));
+                          new CBORString(ISODateTime.encode(timeStamp, 
+                                                            ISODateTime.LOCAL_NO_SUBSECONDS)));
     }
 
     public FWPAssertionBuilder setNetworkOptions(String jsonStringOrNull) throws IOException {

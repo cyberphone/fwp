@@ -42,7 +42,9 @@ import org.webpki.cbor.CBORCryptoUtils;
 import org.webpki.cbor.CBORDecrypter;
 import org.webpki.cbor.CBORObject;
 
+import org.webpki.crypto.CryptoException;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
+import org.webpki.crypto.EncryptionCore;
 import org.webpki.crypto.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
@@ -72,8 +74,38 @@ public class IssuerServlet extends HttpServlet {
     static final long AUTHORIZATION_MAX_FUTURE = 120000;
     
     static final CBORDecrypter decrypter = 
-            new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
+            new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
+                
+            @Override
+            public PrivateKey locate(PublicKey optionalPublicKey, 
+                                     CBORObject optionalKeyId,
+                                     KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                     ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
+            // Somewhat simplistic setup: a single encryption key
+            if (optionalKeyId == null) {
+                throw new CryptoException("Missing keyId");
+            }
+            if (!ApplicationService.issuerEncryptionKeyId.equals(
+                    optionalKeyId)) {
+                throw new CryptoException("Unknown keyId: " + optionalKeyId);
+            }
+            return ApplicationService.issuerEncryptionKey.getPrivate();            }
+                    
+            @Override
+            public byte[] decrypt(PrivateKey privateKey,
+                                  byte[] optionalEncryptedKey,
+                                  PublicKey optionalEphemeralKey,
+                                  KeyEncryptionAlgorithms keyEncryptionAlgorithm,
+                                  ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
+                return EncryptionCore.decryptKey(true,
+                                                 privateKey, optionalEncryptedKey,
+                                                 optionalEphemeralKey,
+                                                 keyEncryptionAlgorithm,
+                                                 contentEncryptionAlgorithm);
+            }
 
+
+/*
         @Override
         public PrivateKey locate(PublicKey optionalPublicKey,
                                  CBORObject optionalKeyId,
@@ -91,15 +123,14 @@ public class IssuerServlet extends HttpServlet {
             }
             return ApplicationService.issuerEncryptionKey.getPrivate();
         }
-        
+*/        
     }).setTagPolicy(CBORCryptoUtils.POLICY.MANDATORY, new CBORCryptoUtils.Collector() {
 
         @Override
-        public void foundData(CBORObject tag) 
-                throws IOException, GeneralSecurityException {
-            String typeUrl = tag.getTag().getObject().getArray().getObject(0).getString();
+        public void foundData(CBORObject tag) {
+            String typeUrl = tag.getTag().getObject().getArray().get(0).getString();
             if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
-                throw new GeneralSecurityException("Unexpected type URL: " + typeUrl);
+                throw new CryptoException("Unexpected type URL: " + typeUrl);
             }
         }
 
@@ -291,8 +322,7 @@ public class IssuerServlet extends HttpServlet {
             .append(String.format("%012d", transactionId++))
             .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
-            .append(ISODateTime.formatDateTime(new GregorianCalendar(),
-                                               ISODateTime.UTC_NO_SUBSECONDS))
+            .append(ISODateTime.encode(new GregorianCalendar(), ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
 
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
@@ -309,8 +339,7 @@ public class IssuerServlet extends HttpServlet {
             .append(fwpPaymentRequest.getRequestId())
             .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
-            .append(ISODateTime.formatDateTime(pspRequest.getTimeStamp(),
-                                               ISODateTime.UTC_NO_SUBSECONDS))
+            .append(ISODateTime.encode(pspRequest.getTimeStamp(), ISODateTime.UTC_NO_SUBSECONDS))
             .append("</td></tr>" +
                     "<tr><td colspan='2' style='background-color:white;border-width:0'></td></tr>" +
 
@@ -344,8 +373,8 @@ public class IssuerServlet extends HttpServlet {
             .append("N/A")
             .append("</td></tr>" +
                     "<tr><th>Time Stamp</th><td>")
-            .append(ISODateTime.formatDateTime(fwpAssertion.getTimeStamp(),
-                                               ISODateTime.LOCAL_NO_SUBSECONDS))
+            .append(ISODateTime.encode(fwpAssertion.getTimeStamp(), 
+                                       ISODateTime.LOCAL_NO_SUBSECONDS))
             .append("</td></tr>" +
                   "</table>" +
                 "</div>" +

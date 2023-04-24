@@ -112,7 +112,7 @@ public class FIDOTest {
                            String rpUrl,
                            byte[] credentialId) throws Exception {
 // System.out.println(attestation.toString());
-        byte[] authData = attestation.getMap().getObject(FWPCrypto.AUTH_DATA_CBOR).getBytes();
+        byte[] authData = attestation.getMap().get(FWPCrypto.AUTH_DATA_CBOR).getBytes();
 // System.out.println(HexaDecimal.encode(authData));
         byte[] rpId = HashAlgorithms.SHA256.digest(UTF8.encode(new URL(rpUrl).getHost()));
         assertTrue("rpId", Arrays.equals(
@@ -292,16 +292,16 @@ public class FIDOTest {
         baos.write(credentialId);
         
         CBORMap publicKey = CBORPublicKey.convert(keyPair.getPublic());
-        publicKey.setObject(FWPCrypto.COSE_ALGORITHM_LABEL,
-                            new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
+        publicKey.set(FWPCrypto.COSE_ALGORITHM_LABEL,
+                      new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
         baos.write(publicKey.encode());
         if (extension) {
-            baos.write(new CBORMap().setObject(new CBORString("blah"), 
-                                               new CBORInteger(-3)).encode());
+            baos.write(new CBORMap().set(new CBORString("blah"), 
+                                         new CBORInteger(-3)).encode());
         }
         
         byte[] attestationObject = new CBORMap()
-                .setObject(FWPCrypto.AUTH_DATA_CBOR, new CBORBytes(baos.toByteArray())).encode();
+                .set(FWPCrypto.AUTH_DATA_CBOR, new CBORBytes(baos.toByteArray())).encode();
         assertTrue("pubk", keyPair.getPublic().equals(
                 CBORPublicKey.convert(CBORObject.decode(FWPCrypto.extractUserCredential(attestationObject)
                         .rawCosePublicKey))));

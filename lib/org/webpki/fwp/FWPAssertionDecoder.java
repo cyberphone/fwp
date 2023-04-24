@@ -49,10 +49,8 @@ public class FWPAssertionDecoder {
         }
         
         PlatformNameVersion(CBORObject nameVersion) throws IOException {
-            this.name = nameVersion.getMap().getObject(
-                    FWPElements.CBOR_PDSUB_NAME).getString();
-            this.version = nameVersion.getMap().getObject(
-                    FWPElements.CBOR_PDSUB_VERSION).getString();
+            this.name = nameVersion.getMap().get(FWPElements.CBOR_PDSUB_NAME).getString();
+            this.version = nameVersion.getMap().get(FWPElements.CBOR_PDSUB_VERSION).getString();
         }
     }
     
@@ -115,7 +113,7 @@ public class FWPAssertionDecoder {
     }
     
     private String getString(FWPElements name) throws IOException {
-        return fwpAssertion.getObject(name.cborLabel).getString();
+        return fwpAssertion.get(name.cborLabel).getString();
     }
     
     private byte[] publicKey;
@@ -135,7 +133,7 @@ public class FWPAssertionDecoder {
         
         // Payment Request (PRCD)
         paymentRequest = new FWPPaymentRequest(
-                fwpAssertion.getObject(FWPElements.PAYMENT_REQUEST.cborLabel));
+                fwpAssertion.get(FWPElements.PAYMENT_REQUEST.cborLabel));
 
         // Account.
         accountId = getString(FWPElements.ACCOUNT_ID);
@@ -148,37 +146,37 @@ public class FWPAssertionDecoder {
         serialNumber = getString(FWPElements.SERIAL_NUMBER);
 
         // Platform Data
-        CBORMap platformData = fwpAssertion.getObject(
+        CBORMap platformData = fwpAssertion.get(
                 FWPElements.PLATFORM_DATA.cborLabel).getMap();
         operatingSystem = new PlatformNameVersion(
-                platformData.getObject(FWPElements.CBOR_PD_OPERATING_SYSTEM));
+                platformData.get(FWPElements.CBOR_PD_OPERATING_SYSTEM));
         userAgent = new PlatformNameVersion(
-                platformData.getObject(FWPElements.CBOR_PD_USER_AGENT));
+                platformData.get(FWPElements.CBOR_PD_USER_AGENT));
 
         // Time Stamp
-        timeStamp = ISODateTime.parseDateTime(getString(FWPElements.TIME_STAMP),
-                                              ISODateTime.COMPLETE);
+        timeStamp = ISODateTime.decode(getString(FWPElements.TIME_STAMP),
+                                       ISODateTime.COMPLETE);
 
         // Payee Host information from the browser
         payeeHost = getString(FWPElements.PAYEE_HOST);
 
         // Optional Network Data.
-        if (fwpAssertion.hasKey(FWPElements.NETWORK_OPTIONS.cborLabel)) {
+        if (fwpAssertion.containsKey(FWPElements.NETWORK_OPTIONS.cborLabel)) {
             // There is such data, get it!  It can be any CBOR data
             // that has a 1-2-1 translation to JSON.
-            networkOptions = fwpAssertion.getObject(FWPElements.NETWORK_OPTIONS.cborLabel);
+            networkOptions = fwpAssertion.get(FWPElements.NETWORK_OPTIONS.cborLabel);
             // We mark it as "read" to not get a problem with checkForUnread().
             networkOptions.scan();
         }
 
         // Optional location.
-        if (fwpAssertion.hasKey(FWPElements.LOCATION.cborLabel)) {
+        if (fwpAssertion.containsKey(FWPElements.LOCATION.cborLabel)) {
             // There is a location, get it!
             CBORArray cborLocation = 
-                    fwpAssertion.getObject(FWPElements.LOCATION.cborLabel).getArray();
+                    fwpAssertion.get(FWPElements.LOCATION.cborLabel).getArray();
             location = new double[2];
             for (int i = 0; i < 2; i++) {
-                location[i] = cborLocation.getObject(i).getDouble();
+                location[i] = cborLocation.get(i).getDouble();
             }
         }
         

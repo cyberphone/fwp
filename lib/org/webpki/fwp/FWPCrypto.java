@@ -121,11 +121,11 @@ public class FWPCrypto {
             throw new GeneralSecurityException("Message hash mismatch");
         }
         CBORMap cborFwpAssertion = CBORObject.decode(unsignedFwpAssertion).getMap();
-        CBORMap authorization = cborFwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
-        authorization.setObject(AS_AUTHENTICATOR_DATA, new CBORBytes(authenticatorData))
-                     .setObject(AS_SIGNATURE, new CBORBytes(signature));
+        CBORMap authorization = cborFwpAssertion.get(FWP_AUTHORIZATION_LABEL).getMap();
+        authorization.set(AS_AUTHENTICATOR_DATA, new CBORBytes(authenticatorData))
+                     .set(AS_SIGNATURE, new CBORBytes(signature));
         if (clientDataJSON != null) {
-            authorization.setObject(AS_CLIENT_DATA_JSON, new CBORBytes(clientDataJSON));
+            authorization.set(AS_CLIENT_DATA_JSON, new CBORBytes(clientDataJSON));
         }
         return cborFwpAssertion.encode();
     }
@@ -150,7 +150,7 @@ public class FWPCrypto {
    
         // Create a FIDO compatible signature.
         int coseAlgorithm = CBORObject.decode(unsignedFwpAssertion)
-            .getMap().getObject(FWP_AUTHORIZATION_LABEL).getMap().getObject(AS_ALGORITHM).getInt();
+            .getMap().get(FWP_AUTHORIZATION_LABEL).getMap().get(AS_ALGORITHM).getInt();
         byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
             // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
             .ecdsaAsn1SignatureEncoding(true)
@@ -176,8 +176,8 @@ public class FWPCrypto {
 
             // Add the authorization container map including the members that
             // also are signed.
-            return new CBORMap().setObject(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
-                                .setObject(AS_PUBLIC_KEY, publicKey);
+            return new CBORMap().set(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
+                                .set(AS_PUBLIC_KEY, publicKey);
         }
     }
 
@@ -276,14 +276,14 @@ public class FWPCrypto {
                                        HashSet<UserValidation> userValidationFlags)
             throws IOException, GeneralSecurityException {
         // Retrieve the authorization object.
-        CBORMap authorization = fwpAssertion.getObject(FWP_AUTHORIZATION_LABEL).getMap();
+        CBORMap authorization = fwpAssertion.get(FWP_AUTHORIZATION_LABEL).getMap();
         
         // Fetch the core FIDO assertion elements. Remove them
         // from the FWP assertion as well since they are not a
         // part of the FIDO "challenge" data.
         byte[] authenticatorData = authorization.readBytesAndRemoveKey(AS_AUTHENTICATOR_DATA);
         // Note that the ctap2 option removes "clientDataJSON" from FWP assertions.
-        boolean ctap2 = !authorization.hasKey(AS_CLIENT_DATA_JSON);
+        boolean ctap2 = !authorization.containsKey(AS_CLIENT_DATA_JSON);
         byte[] clientDataJSON = 
                 ctap2 ? null : authorization.readBytesAndRemoveKey(AS_CLIENT_DATA_JSON);
         byte[] signature = authorization.readBytesAndRemoveKey(AS_SIGNATURE);
@@ -300,11 +300,11 @@ public class FWPCrypto {
         // The public key must be available and be in COSE format.
         // Here it is converted to the Java format since this
         // is necessary for validation using Java standard tools.
-        CBORObject cborPublicKey = authorization.getObject(AS_PUBLIC_KEY);
+        CBORObject cborPublicKey = authorization.get(AS_PUBLIC_KEY);
         PublicKey publicKey = CBORPublicKey.convert(cborPublicKey);
         
         // The mandatory COSE signature algorithm.
-        int coseAlgorithm = authorization.getObject(AS_ALGORITHM).getInt();
+        int coseAlgorithm = authorization.get(AS_ALGORITHM).getInt();
         
         // Does the algorithm match the public key?
         algorithmComplianceTest(publicKey, coseAlgorithm);
@@ -354,7 +354,7 @@ public class FWPCrypto {
 
         // Digging out the COSE public key is somewhat awkward...
         byte[] authData = CBORObject.decode(attestationObject)
-                .getMap().getObject(AUTH_DATA_CBOR).getBytes();
+                .getMap().get(AUTH_DATA_CBOR).getBytes();
         if ((authData[FLAG_OFFSET] & FLAG_AT) == 0) {
             throw new GeneralSecurityException("Unsupported authData flags: 0x" + 
                                                String.format("%2x", authData[FLAG_OFFSET] & 0xff));
@@ -378,8 +378,8 @@ public class FWPCrypto {
                 null).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
-        int signatureAlgorithm = fidoPublicKey.getObject(COSE_ALGORITHM_LABEL).getInt();
-        fidoPublicKey.removeObject(COSE_ALGORITHM_LABEL);
+        int signatureAlgorithm = fidoPublicKey.get(COSE_ALGORITHM_LABEL).getInt();
+        fidoPublicKey.remove(COSE_ALGORITHM_LABEL);
 
         // Verify that we got a genuine FIDO/COSE public key and
         // that the associated signature algorithm matches.
