@@ -16,10 +16,6 @@
  */
 package org.webpki.fwp;
 
-import java.io.IOException;
-
-import java.security.GeneralSecurityException;
-
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 
@@ -43,38 +39,35 @@ public class FWPAssertionBuilder {
 
     HashSet<FWPElements> elementList = new HashSet<>();
 
-    private FWPAssertionBuilder setElement(FWPElements name, 
-                                           CBORObject value) throws IOException {
+    private FWPAssertionBuilder setElement(FWPElements name, CBORObject value) {
         if (!elementList.add(name)) {
-            throw new IOException("Duplicate: " + name.toString());
+            throw new FWPException("Duplicate: " + name.toString());
         }
         fwpAssertion.set(name.cborLabel, value);
         return this;
     }
 
-    private FWPAssertionBuilder setStringElement(FWPElements element,
-                                                 String string) throws IOException {
+    private FWPAssertionBuilder setStringElement(FWPElements element, String string) {
         return setElement(element, new CBORString(string));
     }
 
-    private CBORMap nameVersion(String name, String version) throws IOException {
+    private CBORMap nameVersion(String name, String version) {
         return new CBORMap().set(FWPElements.CBOR_PDSUB_NAME, new CBORString(name))
                             .set(FWPElements.CBOR_PDSUB_VERSION, new CBORString(version));
     }
 
-    public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest)
-            throws IOException {
+    public FWPAssertionBuilder setPaymentRequest(FWPPaymentRequest jsonPaymentRequest) {
         return setElement(FWPElements.PAYMENT_REQUEST, jsonPaymentRequest.serializeAsCBOR());
     }
     
-    public FWPAssertionBuilder setPayeeHost(String payeeHost) throws IOException {
+    public FWPAssertionBuilder setPayeeHost(String payeeHost) {
         return setStringElement(FWPElements.PAYEE_HOST, payeeHost);
     }
     
     public FWPAssertionBuilder setPlatformData(String osName,
                                                String osVersion,
                                                String browserName,
-                                               String browserVersion) throws IOException {
+                                               String browserVersion) {
         return setElement(FWPElements.PLATFORM_DATA,
                           new CBORMap().set(FWPElements.CBOR_PD_OPERATING_SYSTEM,
                                             nameVersion(osName, osVersion))
@@ -84,16 +77,14 @@ public class FWPAssertionBuilder {
     
     public FWPAssertionBuilder setPaymentInstrumentData(String accountId,
                                                         String serialNumber,
-                                                        String paymentNetworkId) 
-            throws IOException {
+                                                        String paymentNetworkId) {
         setStringElement(FWPElements.ACCOUNT_ID, accountId);
         setStringElement(FWPElements.SERIAL_NUMBER, serialNumber);
         setStringElement(FWPElements.PAYMENT_NETWORK_ID, paymentNetworkId);
         return this;
     }
 
-    public FWPAssertionBuilder setLocation(double latitude, double longitude) 
-            throws IOException {
+    public FWPAssertionBuilder setLocation(double latitude, double longitude) {
         setElement(FWPElements.LOCATION, 
                    new CBORArray()
                        .add(new CBORFloatingPoint(latitude))
@@ -101,19 +92,18 @@ public class FWPAssertionBuilder {
         return this;
     }
 
-    public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) 
-            throws IOException {
+    public FWPAssertionBuilder setOptionalTimeStamp(GregorianCalendar timeStamp) {
         return setElement(FWPElements.TIME_STAMP,
                           new CBORString(ISODateTime.encode(timeStamp, 
                                                             ISODateTime.LOCAL_NO_SUBSECONDS)));
     }
 
-    public FWPAssertionBuilder setNetworkOptions(String jsonStringOrNull) throws IOException {
+    public FWPAssertionBuilder setNetworkOptions(String jsonStringOrNull) {
         return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_OPTIONS,
                                                             CBORFromJSON.convert(jsonStringOrNull));
     }
 
-    public byte[] create(FWPPreSigner fwpPreSigner) throws IOException, GeneralSecurityException {
+    public byte[] create(FWPPreSigner fwpPreSigner) {
         // Default time is now.
         if (!elementList.contains(FWPElements.TIME_STAMP)) {
             setOptionalTimeStamp(new GregorianCalendar());
@@ -124,7 +114,7 @@ public class FWPAssertionBuilder {
             if (!elementList.contains(name) &&
                 name != FWPElements.NETWORK_OPTIONS &&
                 name != FWPElements.LOCATION) {
-                throw new IOException("Missing element: " + name.toString());
+                throw new FWPException("Missing element: " + name.toString());
             }
         }
         // Attempts rebuilding will return NPE.

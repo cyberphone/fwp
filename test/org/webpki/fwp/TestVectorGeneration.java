@@ -36,7 +36,6 @@ import org.webpki.cbor.CBORPublicKey;
 import org.webpki.cbor.CBORTag;
 import org.webpki.cbor.CBORString;
 
-import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.EncryptionCore;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
@@ -396,7 +395,6 @@ public class TestVectorGeneration {
 
     public static void main(String[] args) {
         try {
-            CustomCryptoProvider.forcedLoad(false);
            new TestVectorGeneration(args[0] + File.separatorChar,
                                     args[1] + File.separatorChar);
         } catch (Exception e) {

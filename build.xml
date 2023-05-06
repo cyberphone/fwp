@@ -47,7 +47,7 @@
   </condition>
 
   <target name="help">
-      <echo message="build tomcat testfido cryptosvg cryptodoc vectors ctap2test -Ddata2sign=b64u -Dsignature=b64u authenticatordata=b64u"/>
+      <echo message="build tomcat testfido cryptosvg cryptodoc vectors crypto-alternative ctap2test -Ddata2sign=b64u -Dsignature=b64u -Dauthenticatordata=b64u"/>
   </target>
 
   <target name="tomcat">
@@ -188,7 +188,24 @@
      </copy>
   </target>
 
-  <target name="ctap2test" depends="_compile">
+    <target name="crypto-alternative" depends="_compile">
+    <java fork="yes"
+          classname="org.webpki.fwp.CryptoAlternative"
+          failonerror="true">
+       <classpath>
+          <pathelement path="${temp.dir}"/>
+          <fileset dir="${webpki.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+          <fileset dir="${third.party.lib.dir}">
+            <include name="*.jar"/>
+          </fileset>
+       </classpath>
+       <arg line="${dist.dir} ${openkeystore.dir}/testdata/keys"/>
+     </java>
+  </target>
+
+    <target name="ctap2test" depends="_compile">
     <property name="data2sign" value=""/>
     <property name="signature" value=""/>
     <property name="authenticatordata" value=""/>

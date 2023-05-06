@@ -16,8 +16,6 @@
  */
 package org.webpki.fwp;
 
-import java.io.IOException;
-
 import org.webpki.cbor.CBORInteger;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -65,7 +63,7 @@ public class FWPPaymentRequest {
         return amount;
     }
 
-    public FWPPaymentRequest(JSONObjectReader reader) throws IOException {
+    public FWPPaymentRequest(JSONObjectReader reader) {
         payeeName = reader.getString(JSON_PR_PAYEE_NAME);
         requestId = reader.getString(JSON_PR_REQUEST_ID);
         amount = reader.getString(JSON_PR_AMOUNT);
@@ -73,7 +71,7 @@ public class FWPPaymentRequest {
         reader.checkForUnread();
     }
     
-    public FWPPaymentRequest(CBORObject cborObject) throws IOException {
+    public FWPPaymentRequest(CBORObject cborObject) {
         CBORMap cborPaymentRequest = cborObject.getMap();
         payeeName = cborPaymentRequest.get(CBOR_PR_PAYEE_NAME).getString();
         requestId = cborPaymentRequest.get(CBOR_PR_REQUEST_ID).getString();
@@ -92,15 +90,15 @@ public class FWPPaymentRequest {
         this.currency = currency;
     }
     
-    public String serializeAsJSON() throws IOException {
+    public String serializeAsJSON() {
         return serializeAsJSON(JSONOutputFormats.NORMALIZED);
     }
     
-    public String serializeAsJSON(JSONOutputFormats format) throws IOException {
+    public String serializeAsJSON(JSONOutputFormats format) {
         return getWriter().serializeToString(format);
     }
     
-    public CBORMap serializeAsCBOR() throws IOException {
+    public CBORMap serializeAsCBOR() {
         return new CBORMap()
                 .set(CBOR_PR_PAYEE_NAME, new CBORString(payeeName))
                 .set(CBOR_PR_REQUEST_ID, new CBORString(requestId))
@@ -108,7 +106,7 @@ public class FWPPaymentRequest {
                 .set(CBOR_PR_CURRENCY, new CBORString(currency));
     }
 
-    public JSONObjectWriter getWriter() throws IOException {
+    public JSONObjectWriter getWriter() {
         return new JSONObjectWriter()
                 .setString(JSON_PR_PAYEE_NAME, payeeName)
                 .setString(JSON_PR_REQUEST_ID, requestId)
@@ -118,19 +116,11 @@ public class FWPPaymentRequest {
     
     @Override
     public String toString() {
-        try {
-            return getWriter().toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return getWriter().toString();
     }
     
     @Override
     public boolean equals(Object o) {
-        try {
-            return serializeAsCBOR().equals(((FWPPaymentRequest)o).serializeAsCBOR());
-        } catch (IOException e) {
-            return false;
-        }
+        return serializeAsCBOR().equals(((FWPPaymentRequest)o).serializeAsCBOR());
     }
 }

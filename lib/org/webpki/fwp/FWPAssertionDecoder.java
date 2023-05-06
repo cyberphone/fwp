@@ -16,9 +16,6 @@
  */
 package org.webpki.fwp;
 
-import java.io.IOException;
-
-import java.security.GeneralSecurityException;
 
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -48,7 +45,7 @@ public class FWPAssertionDecoder {
             return version;
         }
         
-        PlatformNameVersion(CBORObject nameVersion) throws IOException {
+        PlatformNameVersion(CBORObject nameVersion) {
             this.name = nameVersion.getMap().get(FWPElements.CBOR_PDSUB_NAME).getString();
             this.version = nameVersion.getMap().get(FWPElements.CBOR_PDSUB_VERSION).getString();
         }
@@ -104,15 +101,14 @@ public class FWPAssertionDecoder {
         return location;
     }
 
-    public void verifyClaimedPaymentRequest(FWPPaymentRequest claimedPaymentRequest) 
-            throws IOException {
+    public void verifyClaimedPaymentRequest(FWPPaymentRequest claimedPaymentRequest) {
         if (!paymentRequest.equals(claimedPaymentRequest)) {
-            throw new IOException("Claimed:\n" + claimedPaymentRequest.toString() +
-                                  "Actual:\n" + paymentRequest.toString());
+            throw new FWPException("Claimed:\n" + claimedPaymentRequest.toString() +
+                                      "Actual:\n" + paymentRequest.toString());
         }
     }
     
-    private String getString(FWPElements name) throws IOException {
+    private String getString(FWPElements name) {
         return fwpAssertion.get(name.cborLabel).getString();
     }
     
@@ -126,10 +122,13 @@ public class FWPAssertionDecoder {
         return userValidation;
     }
     
-    public FWPAssertionDecoder(byte[] signedFwpAssertion) throws IOException,
-                                                                 GeneralSecurityException {
+    public FWPAssertionDecoder(byte[] signedFwpAssertion) {
         // Convert SAD binary into CBOR objects.
-        fwpAssertion = CBORObject.decode(signedFwpAssertion).getMap();
+        this(CBORObject.decode(signedFwpAssertion).getMap());
+    }
+        
+    public FWPAssertionDecoder(CBORMap signedFwpAssertion) {
+        fwpAssertion = signedFwpAssertion;
         
         // Payment Request (PRCD)
         paymentRequest = new FWPPaymentRequest(
