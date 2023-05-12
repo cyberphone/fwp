@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.webpki.cbor.CBORBytes;
-import org.webpki.cbor.CBORInteger;
+import org.webpki.cbor.CBORInt;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
@@ -91,22 +91,22 @@ public class FWPCrypto {
     public static final int FIDO_KEYALG_RS256       = -257;
     
     // Authorization Signature (AS) container
-    public static final CBORInteger AS_ALGORITHM            = new CBORInteger(1);
-    public static final CBORInteger AS_PUBLIC_KEY           = new CBORInteger(2);
-    public static final CBORInteger AS_AUTHENTICATOR_DATA   = new CBORInteger(3);
-    public static final CBORInteger AS_SIGNATURE            = new CBORInteger(4);
+    public static final CBORInt AS_ALGORITHM            = new CBORInt(1);
+    public static final CBORInt AS_PUBLIC_KEY           = new CBORInt(2);
+    public static final CBORInt AS_AUTHENTICATOR_DATA   = new CBORInt(3);
+    public static final CBORInt AS_SIGNATURE            = new CBORInt(4);
     
     // Used by the Web emulator to maintain WebAuthn compatibility
-    public static final CBORInteger AS_CLIENT_DATA_JSON     = new CBORInteger(5);
+    public static final CBORInt AS_CLIENT_DATA_JSON     = new CBORInt(5);
     
     // For attestation public key objects
-    static final CBORInteger COSE_ALGORITHM_LABEL           = new CBORInteger(3);
+    static final CBORInt COSE_ALGORITHM_LABEL           = new CBORInt(3);
     
     // authData
     static final int FLAG_OFFSET                    = 32;
     static final int CREDENTIAL_ID_LENGTH_OFFSET    = FLAG_OFFSET + 1 + 4 + 16;
     
-    static final CBORInteger FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
+    static final CBORInt FWP_AUTHORIZATION_LABEL = FWPElements.AUTHORIZATION.cborLabel;
     
     public enum UserValidation {PRESENT, VERIFIED};
 
@@ -179,7 +179,7 @@ public class FWPCrypto {
 
             // Add the authorization container map including the members that
             // also are signed.
-            return new CBORMap().set(AS_ALGORITHM, new CBORInteger(coseAlgorithm))
+            return new CBORMap().set(AS_ALGORITHM, new CBORInt(coseAlgorithm))
                                 .set(AS_PUBLIC_KEY, publicKey);
         }
     }

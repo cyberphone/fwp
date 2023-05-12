@@ -37,7 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.webpki.cbor.CBORBytes;
-import org.webpki.cbor.CBORInteger;
+import org.webpki.cbor.CBORInt;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
@@ -293,11 +293,11 @@ public class FIDOTest {
         
         CBORMap publicKey = CBORPublicKey.convert(keyPair.getPublic());
         publicKey.set(FWPCrypto.COSE_ALGORITHM_LABEL,
-                      new CBORInteger(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
+                      new CBORInt(FWPCrypto.publicKey2CoseSignatureAlgorithm(keyPair.getPublic())));
         baos.write(publicKey.encode());
         if (extension) {
             baos.write(new CBORMap().set(new CBORString("blah"), 
-                                         new CBORInteger(-3)).encode());
+                                         new CBORInt(-3)).encode());
         }
         
         byte[] attestationObject = new CBORMap()

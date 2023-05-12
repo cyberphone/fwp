@@ -23,7 +23,7 @@ import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORString;
 import org.webpki.cbor.CBORArray;
-import org.webpki.cbor.CBORFloatingPoint;
+import org.webpki.cbor.CBORFloat;
 import org.webpki.cbor.CBORFromJSON;
 
 import org.webpki.fwp.FWPCrypto.FWPPreSigner;
@@ -87,8 +87,8 @@ public class FWPAssertionBuilder {
     public FWPAssertionBuilder setLocation(double latitude, double longitude) {
         setElement(FWPElements.LOCATION, 
                    new CBORArray()
-                       .add(new CBORFloatingPoint(latitude))
-                       .add(new CBORFloatingPoint(longitude)));
+                       .add(new CBORFloat(latitude))
+                       .add(new CBORFloat(longitude)));
         return this;
     }
 
@@ -99,8 +99,8 @@ public class FWPAssertionBuilder {
     }
 
     public FWPAssertionBuilder setNetworkOptions(String jsonStringOrNull) {
-        return jsonStringOrNull == null ? this : setElement(FWPElements.NETWORK_OPTIONS,
-                                                            CBORFromJSON.convert(jsonStringOrNull));
+        return jsonStringOrNull == null ? this : 
+            setElement(FWPElements.NETWORK_OPTIONS, CBORFromJSON.convert(jsonStringOrNull));
     }
 
     public byte[] create(FWPPreSigner fwpPreSigner) {
