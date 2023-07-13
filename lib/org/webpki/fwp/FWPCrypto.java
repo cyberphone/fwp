@@ -368,7 +368,6 @@ public class FWPCrypto {
                 new ByteArrayInputStream(authData, offset, authData.length - offset),
                 true, 
                 false,
-                false,
                 null).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
