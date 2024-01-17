@@ -139,7 +139,7 @@ public class EnrollServlet extends HttpServlet {
                 "      timeout: 360000,\n" +
                 "      excludeCredentials: [],\n" +
                 "      authenticatorSelection: {\n" +
-                "        residentKey: 'preferred',\n" +
+                "        residentKey: 'required',\n" +
                 "        userVerification: '" + WalletCore.USER_VERIFICATION + "'\n" +
                 "      },\n" +
 // Attestation on Android is very slow so we drop this for the PoC :(
