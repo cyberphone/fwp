@@ -13,7 +13,8 @@
     </buildSpec>
     <natures>
         <nature>org.eclipse.jdt.core.javanature</nature>
-        <nature>org.eclipse.jdt.ls.unmanagedFolderNature</nature>	</natures>
+        <nature>org.eclipse.jdt.ls.unmanagedFolderNature</nature>
+	</natures>
     <filteredResources>
         <filter>
             <id>1714018386907</id>
