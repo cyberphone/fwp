@@ -22,37 +22,37 @@ public enum Actors {
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<a href='https://github.com/cyberphone/fwp' target='_blank'><img src='images/fwp.svg' " +
         "style='height:25pt' " +
-        "title='Specifications, source code, etc.'/></a>"),
+        "title='Specifications, source code, etc.'></a>"),
     FWP      (
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='images/wallet-internal.svg' " +
         "style='height:35pt' " +
-        "title='Wallet Internal Operation'/>"),
+        "title='Wallet Internal Operation'>"),
     WALLET   (
-            "<div style='display:flex;padding-bottom:10pt'>" +
-            "<img src='images/wallet-ui.svg' " +
-            "style='height:35pt' " +
-            "title='Wallet UI'/>"),
+        "<div style='display:flex;padding-bottom:10pt'>" +
+        "<img src='images/wallet-ui.svg' " +
+        "style='height:35pt' " +
+        "title='Wallet UI'>"),
     MERCHANT (
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='images/merchant.svg' " +
         "style='height:35pt' " +
-        "title='Merchant'/>"),
+        "title='Merchant'>"),
     PSP      (
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='images/psp.svg' " +
         "style='height:35pt' " +
-        "title='Payment System Provider'/>"),
+        "title='Payment System Provider'>"),
     ISSUER   (
-            "<div style='display:flex;padding-bottom:10pt'>" +
-            "<img src='images/issuer.svg' " +
-            "style='height:35pt' " +
-            "title='Issuer (bank)'/>"),
+        "<div style='display:flex;padding-bottom:10pt'>" +
+        "<img src='images/issuer.svg' " +
+        "style='height:35pt' " +
+        "title='Issuer (bank)'>"),
     ADMIN    (
         "<div style='display:flex;padding-bottom:10pt'>" +
         "<img src='../images/issuer.svg' " +
         "style='height:35pt' " +
-        "title='Administrator'/>");
+        "title='Administrator'>");
     
     String html;
 
