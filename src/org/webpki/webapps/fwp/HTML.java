@@ -76,7 +76,7 @@ public class HTML {
                 "<html lang='en'><head><link rel='icon' href='")
         .append(admin)
         .append("images/webpkiorg.png' sizes='192x192'>" + 
-                "<meta name='viewport' content='initial-scale=1.0'/>" + 
+                "<meta name='viewport' content='initial-scale=1.0'>" + 
                 "<title>FWP Lab</title>" + 
                 "<link rel='stylesheet' type='text/css' href='")
         .append(admin)
@@ -99,7 +99,7 @@ public class HTML {
             " onclick=\"document.location.href='")
         .append(admin)
         .append(
-            "home'\" title='Home of the lab...'/></div>")
+            "home'\" title='Home of the lab...'></div>")
         .append(actor.html)
         .append(
             "</div>" +
