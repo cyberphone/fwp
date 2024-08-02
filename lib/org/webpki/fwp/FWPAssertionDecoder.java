@@ -175,7 +175,7 @@ public class FWPAssertionDecoder {
                     fwpAssertion.get(FWPElements.LOCATION.cborLabel).getArray();
             location = new double[2];
             for (int i = 0; i < 2; i++) {
-                location[i] = cborLocation.get(i).getDouble();
+                location[i] = cborLocation.get(i).getFloat64();
             }
         }
         

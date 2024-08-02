@@ -150,7 +150,7 @@ public class FWPCrypto {
        
             // Create a FIDO compatible signature.
             int coseAlgorithm = CBORObject.decode(unsignedFwpAssertion)
-                .getMap().get(FWP_AUTHORIZATION_LABEL).getMap().get(AS_ALGORITHM).getInt();
+                .getMap().get(FWP_AUTHORIZATION_LABEL).getMap().get(AS_ALGORITHM).getInt32();
             byte[] signature = new SignatureWrapper(getWebPkiAlgorithm(coseAlgorithm), privateKey)
                 // Weird, FIDO does not use the same ECDSA signature format as COSE and JOSE
                 .ecdsaAsn1SignatureEncoding(true)
@@ -302,7 +302,7 @@ public class FWPCrypto {
         PublicKey publicKey = CBORPublicKey.convert(cborPublicKey);
         
         // The mandatory COSE signature algorithm.
-        int coseAlgorithm = authorization.get(AS_ALGORITHM).getInt();
+        int coseAlgorithm = authorization.get(AS_ALGORITHM).getInt32();
         
         // Does the algorithm match the public key?
         algorithmComplianceTest(publicKey, coseAlgorithm);
@@ -371,7 +371,7 @@ public class FWPCrypto {
                 null).getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
-        int signatureAlgorithm = fidoPublicKey.get(COSE_ALGORITHM_LABEL).getInt();
+        int signatureAlgorithm = fidoPublicKey.get(COSE_ALGORITHM_LABEL).getInt32();
         fidoPublicKey.remove(COSE_ALGORITHM_LABEL);
 
         // Verify that we got a genuine FIDO/COSE public key and

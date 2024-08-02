@@ -91,7 +91,7 @@ public class CryptoImages {
                   .append("'>")
                   .append(labelText)
                   .append("<tspan fill='black'> (")
-                  .append(cborLabel.getInt())
+                  .append(cborLabel.getInt32())
                   .append(")</tspan></text>\n");
         
         top += LABEL_HEIGHT;
