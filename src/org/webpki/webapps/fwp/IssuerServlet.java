@@ -73,7 +73,7 @@ public class IssuerServlet extends HttpServlet {
     static final long AUTHORIZATION_MAX_AGE    = 600000;
     static final long AUTHORIZATION_MAX_FUTURE = 120000;
     
-    static final CBORDecrypter decrypter = 
+    static final CBORDecrypter<?> decrypter = 
             new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
                 
             @Override

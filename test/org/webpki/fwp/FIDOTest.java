@@ -132,7 +132,7 @@ public class FIDOTest {
     
  
     void test(JSONObjectReader vector) throws Exception {
-        String userAgent = vector.getString("userAgent");
+       // String userAgent = vector.getString("userAgent");
         String authenticator = vector.getString("authenticator");
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");

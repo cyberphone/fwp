@@ -49,7 +49,7 @@ public class ESADServlet extends HttpServlet {
     private static final String WAITING_ID     = "wait";
     private static final String ACTIVATE_ID    = "activate";
     
-    private static CBOREncrypter encrypter = new CBORAsymKeyEncrypter(
+    private static CBOREncrypter<?> encrypter = new CBORAsymKeyEncrypter(
         ApplicationService.issuerEncryptionKey.getPublic(),
         ApplicationService.issuerKeyEncryptionAlgorithm,
         ApplicationService.issuerContentEncryptionAlgorithm)     

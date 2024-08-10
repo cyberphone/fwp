@@ -206,7 +206,7 @@ class ProcessFwpAssertion implements CBORCryptoUtils.Collector {
         ProcessFwpAssertion.decryptionKeys = decryptionKeys;
     }
     
-    CBORDecrypter decrypter = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
+    CBORDecrypter<?> decrypter = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
 
             @Override
             public byte[] decrypt(PrivateKey privateKey,
