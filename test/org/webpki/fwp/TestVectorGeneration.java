@@ -30,6 +30,7 @@ import java.util.GregorianCalendar;
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORAsymKeyEncrypter;
 import org.webpki.cbor.CBORCryptoUtils;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
@@ -158,11 +159,11 @@ public class TestVectorGeneration {
 
         // ES256 generates different results for each round.  We try to limit that...
         fwpAssertion = optionalSignatureRewrite(testDataDir + FILE_SIGNED_CBOR, fwpAssertion);
-        CBORMap authContainer = CBORObject.decode(fwpAssertion).getMap().get(
+        CBORMap authContainer = CBORDecoder.decode(fwpAssertion).getMap().get(
                 FWPCrypto.FWP_AUTHORIZATION_LABEL).getMap();
 
         result.append("\n\n\nUnsigned FWP assertion, here in CBOR 'diagnostic notation':\n")
-              .append(CBORObject.decode(unsignedFwpAssertion).toString())
+              .append(CBORDecoder.decode(unsignedFwpAssertion).toString())
               .append("\n\nNote that the last element (")
               .append(FWPElements.AUTHORIZATION.cborLabel)
               .append(") contains the COSE signature algorithm (ES256) and " +
@@ -209,7 +210,7 @@ public class TestVectorGeneration {
               authContainer.get(FWPCrypto.AS_SIGNATURE).getBytes()));
 
         result.append("\n\nSigned FWP assertion (SAD), here in CBOR 'diagnostic notation':\n")
-              .append(CBORObject.decode(fwpAssertion).toString())
+              .append(CBORDecoder.decode(fwpAssertion).toString())
               .append("\n\nThe added elements " + FWPCrypto.AS_AUTHENTICATOR_DATA +
                       "," + FWPCrypto.AS_CLIENT_DATA_JSON +
                       "," + FWPCrypto.AS_SIGNATURE +
@@ -262,7 +263,7 @@ public class TestVectorGeneration {
         }
         
         result.append("\n\nEncrypted FWP assertion (ESAD), here in CBOR 'diagnostic notation:\n")
-              .append(CBORObject.decode(encryptedAssertion).toString())
+              .append(CBORDecoder.decode(encryptedAssertion).toString())
               .append("\n\nAnd as a hex-encoded binary: ")
               .append(HexaDecimal.encode(encryptedAssertion))
               .append("\n");
@@ -313,7 +314,7 @@ public class TestVectorGeneration {
                 }
             }
 
-        }).decrypt(CBORObject.decode(encryptedAssertion));
+        }).decrypt(CBORDecoder.decode(encryptedAssertion));
  
         FWPAssertionDecoder decodedFwpAssertion =
                 new FWPAssertionDecoder(decryptedFwpAssertion);
@@ -362,7 +363,7 @@ public class TestVectorGeneration {
     }
 
     CBORMap cleanSignature(byte[] assertion) throws IOException {
-        CBORMap fwpAssertion = CBORObject.decode(assertion).getMap();
+        CBORMap fwpAssertion = CBORDecoder.decode(assertion).getMap();
         fwpAssertion.get(FWPElements.AUTHORIZATION.cborLabel)
         .getMap().remove(FWPCrypto.AS_SIGNATURE);
         return fwpAssertion;
@@ -389,7 +390,7 @@ public class TestVectorGeneration {
                                   byte[] fwpAssertion) throws IOException {
         IO.writeFile(testDataDir + fileSignedCbor.toUpperCase()
                 .substring(0, fileSignedCbor.length() - 4) + "txt",
-                           CBORObject.decode(fwpAssertion).toString());
+                CBORDecoder.decode(fwpAssertion).toString());
     }
 
 

@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import java.util.Base64;
 
-import org.webpki.cbor.CBORObject;
+import org.webpki.cbor.CBORDecoder;
 
 
 /**
@@ -42,7 +42,7 @@ public class Ctap2Test {
                                                       base64UrlDecode(args[2]), 
                                                       base64UrlDecode(args[1]));
             new FWPAssertionDecoder(sadObject);
-            System.out.println(CBORObject.decode(sadObject).toString());
+            System.out.println(CBORDecoder.decode(sadObject).toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

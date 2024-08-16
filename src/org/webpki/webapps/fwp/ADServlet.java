@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.HashAlgorithms;
@@ -137,7 +138,7 @@ public class ADServlet extends HttpServlet {
                 "</div>" +
 
                 "<div class='staticbox'>")
-            .append(HTML.encode(CBORObject.decode(unsignedAssertion).toString(), true))
+            .append(HTML.encode(CBORDecoder.decode(unsignedAssertion).toString(), true))
             .append(
                 "</div>");
 

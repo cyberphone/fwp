@@ -21,6 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 import org.webpki.cbor.CBORArray;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
 
@@ -124,7 +125,7 @@ public class FWPAssertionDecoder {
     
     public FWPAssertionDecoder(byte[] signedFwpAssertion) {
         // Convert SAD binary into CBOR objects.
-        this(CBORObject.decode(signedFwpAssertion).getMap());
+        this(CBORDecoder.decode(signedFwpAssertion).getMap());
     }
         
     public FWPAssertionDecoder(CBORMap signedFwpAssertion) {

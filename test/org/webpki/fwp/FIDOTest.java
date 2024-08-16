@@ -37,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.webpki.cbor.CBORBytes;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORInt;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -126,13 +127,13 @@ public class FIDOTest {
                 credentialId,
                 0,
                 credentialIdLength));
-        return CBORPublicKey.convert(CBORObject.decode(
+        return CBORPublicKey.convert(CBORDecoder.decode(
                 FWPCrypto.extractUserCredential(attestation.encode()).rawCosePublicKey));
     }
     
  
     void test(JSONObjectReader vector) throws Exception {
-       // String userAgent = vector.getString("userAgent");
+        String userAgent = vector.getString("userAgent");
         String authenticator = vector.getString("authenticator");
         String rpUrl = vector.getString("rpUrl");
         JSONObjectReader create = vector.getObject("create");
@@ -140,7 +141,7 @@ public class FIDOTest {
         JSONObjectReader createResponse = vector.getObject("create.response");
         byte[] createCredentialId = createResponse.getBinary(FWPCrypto.CREDENTIAL_ID);
         CBORObject attestation = 
-                CBORObject.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
+        CBORDecoder.decode(createResponse.getBinary(FWPCrypto.ATTESTATION_OBJECT));
         PublicKey publicKey = getPublicKey(attestation, rpUrl, createCredentialId);
         assertTrue("alg=" + authenticator, createResponse.getInt("keyAlgorithm") ==
                 FWPCrypto.publicKey2CoseSignatureAlgorithm(publicKey));
@@ -303,7 +304,7 @@ public class FIDOTest {
         byte[] attestationObject = new CBORMap()
                 .set(FWPCrypto.AUTH_DATA_CBOR, new CBORBytes(baos.toByteArray())).encode();
         assertTrue("pubk", keyPair.getPublic().equals(
-                CBORPublicKey.convert(CBORObject.decode(FWPCrypto.extractUserCredential(attestationObject)
+                CBORPublicKey.convert(CBORDecoder.decode(FWPCrypto.extractUserCredential(attestationObject)
                         .rawCosePublicKey))));
     }
     

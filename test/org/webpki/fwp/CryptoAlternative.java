@@ -30,6 +30,7 @@ import java.util.HashMap;
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORAsymKeyEncrypter;
 import org.webpki.cbor.CBORCryptoUtils;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORDecrypter;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -131,15 +132,15 @@ public class CryptoAlternative {
                                      ctap2);
         
         result.append("\n\nSigned FWP assertion (SAD):\n")
-              .append(CBORObject.decode(fwpAssertion).toString());
+              .append(CBORDecoder.decode(fwpAssertion).toString());
         
-        CBORMap cborTemp = CBORObject.decode(fwpAssertion).getMap();
+        CBORMap cborTemp = CBORDecoder.decode(fwpAssertion).getMap();
 
         CBORObject cborPaymentRequest = cborTemp.remove(FWPElements.PAYMENT_REQUEST.cborLabel);
         fwpAssertion = cborTemp.encode();
 
         result.append("\n\nSigned FWP assertion (SAD) after PRCD removal:\n")
-        .append(CBORObject.decode(fwpAssertion).toString());
+        .append(CBORDecoder.decode(fwpAssertion).toString());
   
         
         KeyPair x25519 = readKey("x25519");
@@ -171,7 +172,7 @@ public class CryptoAlternative {
                 }).encrypt(fwpAssertion).encode();
         
         result.append("\n\nEncrypted FWP assertion (ESAD):\n")
-              .append(CBORObject.decode(encryptedAssertion).toString());
+              .append(CBORDecoder.decode(encryptedAssertion).toString());
         
         HashMap<CBORObject, PrivateKey> keys = new HashMap<>();
         keys.put(ISSUER_KEY_ID, x25519.getPrivate());
@@ -252,8 +253,8 @@ class ProcessFwpAssertion implements CBORCryptoUtils.Collector {
     
     ProcessFwpAssertion(byte[] encryptedAssertion) {
         CBORMap decryptedFwpAssertion = 
-                CBORObject.decode(
-                        decrypter.decrypt(CBORObject.decode(encryptedAssertion))).getMap();
+        CBORDecoder.decode(
+                        decrypter.decrypt(CBORDecoder.decode(encryptedAssertion))).getMap();
         CBORMap pr = paymentRequest.getMap();
 /*
         pr.remove(FWPPaymentRequest.CBOR_PR_PAYEE_NAME);

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORObject;
 import org.webpki.cbor.CBORPublicKey;
 
@@ -165,7 +166,7 @@ public class LoginServlet extends HttpServlet {
                 WalletCore.failed("No session!");
             }
             
-            CBORObject publicKey = CBORObject.decode(coreClientData.cosePublicKey);
+            CBORObject publicKey = CBORDecoder.decode(coreClientData.cosePublicKey);
             
             StringBuilder html = new StringBuilder(
                     "<div class='header'>Login Succeeded!</div>" +

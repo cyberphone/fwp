@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.cbor.CBORObject;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORPublicKey;
 
 import org.webpki.crypto.CryptoRandom;
@@ -143,7 +143,7 @@ public class FIDOLoginServlet extends HttpServlet {
                     DataBaseOperations.CoreClientData coreClientData = 
                             DataBaseOperations.getCoreClientData(userId, connection);
                     PublicKey publicKey = 
-                            CBORPublicKey.convert(CBORObject.decode(coreClientData.cosePublicKey));
+                            CBORPublicKey.convert(CBORDecoder.decode(coreClientData.cosePublicKey));
                     FWPCrypto.validateFidoSignature(
                             FWPCrypto.getWebPkiAlgorithm(
                                     FWPCrypto.publicKey2CoseSignatureAlgorithm(publicKey)), 

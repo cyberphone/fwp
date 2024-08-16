@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.cbor.CBORObject;
+import org.webpki.cbor.CBORDecoder;
 
 /**
  * Receives and shows the Signed Authorization Data (SAD).
@@ -96,7 +96,7 @@ public class SADServlet extends HttpServlet {
             "</div>" +
 
             "<div class='staticbox'>")
-        .append(HTML.encode(CBORObject.decode(
+        .append(HTML.encode(CBORDecoder.decode(
                     ApplicationService.base64UrlDecode(signedAuthorizationB64U)).toString(), true))
         .append(
             "</div>");

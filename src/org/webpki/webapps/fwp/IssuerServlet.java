@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyDecrypter;
 import org.webpki.cbor.CBORCryptoUtils;
+import org.webpki.cbor.CBORDecoder;
 import org.webpki.cbor.CBORDecrypter;
 import org.webpki.cbor.CBORObject;
 
@@ -159,7 +160,7 @@ public class IssuerServlet extends HttpServlet {
         .append(
             ") object:</div>" +
             "<div class='staticbox'>")
-        .append(HTML.encode(CBORObject.decode(fwpAssertionBinary).toString(), true))
+        .append(HTML.encode(CBORDecoder.decode(fwpAssertionBinary).toString(), true))
         .append(
             "</div>");
         HTML.standardPage(response, Actors.ISSUER, WalletCore.GO_HOME_JAVASCRIPT, html);
@@ -183,7 +184,7 @@ public class IssuerServlet extends HttpServlet {
              
               // Decrypt ESAD returning SAD.
             byte[] fwpAssertionBinary = decrypter.decrypt(
-                    CBORObject.decode(fwpJsonAssertion.getUserAuthorization()));
+                CBORDecoder.decode(fwpJsonAssertion.getUserAuthorization()));
             // Succeeded.
             
             // Decode signed assertion (SAD).
