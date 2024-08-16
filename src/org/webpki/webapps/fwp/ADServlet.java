@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORDecoder;
-import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.HashAlgorithms;
 
