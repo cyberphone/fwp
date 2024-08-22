@@ -372,8 +372,7 @@ public class FWPCrypto {
                 .setInputLength(maxLength).decodeWithOptions().getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
-        int signatureAlgorithm = fidoPublicKey.get(COSE_ALGORITHM_LABEL).getInt32();
-        fidoPublicKey.remove(COSE_ALGORITHM_LABEL);
+        int signatureAlgorithm = fidoPublicKey.remove(COSE_ALGORITHM_LABEL).getInt32();
 
         // Verify that we got a genuine FIDO/COSE public key and
         // that the associated signature algorithm matches.
