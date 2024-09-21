@@ -37,7 +37,6 @@ import org.webpki.cbor.CBORPublicKey;
 import org.webpki.cbor.CBORTag;
 import org.webpki.cbor.CBORString;
 
-import org.webpki.crypto.EncryptionCore;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
 import org.webpki.crypto.CryptoException;
@@ -278,7 +277,7 @@ public class TestVectorGeneration {
                            UTF8.encode(fwpJsonAssertion.toString()));
 
         byte[] decryptedFwpAssertion = 
-                new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
+                new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
                     
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,
@@ -289,19 +288,6 @@ public class TestVectorGeneration {
                     throw new CryptoException("Wrong/missing ID");
                 }
                 return x25519.getPrivate();
-            }
-            
-            @Override
-            public byte[] decrypt(PrivateKey privateKey,
-                                  byte[] optionalEncryptedKey,
-                                  PublicKey optionalEphemeralKey,
-                                  KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                  ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
-                return EncryptionCore.decryptKey(true,
-                                                 privateKey, optionalEncryptedKey,
-                                                 optionalEphemeralKey,
-                                                 keyEncryptionAlgorithm,
-                                                 contentEncryptionAlgorithm);
             }
           
         }).setTagPolicy(CBORCryptoUtils.POLICY.MANDATORY, new CBORCryptoUtils.Collector() {

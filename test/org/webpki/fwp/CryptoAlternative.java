@@ -38,7 +38,6 @@ import org.webpki.cbor.CBORPublicKey;
 import org.webpki.cbor.CBORTag;
 import org.webpki.cbor.CBORString;
 
-import org.webpki.crypto.EncryptionCore;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
 import org.webpki.crypto.CryptoException;
 import org.webpki.crypto.KeyEncryptionAlgorithms;
@@ -207,20 +206,7 @@ class ProcessFwpAssertion implements CBORCryptoUtils.Collector {
         ProcessFwpAssertion.decryptionKeys = decryptionKeys;
     }
     
-    CBORDecrypter<?> decrypter = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
-
-            @Override
-            public byte[] decrypt(PrivateKey privateKey,
-                                  byte[] optionalEncryptedKey,
-                                  PublicKey optionalEphemeralKey,
-                                  KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                  ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
-                return EncryptionCore.decryptKey(true,
-                                                 privateKey, optionalEncryptedKey,
-                                                 optionalEphemeralKey,
-                                                 keyEncryptionAlgorithm,
-                                                 contentEncryptionAlgorithm);
-            }
+    CBORDecrypter<?> decrypter = new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
 
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey,

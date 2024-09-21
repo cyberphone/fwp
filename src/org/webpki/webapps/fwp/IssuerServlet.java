@@ -45,7 +45,6 @@ import org.webpki.cbor.CBORObject;
 
 import org.webpki.crypto.CryptoException;
 import org.webpki.crypto.ContentEncryptionAlgorithms;
-import org.webpki.crypto.EncryptionCore;
 import org.webpki.crypto.KeyEncryptionAlgorithms;
 
 import org.webpki.fwp.FWPAssertionDecoder;
@@ -75,36 +74,24 @@ public class IssuerServlet extends HttpServlet {
     static final long AUTHORIZATION_MAX_FUTURE = 120000;
     
     static final CBORDecrypter<?> decrypter = 
-            new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.DecrypterImpl() {
+        new CBORAsymKeyDecrypter(new CBORAsymKeyDecrypter.KeyLocator() {
                 
             @Override
             public PrivateKey locate(PublicKey optionalPublicKey, 
                                      CBORObject optionalKeyId,
                                      KeyEncryptionAlgorithms keyEncryptionAlgorithm,
                                      ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
-            // Somewhat simplistic setup: a single encryption key
-            if (optionalKeyId == null) {
-                throw new CryptoException("Missing keyId");
+                // Somewhat simplistic setup: a single encryption key
+                if (optionalKeyId == null) {
+                    throw new CryptoException("Missing keyId");
+                }
+                if (!ApplicationService.issuerEncryptionKeyId.equals(
+                        optionalKeyId)) {
+                    throw new CryptoException("Unknown keyId: " + optionalKeyId);
+                }
+                return ApplicationService.issuerEncryptionKey.getPrivate();
             }
-            if (!ApplicationService.issuerEncryptionKeyId.equals(
-                    optionalKeyId)) {
-                throw new CryptoException("Unknown keyId: " + optionalKeyId);
-            }
-            return ApplicationService.issuerEncryptionKey.getPrivate();            }
                     
-            @Override
-            public byte[] decrypt(PrivateKey privateKey,
-                                  byte[] optionalEncryptedKey,
-                                  PublicKey optionalEphemeralKey,
-                                  KeyEncryptionAlgorithms keyEncryptionAlgorithm,
-                                  ContentEncryptionAlgorithms contentEncryptionAlgorithm) {
-                return EncryptionCore.decryptKey(true,
-                                                 privateKey, optionalEncryptedKey,
-                                                 optionalEphemeralKey,
-                                                 keyEncryptionAlgorithm,
-                                                 contentEncryptionAlgorithm);
-            }
-
 
 /*
         @Override
