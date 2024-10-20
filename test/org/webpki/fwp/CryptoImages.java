@@ -140,14 +140,14 @@ public class CryptoImages {
  //       if (cborFull) {
  //           label("customData", CUSTOM_DATA_LABEL, false);
  //       }
-        label("algorithm", ALGORITHM_LABEL, true);
-        label("keyEncryption", KEY_ENCRYPTION_LABEL, !cborFull);
+        label("algorithm", CXF_ALGORITHM_LBL, true);
+        label("keyEncryption", CEF_KEY_ENCRYPTION_LBL, !cborFull);
         if (cborFull) {
-            label("keyId", KEY_ID_LABEL, false);
+            label("keyId", CXF_KEY_ID_LBL, false);
         }        
-        label("tag", TAG_LABEL, true);
-        label("iv", IV_LABEL, true);
-        label("cipherText", CIPHER_TEXT_LABEL, true);
+        label("tag", CEF_TAG_LBL, true);
+        label("iv", CEF_IV_LBL, true);
+        label("cipherText", CEF_CIPHER_TEXT_LBL, true);
         
         top = HEADER_HEIGHT;
         left += width + IMAGE_WIDTH + 2 * MARGIN;
@@ -155,14 +155,14 @@ public class CryptoImages {
 
         headers("(Key Encryption)", cborFull ? "Optional Sub Map" : "Sub Map");
 
-        label("algorithm", ALGORITHM_LABEL, true);
-        label("keyId", KEY_ID_LABEL, false);
-        label("publicKey", PUBLIC_KEY_LABEL, false);
+        label("algorithm", CXF_ALGORITHM_LBL, true);
+        label("keyId", CXF_KEY_ID_LBL, false);
+        label("publicKey", CXF_PUBLIC_KEY_LBL, false);
         if (cborFull) {
-            label("certificatePath", CERT_PATH_LABEL, false);
+            label("certificatePath", CXF_CERT_PATH_LBL, false);
         }
-        label("ephemeralKey", EPHEMERAL_KEY_LABEL, !cborFull);
-        label("cipherText", CIPHER_TEXT_LABEL, false);
+        label("ephemeralKey", CEF_EPHEMERAL_KEY_LBL, !cborFull);
+        label("cipherText", CEF_CIPHER_TEXT_LBL, false);
         
         int longPath = (LABEL_HEIGHT + LABEL_GUTTER) * (cborFull ? 3 : 2);
 

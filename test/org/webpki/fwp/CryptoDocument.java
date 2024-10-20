@@ -195,22 +195,22 @@ public class CryptoDocument  {
                 .add(new int[] {-1, 3}, "authenticatorData")
                 .add(new int[] {-1, 4}, "signatureValue");
             
-            int keyEncryption = CBORCryptoConstants.KEY_ENCRYPTION_LABEL.getInt32();
-            int ephemeralKey = CBORCryptoConstants.EPHEMERAL_KEY_LABEL.getInt32();
+            int keyEncryption = CBORCryptoConstants.CEF_KEY_ENCRYPTION_LBL.getInt32();
+            int ephemeralKey = CBORCryptoConstants.CEF_EPHEMERAL_KEY_LBL.getInt32();
         
             new DecoratorBuilder("ESAD.txt")
-                .add(new int[] {CBORCryptoConstants.ALGORITHM_LABEL.getInt32()}, "algorithm = A256GCM")
+                .add(new int[] {CBORCryptoConstants.CXF_ALGORITHM_LBL.getInt32()}, "algorithm = A256GCM")
                 .add(new int[] {keyEncryption}, "keyEncryption")
-                .add(new int[] {keyEncryption, CBORCryptoConstants.ALGORITHM_LABEL.getInt32()}, "algorithm = ECDH-ES+A256KW")
-                .add(new int[] {keyEncryption, CBORCryptoConstants.KEY_ID_LABEL.getInt32()}, "keyId")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.CXF_ALGORITHM_LBL.getInt32()}, "algorithm = ECDH-ES+A256KW")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.CXF_KEY_ID_LBL.getInt32()}, "keyId")
                 .add(new int[] {keyEncryption, ephemeralKey}, "ephemeralKey")
-                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_KTY_LABEL.getInt32()}, "kty = OKP")
-                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_CRV_LABEL.getInt32()}, "crv = X25519")
-                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_X_LABEL.getInt32()}, "x")
-                .add(new int[] {keyEncryption, CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt32()}, "cipherText")
-                .add(new int[] {CBORCryptoConstants.TAG_LABEL.getInt32()}, "tag")
-                .add(new int[] {CBORCryptoConstants.IV_LABEL.getInt32()}, "iv")
-                .add(new int[] {CBORCryptoConstants.CIPHER_TEXT_LABEL.getInt32()}, "cipherText");
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_KTY_LBL.getInt32()}, "kty = OKP")
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_CRV_LBL.getInt32()}, "crv = X25519")
+                .add(new int[] {keyEncryption, ephemeralKey, CBORCryptoConstants.COSE_OKP_X_LBL.getInt32()}, "x")
+                .add(new int[] {keyEncryption, CBORCryptoConstants.CEF_CIPHER_TEXT_LBL.getInt32()}, "cipherText")
+                .add(new int[] {CBORCryptoConstants.CEF_TAG_LBL.getInt32()}, "tag")
+                .add(new int[] {CBORCryptoConstants.CEF_IV_LBL.getInt32()}, "iv")
+                .add(new int[] {CBORCryptoConstants.CEF_CIPHER_TEXT_LBL.getInt32()}, "cipherText");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
