@@ -227,7 +227,7 @@ class ProcessFwpAssertion implements CBORCryptoUtils.Collector {
             
             @Override
             public void foundData(CBORObject tag) {
-                String typeUrl = tag.getTag().getTaggedObject().getArray().get(0).getString();
+                String typeUrl = tag.getTag().get().getArray().get(0).getString();
                 if (!FWPCrypto.FWP_ESAD_OBJECT_ID.equals(typeUrl)) {
                     throw new CryptoException("Unexpected type URL: " + typeUrl);
                 }
