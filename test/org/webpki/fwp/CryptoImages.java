@@ -35,7 +35,6 @@ public class CryptoImages {
     
     static int LABEL_GUTTER = 20;
     static int LABEL_HEIGHT = 80;
-    static int LABEL_MIDDLE = (LABEL_GUTTER + LABEL_GUTTER + LABEL_HEIGHT) / 2;
     
     static int IMAGE_WIDTH  = 83;
     
@@ -64,7 +63,7 @@ public class CryptoImages {
     }
     
     int totalHeight() {
-        return (cborFull ? 6 * LABEL_HEIGHT + 5 * LABEL_GUTTER
+        return (cborFull ? 7 * LABEL_HEIGHT + 6 * LABEL_GUTTER
                                        :
                            5 * LABEL_HEIGHT + 4 * LABEL_GUTTER) + HEADER_HEIGHT + MARGIN;
     }
@@ -137,9 +136,9 @@ public class CryptoImages {
 
         headers("(Content Encryption)", "Main Map");
 
- //       if (cborFull) {
- //           label("customData", CUSTOM_DATA_LABEL, false);
- //       }
+        if (cborFull) {
+            label("customData", CXF_CUSTOM_DATA_LBL, false);
+        }
         label("algorithm", CXF_ALGORITHM_LBL, true);
         label("keyEncryption", CEF_KEY_ENCRYPTION_LBL, !cborFull);
         if (cborFull) {
@@ -164,7 +163,9 @@ public class CryptoImages {
         label("ephemeralKey", CEF_EPHEMERAL_KEY_LBL, !cborFull);
         label("cipherText", CEF_CIPHER_TEXT_LBL, false);
         
-        int longPath = (LABEL_HEIGHT + LABEL_GUTTER) * (cborFull ? 3 : 2);
+        int lowerPath = (LABEL_HEIGHT + LABEL_GUTTER) * 2;
+        int upperPath = cborFull ? (LABEL_GUTTER + LABEL_HEIGHT) : 0;
+        int turnParam = (LABEL_GUTTER + LABEL_GUTTER + LABEL_HEIGHT) / 2;
 
         svg.append("</g>\n<g font-size='" + TEXT_FONT_SIZE + 
                    "' font-family='Roboto,sans-serif'>\n")
@@ -178,10 +179,10 @@ public class CryptoImages {
            .append(left - MARGIN)
            .append("," + HEADER_HEIGHT)
            .append(" c -35,0 -35," + LABEL_HEIGHT + " -35," + LABEL_HEIGHT +
-                   " v 0" +
-                   " c 0,0 0,49 -48," + LABEL_MIDDLE + 
-                   " c 48,11 48," + LABEL_MIDDLE + " 48," + LABEL_MIDDLE +
-                   " v " + longPath + " c 0,0 0," + LABEL_HEIGHT + " 35," + LABEL_HEIGHT + "'/>\n");
+                   " v " + upperPath +
+                   " c 0,0 0,49 -48," + turnParam + 
+                   " c 48,11 48," + turnParam + " 48," + turnParam +
+                   " v " + lowerPath + " c 0,0 0," + LABEL_HEIGHT + " 35," + LABEL_HEIGHT + "'/>\n");
         
         IO.writeFile(fileName, svg.append("</svg>\n").toString());
     }
