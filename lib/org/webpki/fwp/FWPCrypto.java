@@ -367,8 +367,8 @@ public class FWPCrypto {
         // We silently drop possible Extension Data (ED).
         int maxLength = authData.length - offset;
         CBORMap fidoPublicKey = 
-            new CBORDecoder(new ByteArrayInputStream(authData, offset, maxLength))
-                .setSequenceMode(true)
+            new CBORDecoder(new ByteArrayInputStream(authData, offset, maxLength),
+                            CBORDecoder.SEQUENCE_MODE)
                 .setInputLength(maxLength).decodeWithOptions().getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
