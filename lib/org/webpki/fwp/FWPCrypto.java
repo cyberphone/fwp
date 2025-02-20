@@ -368,8 +368,9 @@ public class FWPCrypto {
         int maxLength = authData.length - offset;
         CBORMap fidoPublicKey = 
             new CBORDecoder(new ByteArrayInputStream(authData, offset, maxLength),
-                            CBORDecoder.SEQUENCE_MODE)
-                .setInputLength(maxLength).decodeWithOptions().getMap();
+                            CBORDecoder.SEQUENCE_MODE,
+                            maxLength)
+                .decodeWithOptions().getMap();
 
         // Fetch the signature algorithm but remove it from the public key object.
         int signatureAlgorithm = fidoPublicKey.remove(COSE_ALGORITHM_LABEL).getInt32();
