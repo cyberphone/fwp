@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.cbor.CBORAsymKeyEncrypter;
-import org.webpki.cbor.CBORCryptoUtils;
 import org.webpki.cbor.CBOREncrypter;
 import org.webpki.cbor.CBORMap;
 import org.webpki.cbor.CBORObject;
@@ -53,14 +52,7 @@ public class ESADServlet extends HttpServlet {
         ApplicationService.issuerEncryptionKey.getPublic(),
         ApplicationService.issuerKeyEncryptionAlgorithm,
         ApplicationService.issuerContentEncryptionAlgorithm)     
-            .setIntercepter(new CBORCryptoUtils.Intercepter() {
-    
-                @Override
-                public CBORObject wrap(CBORMap unwrappedMap) {
-                    return new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, unwrappedMap);
-                }
-                
-            }).setKeyId(ApplicationService.issuerEncryptionKeyId);
+            .setKeyId(ApplicationService.issuerEncryptionKeyId);
     
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -76,7 +68,8 @@ public class ESADServlet extends HttpServlet {
                 return;
             }            
             CBORObject encryptedAssertion = encrypter.encrypt(
-                        ApplicationService.base64UrlDecode(signedAuthorizationDataB64U));
+                        ApplicationService.base64UrlDecode(signedAuthorizationDataB64U),
+                        new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, new CBORMap()));
 
             StringBuilder html = new StringBuilder(
                 "<form name='shoot' method='POST' action='finalizeassertion'>" +

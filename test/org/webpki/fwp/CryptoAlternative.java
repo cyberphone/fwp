@@ -159,16 +159,12 @@ public class CryptoAlternative {
                 .setIntercepter(new CBORCryptoUtils.Intercepter() {
 
                     @Override
-                    public CBORObject wrap(CBORMap unwrappedMap) {
-                        return new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, unwrappedMap);
-                    }
-
-                    @Override
                     public CBORObject getCustomData() {
                         return cborPaymentRequest;
                     }
 
-                }).encrypt(fwpAssertion).encode();
+                }).encrypt(fwpAssertion,
+                           new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, new CBORMap())).encode();
         
         result.append("\n\nEncrypted FWP assertion (ESAD):\n")
               .append(CBORDecoder.decode(encryptedAssertion).toString());

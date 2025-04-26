@@ -242,13 +242,8 @@ public class TestVectorGeneration {
                                          ISSUER_KEY_ENCRYPTION_ALGORITHM,
                                          ISSUER_CONTENT_ENCRYPTION_ALGORITHM)
                 .setKeyId(ISSUER_KEY_ID)
-                .setIntercepter(new CBORCryptoUtils.Intercepter() {
-
-                    @Override
-                    public CBORObject wrap(CBORMap unwrappedMap) {
-                        return new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, unwrappedMap);
-                    }
-                }).encrypt(fwpAssertion).encode();
+                .encrypt(fwpAssertion, 
+                         new CBORTag(FWPCrypto.FWP_ESAD_OBJECT_ID, new CBORMap())).encode();
         if (!signRewrite) {
             try {
                 encryptedAssertion = IO.readFile(testDataDir + FILE_ENCRYPTED_CBOR);
